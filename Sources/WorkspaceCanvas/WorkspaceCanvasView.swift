@@ -19,6 +19,8 @@ struct WorkspaceCanvasView: View {
     @State private var showMinimap = false
     @State private var showAssignRoleSheet = false
     @State private var assignRoleNodeId: UUID? = nil
+    @State private var orcaRegistry = OrcaTerminalRegistry.shared
+    @State private var orcaSendTarget: OrcaSendTarget?
 
 
     var body: some View {
@@ -59,7 +61,22 @@ struct WorkspaceCanvasView: View {
             if activeDrawingTool == nil && !selectedNodeIds.isEmpty && selectedNodeIds.contains(where: { id in
                 workspace.nodes.contains { $0.id == id }
             }) {
-                if selectedNodeContentType == "fileTree" {
+                if let selectedId = selectedNodeIds.first,
+                   selectedNodeIds.count == 1,
+                   orcaRegistry.isExternalNode(selectedId) {
+                    OrcaTerminalContextToolbar(
+                        onConnect: { startConnectionFromSelected() },
+                        onRefresh: { Task { await orcaRegistry.refresh(nodeId: selectedId) } },
+                        onSendQueued: { orcaSendTarget = OrcaSendTarget(id: selectedId, mode: .queue) },
+                        onInterrupt: { orcaSendTarget = OrcaSendTarget(id: selectedId, mode: .interrupt) },
+                        onDelete: { deleteSelectedNodes() },
+                        connections: selectedNodeConnections,
+                        onDeleteConnection: { deleteConnection(id: $0) }
+                    )
+                    .fixedSize()
+                    .padding(.bottom, 36)
+                    .contentShape(Rectangle())
+                } else if selectedNodeContentType == "fileTree" {
                     FileTreeContextToolbar(
                         onRevealInFinder: { revealFileTreeInFinder() },
                         onChangeRoot: { changeFileTreeRoot() },
@@ -349,11 +366,15 @@ struct WorkspaceCanvasView: View {
         .onAppear {
             canvasOrigin = workspace.canvasOrigin
             zoom = workspace.canvasZoom
+            orcaRegistry.start(workspace: workspace)
             preInitializeAllTerminals()
             ConnectionManager.shared.restoreConnections(
                 from: workspace,
                 serverPort: InterAgentServer.shared.port
             )
+        }
+        .onDisappear {
+            orcaRegistry.stop(workspaceId: workspace.id)
         }
         .onReceive(NotificationCenter.default.publisher(for: .showFloorOverview)) { _ in
             showFloorOverview = true
@@ -408,6 +429,9 @@ struct WorkspaceCanvasView: View {
                 onDismiss: { showAssignRoleSheet = false }
             )
             .environment(\.locale, LocalizationManager.shared.locale)
+        }
+        .sheet(item: $orcaSendTarget) { target in
+            OrcaSendSheet(target: target)
         }
         .sheet(item: Binding(
             get: { terminalToEdit.map { EditTerminalItem(id: $0.nodeId, content: $0.content) } },
@@ -738,6 +762,7 @@ struct WorkspaceCanvasView: View {
         // 筛出需要初始化的终端节点
         let pending = nodes.filter { node -> Bool in
             guard case .terminal(let tc) = node.content else { return false }
+            guard tc.agentType != "orca_external" else { return false }
             return TerminalManager.shared.terminals[tc.id] == nil
         }
         guard !pending.isEmpty else { return }

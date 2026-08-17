@@ -23,6 +23,12 @@ extension CanvasNodeRenderer {
         guard let ws = currentWorkspace,
               let node = ws.nodes.first(where: { $0.id == terminalId }),
               case .terminal(let tc) = node.content else { return }
+        if tc.agentType == "orca_external" {
+            Task { @MainActor in
+                await OrcaTerminalRegistry.shared.refresh(nodeId: terminalId)
+            }
+            return
+        }
         if let provider = TerminalManager.shared.providers[tc.id] {
             provider.restartProcess(command: tc.command, workingDirectory: tc.workingDirectory)
         }
@@ -33,6 +39,14 @@ extension CanvasNodeRenderer {
         guard let ws = currentWorkspace,
               let node = ws.nodes.first(where: { $0.id == terminalId }),
               case .terminal(let tc) = node.content else { return }
+        if tc.agentType == "orca_external" {
+            let text = OrcaTerminalRegistry.shared.state(for: terminalId)?.output.joined(separator: "\n") ?? ""
+            if !text.isEmpty {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(text, forType: .string)
+            }
+            return
+        }
         if let session = TerminalManager.shared.terminals[tc.id] {
             let text = session.recentOutput(lines: 200)
             if !text.isEmpty {

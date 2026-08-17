@@ -417,12 +417,24 @@ struct CanvasNodesSwiftUIView: View {
         let isLocked = lockedNodeIds.contains(node.id)
         switch node.content {
         case .terminal(let tc):
-            TerminalNodeSwiftUIView(
-                nodeId: node.id, content: tc, isSelected: isSelected, isLocked: isLocked,
-                zoom: zoom, nodeSize: node.frame.size, workspace: workspace,
-                onActivated: onActivated, onClose: onClose,
-                onRename: onRename, onDuplicate: onDuplicate, onLockToggle: onLockToggle
-            )
+            if tc.agentType == "orca_external" {
+                OrcaTerminalNodeSwiftUIView(
+                    nodeId: node.id,
+                    fallbackContent: tc,
+                    isSelected: isSelected,
+                    isLocked: isLocked,
+                    zoom: zoom,
+                    onClose: onClose,
+                    onLockToggle: onLockToggle
+                )
+            } else {
+                TerminalNodeSwiftUIView(
+                    nodeId: node.id, content: tc, isSelected: isSelected, isLocked: isLocked,
+                    zoom: zoom, nodeSize: node.frame.size, workspace: workspace,
+                    onActivated: onActivated, onClose: onClose,
+                    onRename: onRename, onDuplicate: onDuplicate, onLockToggle: onLockToggle
+                )
+            }
         case .stickyNote(let nc):
             NoteNodeSwiftUIView(
                 nodeId: node.id, content: nc, isSelected: isSelected, isLocked: isLocked,

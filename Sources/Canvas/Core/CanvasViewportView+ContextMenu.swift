@@ -39,6 +39,18 @@ extension CanvasViewportView {
 
         switch node.content {
         case .terminal(let tc):
+            if tc.agentType == "orca_external" {
+                menu.addItem(menuItem("Refresh from Orca", action: #selector(contextMenuReloadTerminal(_:)), id: id, icon: "arrow.clockwise"))
+                menu.addItem(menuItem("Copy mirrored output", action: #selector(contextMenuCopyTerminal(_:)), id: id, icon: "doc.on.doc", keyEquivalent: "c"))
+                menu.addItem(NSMenuItem.separator())
+                menu.addItem(menuItem("canvas.context.connect".localized, action: #selector(contextMenuConnect(_:)), id: id, icon: "arrow.trianglehead.branch"))
+                let lockTitle = node.isLocked ? "menu.unlock".localized : "menu.lock".localized
+                let lockIcon = node.isLocked ? "lock.open" : "lock"
+                menu.addItem(menuItem(lockTitle, action: #selector(contextMenuLockToggle(_:)), id: id, icon: lockIcon))
+                menu.addItem(NSMenuItem.separator())
+                menu.addItem(destructiveItem("Delete Orca mirror", action: #selector(contextMenuClose(_:)), id: id, icon: "trash"))
+                return menu
+            }
             // 编辑
             menu.addItem(menuItem("canvas.context.edit_terminal".localized, action: #selector(contextMenuEditTerminal(_:)), id: id, icon: "slider.horizontal.3"))
             menu.addItem(NSMenuItem.separator())

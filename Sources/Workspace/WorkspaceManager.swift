@@ -104,7 +104,11 @@ final class WorkspaceManager: Identifiable {
         guard let node = nodes.first(where: { $0.id == nodeId }) else { return }
 
         // 停止 Terminal PTY 进程（避免内存泄漏）
-        if case .terminal = node.content {
+        if case .terminal(let content) = node.content, content.agentType == "orca_external" {
+            Task { @MainActor in
+                OrcaTerminalRegistry.shared.removeBinding(nodeId: nodeId)
+            }
+        } else if case .terminal = node.content {
             Task { @MainActor in
                 TerminalManager.shared.removeTerminal(id: nodeId)
             }
