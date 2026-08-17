@@ -29,6 +29,7 @@ final class InterAgentServerTests: XCTestCase {
             ["check", "agent"],
             ["note", "read", "name"],
             ["portal", "navigate", "name", "url"],
+            ["orca"],
             ["recruit", "name"],
             ["dismiss", "name"],
             ["connect", "a", "b"],

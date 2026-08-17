@@ -13,6 +13,7 @@ func printHelp() {
       check "Agent" [lines]             View agent's recent output
       note <read|write|edit|create>     Read/write connected notes
       portal <subcommand>               Interact with connected portals
+      orca <list|read|send>             Bridge Orca-managed terminals
       recruit "Name" [--preset x]       Recruit a new agent (Maestro only)
       dismiss "Name"                    Dismiss a recruited agent
       connect "From" "To"               Connect two agents

@@ -30,6 +30,8 @@ case "note":
     NoteCommand.run(args, socketPath, terminalId)
 case "portal":
     PortalCommand.run(args, socketPath, terminalId)
+case "orca":
+    OrcaCommand.run(args, socketPath, terminalId)
 case "recruit", "dismiss", "connect":
     MaestroCommands.run(args, socketPath, terminalId)
 case "role":

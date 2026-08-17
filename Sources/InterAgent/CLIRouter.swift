@@ -21,6 +21,8 @@ final class CLIRouter {
             return await NoteHandler.shared.handleAsync(args: args, terminalId: terminalId)
         case "portal":
             return await PortalHandler.shared.handleAsync(args: args, terminalId: terminalId)
+        case "orca":
+            return await OrcaBridgeHandler.shared.handleAsync(args: args, terminalId: terminalId)
         case "recruit", "dismiss", "connect", "role", "preset":
             return await MaestroHandlers.shared.handleAsync(args: args, terminalId: terminalId)
         case "debug":
@@ -35,7 +37,7 @@ final class CLIRouter {
     private func buildDebugInfo(terminalId: UUID?) -> String {
         let port = InterAgentServer.shared.port
         let tidStr = terminalId?.uuidString ?? "(none)"
-        let commands = "list ask check note portal recruit dismiss connect role preset debug"
+        let commands = "list ask check note portal orca recruit dismiss connect role preset debug"
         return "open-maestri inter-agent server debug:\n  Server port: \(port)\n  Terminal ID: \(tidStr)\n  Commands: \(commands)"
     }
 }
