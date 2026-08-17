@@ -2,6 +2,58 @@ import XCTest
 @testable import open_maestri
 
 final class OrcaCLIClientTests: XCTestCase {
+    func testDecodesLiveTerminalListContract() throws {
+        let executor = RecordingOrcaExecutor()
+        executor.outputs = [OrcaCommandOutput(
+            stdout: """
+            {"ok":true,"result":{"terminals":[{"handle":"term_1","worktreeId":"repo::/tmp/w","worktreePath":"/tmp/w","tabId":"tab_1","leafId":"leaf_1","connected":true,"writable":true,"orphaned":false}],"totalCount":1,"truncated":false},"_meta":{"runtimeId":"runtime_1"}}
+            """,
+            stderr: "",
+            exitCode: 0
+        )]
+        let client = OrcaCLIClient(executor: executor)
+
+        let result = try client.listTerminals(limit: 10)
+
+        XCTAssertEqual(result.runtimeId, "runtime_1")
+        XCTAssertEqual(result.terminals.first?.handle, "term_1")
+        XCTAssertEqual(result.terminals.first?.stableIdentity, "repo::/tmp/w|tab_1|leaf_1")
+    }
+
+    func testDecodesCursorReadContract() throws {
+        let executor = RecordingOrcaExecutor()
+        executor.outputs = [OrcaCommandOutput(
+            stdout: """
+            {"ok":true,"result":{"terminal":{"handle":"term_1","status":"running","tail":["one","two"],"truncated":false,"limited":false,"oldestCursor":"0","nextCursor":"2","latestCursor":"2","returnedLineCount":2}},"_meta":{"runtimeId":"runtime_1"}}
+            """,
+            stderr: "",
+            exitCode: 0
+        )]
+        let client = OrcaCLIClient(executor: executor)
+
+        let result = try client.readTerminal(handle: "term_1", cursor: "0")
+
+        XCTAssertEqual(result.tail, ["one", "two"])
+        XCTAssertEqual(result.latestCursor, "2")
+    }
+
+    func testEnvironmentDiscoveryDoesNotTargetCurrentRemote() throws {
+        let executor = RecordingOrcaExecutor()
+        executor.outputs = [OrcaCommandOutput(
+            stdout: """
+            {"ok":true,"result":{"environments":[{"id":"vps-1","name":"oracle-vps","connected":true}]},"_meta":{"runtimeId":"local"}}
+            """,
+            stderr: "",
+            exitCode: 0
+        )]
+        let client = OrcaCLIClient(executor: executor, environmentName: "already-remote")
+
+        let environments = try client.listEnvironments()
+
+        XCTAssertEqual(environments.first?.name, "oracle-vps")
+        XCTAssertFalse(executor.calls[0].contains("--environment"))
+    }
+
     func testListUsesEnvironmentAndJSON() throws {
         let executor = RecordingOrcaExecutor()
         let client = OrcaCLIClient(executor: executor, environmentName: "vps")

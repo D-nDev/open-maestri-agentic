@@ -32,6 +32,10 @@ final class PersistenceManager {
         workspaceDirURL(id: workspaceId).appendingPathComponent("notes")
     }
 
+    func orcaBindingsURL(workspaceId: UUID) -> URL {
+        workspaceDirURL(id: workspaceId).appendingPathComponent("orca-bindings.json")
+    }
+
     func scrollbackURL(terminalId: UUID, workspaceId: UUID) -> URL {
         workspaceDirURL(id: workspaceId).appendingPathComponent("terminals/\(terminalId.uuidString).scrollback")
     }
@@ -154,6 +158,17 @@ final class PersistenceManager {
     func saveWorkspace(_ doc: WorkspaceDocument) async throws {
         let url = workspaceURL(id: doc.payload.id)
         try await save(doc, to: url)
+    }
+
+    func loadOrcaBindings(workspaceId: UUID) throws -> OrcaTerminalBindingDocument {
+        (try loadIfExists(
+            OrcaTerminalBindingDocument.self,
+            from: orcaBindingsURL(workspaceId: workspaceId)
+        )) ?? OrcaTerminalBindingDocument(workspaceId: workspaceId)
+    }
+
+    func saveOrcaBindings(_ document: OrcaTerminalBindingDocument) async throws {
+        try await save(document, to: orcaBindingsURL(workspaceId: document.workspaceId))
     }
 
     func loadAppState() throws -> AppStateData {

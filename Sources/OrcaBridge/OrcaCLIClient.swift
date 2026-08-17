@@ -13,6 +13,7 @@ protocol OrcaCommandExecuting {
 enum OrcaBridgeError: LocalizedError, Equatable {
     case cliNotFound
     case invalidArgument(String)
+    case invalidResponse(String)
     case commandFailed(arguments: [String], exitCode: Int32, message: String)
 
     var errorDescription: String? {
@@ -21,6 +22,8 @@ enum OrcaBridgeError: LocalizedError, Equatable {
             return "Orca CLI not found. Set OPEN_MAESTRI_ORCA_CLI or install Orca."
         case .invalidArgument(let message):
             return message
+        case .invalidResponse(let message):
+            return "Invalid Orca response: \(message)"
         case .commandFailed(let arguments, let exitCode, let message):
             let command = (["orca"] + Self.redactingTextValue(in: arguments)).joined(separator: " ")
             return "\(command) failed with exit \(exitCode): \(message)"
@@ -108,6 +111,16 @@ final class OrcaCLIClient {
         return try run(["terminal", "list", "--limit", String(limit)])
     }
 
+    func listTerminals(limit: Int = 200) throws -> (terminals: [OrcaTerminalDescriptor], runtimeId: String?) {
+        guard (1...1000).contains(limit) else {
+            throw OrcaBridgeError.invalidArgument("limit must be between 1 and 1000")
+        }
+        let envelope: OrcaAPIEnvelope<OrcaTerminalListResult> = try runDecoded([
+            "terminal", "list", "--limit", String(limit),
+        ])
+        return (envelope.result.terminals, envelope.meta?.runtimeId)
+    }
+
     func read(handle: String, cursor: String? = nil, limit: Int = 1000) throws -> String {
         try validateHandle(handle)
         guard (1...5000).contains(limit) else {
@@ -118,6 +131,37 @@ final class OrcaCLIClient {
             arguments += ["--cursor", cursor]
         }
         return try run(arguments)
+    }
+
+    func readTerminal(
+        handle: String,
+        cursor: String? = nil,
+        limit: Int = 1000
+    ) throws -> OrcaTerminalReadSnapshot {
+        try validateHandle(handle)
+        guard (1...5000).contains(limit) else {
+            throw OrcaBridgeError.invalidArgument("limit must be between 1 and 5000")
+        }
+        var arguments = ["terminal", "read", "--terminal", handle, "--limit", String(limit)]
+        if let cursor, !cursor.isEmpty {
+            arguments += ["--cursor", cursor]
+        }
+        let envelope: OrcaAPIEnvelope<OrcaTerminalReadResult> = try runDecoded(arguments)
+        return envelope.result.terminal
+    }
+
+    func listEnvironments() throws -> [OrcaEnvironmentDescriptor] {
+        let envelope: OrcaAPIEnvelope<OrcaEnvironmentListResult> = try runDecoded([
+            "environment", "list",
+        ], includeEnvironment: false)
+        return envelope.result.environments
+    }
+
+    func listWorkers() throws -> [OrcaWorkerDescriptor] {
+        let envelope: OrcaAPIEnvelope<OrcaWorkerListResult> = try runDecoded([
+            "orchestration", "worker-list",
+        ])
+        return envelope.result.workers
     }
 
     func send(
@@ -159,9 +203,9 @@ final class OrcaCLIClient {
         }
     }
 
-    private func run(_ baseArguments: [String]) throws -> String {
+    private func run(_ baseArguments: [String], includeEnvironment: Bool = true) throws -> String {
         var arguments = baseArguments
-        if let environmentName, !environmentName.isEmpty {
+        if includeEnvironment, let environmentName, !environmentName.isEmpty {
             arguments += ["--environment", environmentName]
         }
         arguments.append("--json")
@@ -178,6 +222,21 @@ final class OrcaCLIClient {
             )
         }
         return result.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func runDecoded<Result: Decodable>(
+        _ baseArguments: [String],
+        includeEnvironment: Bool = true
+    ) throws -> OrcaAPIEnvelope<Result> {
+        let raw = try run(baseArguments, includeEnvironment: includeEnvironment)
+        guard let data = raw.data(using: .utf8) else {
+            throw OrcaBridgeError.invalidResponse("response was not UTF-8")
+        }
+        do {
+            return try JSONDecoder().decode(OrcaAPIEnvelope<Result>.self, from: data)
+        } catch {
+            throw OrcaBridgeError.invalidResponse(error.localizedDescription)
+        }
     }
 
     private func redactingTextValue(in message: String, arguments: [String]) -> String {
