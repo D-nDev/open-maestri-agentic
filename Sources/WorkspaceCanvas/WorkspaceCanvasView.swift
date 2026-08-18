@@ -573,6 +573,9 @@ struct WorkspaceCanvasView: View {
         case "fileTree":
             createFileTreeAtFrame(frame)
             activeDrawingTool = nil
+        case "linkedFile":
+            createLinkedFileAtFrame(frame)
+            activeDrawingTool = nil
         case "text":
             createTextAtFrame(frame)
             activeDrawingTool = nil

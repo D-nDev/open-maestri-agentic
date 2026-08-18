@@ -13,6 +13,12 @@ struct NoteNodeSwiftUIView: View {
     var onDuplicate: ((UUID) -> Void)?
     var onLockToggle: ((UUID, Bool) -> Void)?
 
+    @State private var orcaRegistry = OrcaTerminalRegistry.shared
+
+    private var deliveryState: OrcaNoteDeliveryState? {
+        orcaRegistry.noteDeliveryState(for: nodeId)
+    }
+
     var body: some View {
         NodeShellView(
             nodeId: nodeId,
@@ -23,6 +29,7 @@ struct NoteNodeSwiftUIView: View {
             headerIcon: "note.text",
             headerColor: noteColor(content.color),
             themeColor: noteColor(content.color),
+            headerTitleAccessory: { deliveryBadge },
             onClose: { onClose?(nodeId) },
             onRename: { onRename?(nodeId, $0) },
             onDuplicate: { onDuplicate?(nodeId) },
@@ -38,6 +45,57 @@ struct NoteNodeSwiftUIView: View {
 
     private func noteColor(_ str: String) -> Color {
         NoteColorPickerPopover.colorFromString(str)
+    }
+
+    @ViewBuilder
+    private var deliveryBadge: some View {
+        if let deliveryState {
+            HStack(spacing: 3) {
+                Image(systemName: deliveryIcon(for: deliveryState.phase))
+                    .font(.system(size: 8, weight: .semibold))
+                Text(deliveryKey(for: deliveryState.phase).localized)
+                    .font(.system(size: 8, weight: .semibold))
+                    .lineLimit(1)
+            }
+            .foregroundStyle(deliveryColor(for: deliveryState.phase))
+            .padding(.horizontal, 5)
+            .padding(.vertical, 2)
+            .background(
+                Capsule().fill(deliveryColor(for: deliveryState.phase).opacity(0.13))
+            )
+            .help(deliveryHelp(deliveryState))
+        }
+    }
+
+    private func deliveryKey(for phase: OrcaNoteDeliveryPhase) -> String {
+        switch phase {
+        case .waiting: return "note.delivery.waiting"
+        case .sent: return "note.delivery.sent"
+        case .failed: return "note.delivery.failed"
+        }
+    }
+
+    private func deliveryIcon(for phase: OrcaNoteDeliveryPhase) -> String {
+        switch phase {
+        case .waiting: return "clock.arrow.circlepath"
+        case .sent: return "checkmark.circle.fill"
+        case .failed: return "exclamationmark.triangle.fill"
+        }
+    }
+
+    private func deliveryColor(for phase: OrcaNoteDeliveryPhase) -> Color {
+        switch phase {
+        case .waiting: return .orange
+        case .sent: return .green
+        case .failed: return .red
+        }
+    }
+
+    private func deliveryHelp(_ state: OrcaNoteDeliveryState) -> String {
+        if let errorMessage = state.errorMessage, !errorMessage.isEmpty {
+            return errorMessage
+        }
+        return deliveryKey(for: state.phase).localized
     }
 }
 

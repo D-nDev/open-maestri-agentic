@@ -47,6 +47,19 @@ struct OrcaTerminalRuntimeState: Equatable {
     var environmentLabel: String { environment ?? "local" }
 }
 
+enum OrcaNoteDeliveryPhase: String, Equatable {
+    case waiting
+    case sent
+    case failed
+}
+
+struct OrcaNoteDeliveryState: Equatable {
+    var phase: OrcaNoteDeliveryPhase
+    var targetCount: Int
+    var updatedAt: Date
+    var errorMessage: String?
+}
+
 struct AgenticWorkerMetadata: Equatable, Sendable {
     var runId: String
     var workerId: String

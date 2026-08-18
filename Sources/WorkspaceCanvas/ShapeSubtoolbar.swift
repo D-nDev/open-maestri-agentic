@@ -104,6 +104,7 @@ struct ShapeSubtoolbar: View {
             } label: {
                 Image(systemName: "minus")
                     .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Color(white: 0.25))
                     .frame(width: 22, height: 26)
             }
             .buttonStyle(.plain)
@@ -111,6 +112,7 @@ struct ShapeSubtoolbar: View {
 
             Text("\(Int(defaultStrokeWidth))pt")
                 .font(.system(size: 12, weight: .medium, design: .monospaced))
+                .foregroundStyle(Color(white: 0.25))
                 .frame(minWidth: 30, alignment: .center)
 
             Button {
@@ -118,6 +120,7 @@ struct ShapeSubtoolbar: View {
             } label: {
                 Image(systemName: "plus")
                     .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Color(white: 0.25))
                     .frame(width: 22, height: 26)
             }
             .buttonStyle(.plain)

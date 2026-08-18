@@ -89,6 +89,7 @@ final class OrcaTerminalRegistry {
     private(set) var environments: [OrcaEnvironmentDescriptor] = []
     private(set) var isSynchronizing = false
     private(set) var lastSynchronizedAt: Date?
+    private(set) var noteDeliveryStates: [UUID: OrcaNoteDeliveryState] = [:]
 
     private let logger = Logger.make(category: "OrcaTerminalRegistry")
     private let persistence = PersistenceManager.shared
@@ -97,6 +98,8 @@ final class OrcaTerminalRegistry {
     private var pollingTask: Task<Void, Never>?
     private var noteObserver: NSObjectProtocol?
     private var noteDebounceTasks: [String: Task<Void, Never>] = [:]
+    private var noteDeliveryTargetPhases: [UUID: [UUID: OrcaNoteDeliveryPhase]] = [:]
+    private var noteDeliveryErrors: [UUID: String] = [:]
     private var bindingSaveTasks: [UUID: Task<Void, Never>] = [:]
     private var environmentFailureCounts: [String: Int] = [:]
     private var environmentRetryAfter: [String: Date] = [:]
@@ -152,6 +155,10 @@ final class OrcaTerminalRegistry {
 
     func state(for nodeId: UUID) -> OrcaTerminalRuntimeState? {
         states[nodeId]
+    }
+
+    func noteDeliveryState(for noteNodeId: UUID) -> OrcaNoteDeliveryState? {
+        noteDeliveryStates[noteNodeId]
     }
 
     func isExternalNode(_ nodeId: UUID) -> Bool {
@@ -657,13 +664,24 @@ final class OrcaTerminalRegistry {
                 return (node.id, name)
             }
             for (noteNodeId, noteName) in matchingNotes {
-                for connection in workspace.noteConnections where connection.noteNodeId == noteNodeId {
+                let activeConnections = workspace.noteConnections.filter {
+                    $0.noteNodeId == noteNodeId && states[$0.terminalId] != nil
+                }
+                synchronizeNoteDeliveryTargets(
+                    noteNodeId: noteNodeId,
+                    terminalIds: Set(activeConnections.map(\.terminalId))
+                )
+                for connection in activeConnections {
                     let terminalId = connection.terminalId
-                    guard states[terminalId] != nil else { continue }
                     let hashKey = standardizedPath
                     let previousHash = binding(nodeId: terminalId)?.noteHashes[hashKey]
                     guard previousHash != digest else { continue }
                     updateBinding(nodeId: terminalId) { $0.noteHashes[hashKey] = digest }
+                    updateNoteDelivery(
+                        noteNodeId: noteNodeId,
+                        terminalId: terminalId,
+                        phase: .waiting
+                    )
 
                     let key = "\(terminalId.uuidString)|\(hashKey)"
                     noteDebounceTasks[key]?.cancel()
@@ -683,14 +701,74 @@ final class OrcaTerminalRegistry {
                         """
                         do {
                             try await self?.send(nodeId: terminalId, text: message, mode: .queue)
+                            self?.updateNoteDelivery(
+                                noteNodeId: noteNodeId,
+                                terminalId: terminalId,
+                                phase: .sent
+                            )
                             ConnectionManager.shared.markCommunicating(connection.id)
                         } catch {
+                            self?.updateNoteDelivery(
+                                noteNodeId: noteNodeId,
+                                terminalId: terminalId,
+                                phase: .failed,
+                                errorMessage: error.localizedDescription
+                            )
                             self?.logger.error("Failed to notify Orca terminal about note change: \(error.localizedDescription)")
                         }
                     }
                 }
             }
         }
+    }
+
+    private func synchronizeNoteDeliveryTargets(noteNodeId: UUID, terminalIds: Set<UUID>) {
+        guard !terminalIds.isEmpty else {
+            noteDeliveryTargetPhases.removeValue(forKey: noteNodeId)
+            noteDeliveryErrors.removeValue(forKey: noteNodeId)
+            noteDeliveryStates.removeValue(forKey: noteNodeId)
+            return
+        }
+        noteDeliveryTargetPhases[noteNodeId] = noteDeliveryTargetPhases[noteNodeId, default: [:]]
+            .filter { terminalIds.contains($0.key) }
+        refreshNoteDeliveryState(noteNodeId: noteNodeId)
+    }
+
+    private func updateNoteDelivery(
+        noteNodeId: UUID,
+        terminalId: UUID,
+        phase: OrcaNoteDeliveryPhase,
+        errorMessage: String? = nil
+    ) {
+        noteDeliveryTargetPhases[noteNodeId, default: [:]][terminalId] = phase
+        if let errorMessage {
+            noteDeliveryErrors[noteNodeId] = errorMessage
+        } else if phase != .failed,
+                  noteDeliveryTargetPhases[noteNodeId]?.values.contains(.failed) != true {
+            noteDeliveryErrors.removeValue(forKey: noteNodeId)
+        }
+        refreshNoteDeliveryState(noteNodeId: noteNodeId)
+    }
+
+    private func refreshNoteDeliveryState(noteNodeId: UUID) {
+        guard let phases = noteDeliveryTargetPhases[noteNodeId], !phases.isEmpty else {
+            noteDeliveryStates.removeValue(forKey: noteNodeId)
+            return
+        }
+        let phase: OrcaNoteDeliveryPhase
+        if phases.values.contains(.failed) {
+            phase = .failed
+        } else if phases.values.contains(.waiting) {
+            phase = .waiting
+        } else {
+            phase = .sent
+        }
+        noteDeliveryStates[noteNodeId] = OrcaNoteDeliveryState(
+            phase: phase,
+            targetCount: phases.count,
+            updatedAt: Date(),
+            errorMessage: phase == .failed ? noteDeliveryErrors[noteNodeId] : nil
+        )
     }
 
     private func notePath(_ content: StickyNoteContent, workspaceId: UUID) -> String? {

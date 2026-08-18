@@ -52,10 +52,10 @@ struct CanvasToolbar: View {
                         toggleDrawingTool("stickyNote")
                     }
 
-                    // 4. Link file (placeholder, not yet implemented)
+                    // 4. Link a local file as a canvas note
                     FloatingToolButton(
                         icon: "paperclip",
-                        tooltip: "canvas.toolbar.text".localized,
+                        tooltip: "canvas.context.add.attachment".localized,
                         isActive: activeDrawingTool == "linkedFile"
                     ) {
                         toggleDrawingTool("linkedFile")
