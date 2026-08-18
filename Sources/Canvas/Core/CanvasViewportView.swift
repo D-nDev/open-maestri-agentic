@@ -480,9 +480,9 @@ final class CanvasViewportView: NSView {
     // MARK: - 滚动事件路由（Local Event Monitor）
 
     /// 通过 local event monitor 拦截 scrollWheel / magnify 事件
-    /// 逻辑：如果鼠标在某个**未选中**节点上，将事件重定向给画布（自己）
-    /// 如果鼠标在**选中**节点上，让事件正常传递给节点内容（终端滚动等）
-    /// 如果鼠标在空白区域，正常传递给画布
+    /// Terminal content always receives scrolling under the pointer, regardless of selection.
+    /// Other scrollable content receives the event when its node is selected;
+    /// headers, footers, and empty space continue navigating the canvas.
     private var scrollMonitor: Any?
     var notificationObservers: [NSObjectProtocol] = []
 
@@ -510,6 +510,22 @@ final class CanvasViewportView: NSView {
         }
         guard event.type == .scrollWheel else { return event }
 
+        // Terminal content scrolls directly under the pointer, whether the node
+        // is selected or not. Header/footer keep their canvas navigation behavior.
+        if case .nodeContent(let nodeId, _) = hitTestCanvas(at: locInCanvas),
+           let node = currentNodes.first(where: { $0.id == nodeId }),
+           case .terminal = node.content {
+            if let provider = TerminalManager.shared.providers[nodeId],
+               let terminalView = provider.terminalView {
+                terminalView.scrollWheel(with: event)
+                return nil
+            }
+            if let scrollView = OrcaTerminalScrollViewRegistry.shared.scrollView(for: nodeId) {
+                scrollView.scrollWheel(with: event)
+                return nil
+            }
+        }
+
         // 用 canvasFrame 做命中测试：不依赖 nodeViews（NSHostingView 迁移后为空）
         for selectedId in selectedNodeIds {
             guard let canvasFrame = nodeCanvasFrames[selectedId] else { continue }
@@ -524,12 +540,6 @@ final class CanvasViewportView: NSView {
                 height: screenFrame.height - headerScreenHeight
             )
             guard contentScreenFrame.contains(locInCanvas) else { break }
-            // Terminal 节点：路由滚动事件给 TerminalView
-            if let provider = TerminalManager.shared.providers[selectedId],
-               let terminalView = provider.terminalView {
-                terminalView.scrollWheel(with: event)
-                return nil
-            }
             // FileTree 节点：路由滚动事件给内部 NSScrollView
             if let fileTreeView = FileTreeViewRegistry.shared.view(for: selectedId),
                let scrollView = fileTreeView.innerScrollView {

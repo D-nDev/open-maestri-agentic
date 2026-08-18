@@ -58,16 +58,7 @@ struct OrcaTerminalNodeSwiftUIView: View {
     }
 
     private var outputView: some View {
-        ScrollView {
-            Text(outputText)
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundStyle(Color(nsColor: .textColor))
-                .textSelection(.enabled)
-                .frame(maxWidth: .infinity, alignment: .topLeading)
-                .padding(10)
-        }
-        .defaultScrollAnchor(.bottom)
-        .background(Color(nsColor: .textBackgroundColor).opacity(0.92))
+        OrcaTerminalOutputView(nodeId: nodeId, text: outputText)
         .overlay(alignment: .topTrailing) {
             if let role = state?.role, !role.isEmpty {
                 Text(role)
