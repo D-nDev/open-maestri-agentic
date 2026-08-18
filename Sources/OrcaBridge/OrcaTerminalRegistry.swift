@@ -61,6 +61,12 @@ enum OrcaProxyLayout {
     }
 }
 
+enum OrcaTerminalDiscoveryPolicy {
+    static func shouldMirror(agenticMetadata: AgenticWorkerMetadata?) -> Bool {
+        agenticMetadata != nil
+    }
+}
+
 @MainActor
 @Observable
 final class OrcaTerminalRegistry {
@@ -289,6 +295,10 @@ final class OrcaTerminalRegistry {
         for terminal in snapshot.terminals {
             let agentic = agenticByHandle[terminal.handle]
             let worker = orcaWorkersByHandle[terminal.handle]
+            guard OrcaTerminalDiscoveryPolicy.shouldMirror(agenticMetadata: agentic) else {
+                removeUnmanagedBinding(for: terminal, environment: environment)
+                continue
+            }
             guard let workspace = targetWorkspace(for: terminal, metadata: agentic) else { continue }
 
             var document = documents[workspace.id]
@@ -369,6 +379,35 @@ final class OrcaTerminalRegistry {
             )
             persist(document)
             if created {
+                Task { try? await workspace.save() }
+            }
+        }
+    }
+
+    private func removeUnmanagedBinding(
+        for terminal: OrcaTerminalDescriptor,
+        environment: String?
+    ) {
+        let identity = terminal.stableIdentity.isEmpty ? terminal.handle : terminal.stableIdentity
+        for workspaceId in Array(documents.keys) {
+            guard var document = documents[workspaceId] else { continue }
+            let removedNodeIds = document.bindings.compactMap { binding -> UUID? in
+                guard (binding.environment ?? "local") == (environment ?? "local"),
+                      binding.stableIdentity == identity || binding.handle == terminal.handle else {
+                    return nil
+                }
+                return binding.nodeId
+            }
+            guard !removedNodeIds.isEmpty else { continue }
+
+            document.bindings.removeAll { removedNodeIds.contains($0.nodeId) }
+            documents[workspaceId] = document
+            for nodeId in removedNodeIds {
+                states.removeValue(forKey: nodeId)
+                workspaces[workspaceId]?.removeExternallyManagedNodeFromAuthority(id: nodeId)
+            }
+            persist(document)
+            if let workspace = workspaces[workspaceId] {
                 Task { try? await workspace.save() }
             }
         }

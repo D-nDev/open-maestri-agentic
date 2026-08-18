@@ -424,7 +424,6 @@ struct CanvasNodesSwiftUIView: View {
                     isSelected: isSelected,
                     isLocked: isLocked,
                     zoom: zoom,
-                    onClose: onClose,
                     onLockToggle: onLockToggle
                 )
             } else {

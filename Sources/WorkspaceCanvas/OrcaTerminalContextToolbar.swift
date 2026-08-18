@@ -5,7 +5,6 @@ struct OrcaTerminalContextToolbar: View {
     let onRefresh: () -> Void
     let onSendQueued: () -> Void
     let onInterrupt: () -> Void
-    let onDelete: () -> Void
     var connections: [ToolbarConnectionItem] = []
     var onDeleteConnection: (UUID) -> Void = { _ in }
 
@@ -22,7 +21,6 @@ struct OrcaTerminalContextToolbar: View {
             ContextToolbarButton(icon: "arrow.clockwise", tooltip: "Refresh from Orca", action: onRefresh)
             ContextToolbarButton(icon: "paperplane", tooltip: "Queue message", action: onSendQueued)
             ContextToolbarButton(icon: "exclamationmark.octagon", tooltip: "Interrupt and send", action: onInterrupt)
-            ContextToolbarButton(icon: "trash", tooltip: "Delete mirror", action: onDelete)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 5)

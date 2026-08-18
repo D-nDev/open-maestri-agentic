@@ -45,6 +45,37 @@ final class WorkspaceManagerTests: XCTestCase {
         XCTAssertTrue(manager.nodes.isEmpty)
     }
 
+    func testRemoveNodePreservesOrcaManagedProxy() {
+        let manager = WorkspaceManager(name: "WS", workingDirectory: "/tmp")
+        var terminal = TerminalContent(name: "Agentic worker")
+        terminal.agentType = "orca_external"
+        let node = CanvasNode(
+            frame: CGRect(x: 0, y: 0, width: 400, height: 250),
+            content: .terminal(terminal)
+        )
+        manager.addNode(node)
+
+        manager.removeNode(id: node.id)
+
+        XCTAssertEqual(manager.nodes.map(\.id), [node.id])
+        XCTAssertTrue(manager.isExternallyManagedNode(id: node.id))
+    }
+
+    func testAuthorityCanRemoveOrcaManagedProxy() {
+        let manager = WorkspaceManager(name: "WS", workingDirectory: "/tmp")
+        var terminal = TerminalContent(name: "Agentic worker")
+        terminal.agentType = "orca_external"
+        let node = CanvasNode(
+            frame: CGRect(x: 0, y: 0, width: 400, height: 250),
+            content: .terminal(terminal)
+        )
+        manager.addNode(node)
+
+        manager.removeExternallyManagedNodeFromAuthority(id: node.id)
+
+        XCTAssertTrue(manager.nodes.isEmpty)
+    }
+
     func testUpdateNodeFrame() {
         let manager = WorkspaceManager(name: "WS", workingDirectory: "/tmp")
         let node = CanvasNode(

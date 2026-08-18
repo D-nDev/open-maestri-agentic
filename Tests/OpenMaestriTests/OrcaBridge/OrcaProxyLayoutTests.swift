@@ -2,6 +2,23 @@ import XCTest
 @testable import open_maestri
 
 final class OrcaProxyLayoutTests: XCTestCase {
+    func testDiscoveryMirrorsOnlyAgenticOSWorkers() {
+        XCTAssertFalse(OrcaTerminalDiscoveryPolicy.shouldMirror(agenticMetadata: nil))
+
+        let worker = AgenticWorkerMetadata(
+            runId: "run-1",
+            workerId: "coordinator",
+            parentWorkerId: nil,
+            terminalHandle: "term-1",
+            role: "Coordinator",
+            model: "test-model",
+            status: "running",
+            worktree: "/tmp/worktree",
+            environment: nil
+        )
+        XCTAssertTrue(OrcaTerminalDiscoveryPolicy.shouldMirror(agenticMetadata: worker))
+    }
+
     func testFirstProxyIsPlacedRelativeToVisibleCanvasOrigin() {
         let frame = OrcaProxyLayout.frame(index: 0, canvasOrigin: CGPoint(x: 9_800, y: 8_500))
 

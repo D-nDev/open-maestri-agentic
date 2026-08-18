@@ -47,8 +47,6 @@ extension CanvasViewportView {
                 let lockTitle = node.isLocked ? "menu.unlock".localized : "menu.lock".localized
                 let lockIcon = node.isLocked ? "lock.open" : "lock"
                 menu.addItem(menuItem(lockTitle, action: #selector(contextMenuLockToggle(_:)), id: id, icon: lockIcon))
-                menu.addItem(NSMenuItem.separator())
-                menu.addItem(destructiveItem("Delete Orca mirror", action: #selector(contextMenuClose(_:)), id: id, icon: "trash"))
                 return menu
             }
             // 编辑

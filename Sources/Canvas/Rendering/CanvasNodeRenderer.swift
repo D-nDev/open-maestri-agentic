@@ -317,6 +317,7 @@ final class CanvasNodeRenderer {
     // MARK: - 节点删除
 
     func removeNode(id: UUID, from workspace: WorkspaceManager?) {
+        guard workspace?.isExternallyManagedNode(id: id) != true else { return }
         // Note 节点删除时同时删除磁盘 .md 文件（官方行为：docs/05-notes.md）
         if let (nc, wsId) = noteInfo(nodeId: id, workspace: workspace) {
             switch nc.storageMode {

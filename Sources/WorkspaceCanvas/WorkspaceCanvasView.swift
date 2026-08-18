@@ -69,7 +69,6 @@ struct WorkspaceCanvasView: View {
                         onRefresh: { Task { await orcaRegistry.refresh(nodeId: selectedId) } },
                         onSendQueued: { orcaSendTarget = OrcaSendTarget(id: selectedId, mode: .queue) },
                         onInterrupt: { orcaSendTarget = OrcaSendTarget(id: selectedId, mode: .interrupt) },
-                        onDelete: { deleteSelectedNodes() },
                         connections: selectedNodeConnections,
                         onDeleteConnection: { deleteConnection(id: $0) }
                     )
@@ -817,11 +816,14 @@ struct WorkspaceCanvasView: View {
     }
 
     private func deleteSelectedNodes() {
-        for id in selectedNodeIds {
+        let removableIds = selectedNodeIds.filter { !workspace.isExternallyManagedNode(id: $0) }
+        for id in removableIds {
             workspace.removeNode(id: id)
         }
-        selectedNodeIds.removeAll()
-        selectedNodeScreenFrame = nil
+        selectedNodeIds.subtract(removableIds)
+        if selectedNodeIds.isEmpty {
+            selectedNodeScreenFrame = nil
+        }
         Task { try? await workspace.save() }
     }
 

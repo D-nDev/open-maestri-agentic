@@ -95,20 +95,23 @@ final class WorkspaceManager: Identifiable {
 
     // MARK: - 节点管理
 
+    func isExternallyManagedNode(id nodeId: UUID) -> Bool {
+        guard let node = nodes.first(where: { $0.id == nodeId }),
+              case .terminal(let content) = node.content else { return false }
+        return content.agentType == "orca_external"
+    }
+
     func addNode(_ node: CanvasNode) {
         nodes.append(node)
         isDirty = true
     }
 
     func removeNode(id nodeId: UUID) {
+        guard !isExternallyManagedNode(id: nodeId) else { return }
         guard let node = nodes.first(where: { $0.id == nodeId }) else { return }
 
         // 停止 Terminal PTY 进程（避免内存泄漏）
-        if case .terminal(let content) = node.content, content.agentType == "orca_external" {
-            Task { @MainActor in
-                OrcaTerminalRegistry.shared.removeBinding(nodeId: nodeId)
-            }
-        } else if case .terminal = node.content {
+        if case .terminal = node.content {
             Task { @MainActor in
                 TerminalManager.shared.removeTerminal(id: nodeId)
             }
@@ -127,6 +130,16 @@ final class WorkspaceManager: Identifiable {
         connections.removeAll { $0.terminalIdA == nodeId || $0.terminalIdB == nodeId }
         noteConnections.removeAll { $0.terminalId == nodeId || $0.noteNodeId == nodeId }
         portalConnections.removeAll { $0.terminalId == nodeId || $0.portalNodeId == nodeId }
+    }
+
+    /// Removes an Orca proxy only when the authoritative registry reconciles it.
+    func removeExternallyManagedNodeFromAuthority(id nodeId: UUID) {
+        guard isExternallyManagedNode(id: nodeId) else { return }
+        nodes.removeAll { $0.id == nodeId }
+        connections.removeAll { $0.terminalIdA == nodeId || $0.terminalIdB == nodeId }
+        noteConnections.removeAll { $0.terminalId == nodeId || $0.noteNodeId == nodeId }
+        portalConnections.removeAll { $0.terminalId == nodeId || $0.portalNodeId == nodeId }
+        isDirty = true
     }
 
     func updateNodeFrame(id nodeId: UUID, frame: CGRect) {

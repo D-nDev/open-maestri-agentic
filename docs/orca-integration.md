@@ -1,9 +1,10 @@
 # Orca external terminal integration
 
 This fork keeps Orca as the terminal authority while open-maestri acts as the
-visual control plane. Orca terminals are discovered automatically and rendered
-as live canvas nodes without changing the Maestri-compatible `workspace.json`
-schema.
+visual control plane. Terminals created by the Agentic OS workflow are discovered
+through their worker metadata and rendered as live canvas nodes without changing
+the Maestri-compatible `workspace.json` schema. Unrelated interactive Orca shells
+are intentionally ignored.
 
 ## Runtime architecture
 
@@ -29,8 +30,12 @@ Select an Orca node to expose these controls:
 - **Queue message** waits for `tui-idle`, then delivers the message.
 - **Interrupt and send** explicitly interrupts the current model turn.
 - **Connect** creates normal Maestri canvas connections.
-- **Delete mirror** removes only the visual binding; it does not kill the Orca
-  terminal.
+
+The external node lifecycle is read-only in Open Maestri. It has no local delete
+action because Orca is authoritative; the proxy disappears as part of the Orca
+reconciliation lifecycle instead of being locally hidden and recreated.
+Terminals created directly inside Open Maestri retain their normal close and
+delete controls.
 
 When a connected note changes, the app queues a delimited snapshot directly to
 the Orca terminal. The snapshot is hash-deduplicated, debounced, and capped at

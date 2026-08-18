@@ -6,7 +6,6 @@ struct OrcaTerminalNodeSwiftUIView: View {
     let isSelected: Bool
     let isLocked: Bool
     let zoom: CGFloat
-    var onClose: ((UUID) -> Void)?
     var onLockToggle: ((UUID, Bool) -> Void)?
 
     @State private var registry = OrcaTerminalRegistry.shared
@@ -26,7 +25,6 @@ struct OrcaTerminalNodeSwiftUIView: View {
             headerTitleAccessory: { statusBadge },
             headerAccessory: { environmentBadge },
             footer: { footer },
-            onClose: { onClose?(nodeId) },
             onLockToggle: { onLockToggle?(nodeId, $0) }
         ) {
             outputView

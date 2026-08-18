@@ -1,8 +1,9 @@
 # Integração de terminais externos do Orca
 
 Este fork mantém o Orca como autoridade dos terminais e usa o Open Maestri como
-plano de controle visual. Os terminais locais e de ambientes Orca remotos são
-descobertos automaticamente, recebem nós vivos no canvas e não alteram o
+plano de controle visual. Apenas terminais criados pelo fluxo do Agentic OS são
+descobertos por seus metadados de worker e recebem nós vivos no canvas. Shells
+interativos não relacionados do Orca são ignorados. O bridge não altera o
 `workspace.json` compatível com o Maestri.
 
 ## O que já funciona
@@ -17,6 +18,12 @@ descobertos automaticamente, recebem nós vivos no canvas e não alteram o
 - árvore coordenador → subagentes reconstruída a partir do Orca orchestration e
   dos eventos `worker_*` do Agentic OS;
 - sidecar por workspace, com gravação atômica, sem mudar o schema v2 original.
+
+O ciclo de vida dos nós externos é somente leitura no Open Maestri: eles não
+possuem ação local de exclusão porque o Orca é a autoridade. O cleanup do fluxo
+é refletido pelo ciclo de reconciliação, em vez de o proxy ser ocultado localmente
+e recriado logo depois. Terminais criados diretamente no Open Maestri mantêm
+seus controles normais de fechar e excluir.
 
 ## Fluxo Agentic OS
 
