@@ -24,6 +24,43 @@ private struct OrcaOutputResult: Sendable {
     let errorMessage: String?
 }
 
+enum OrcaProxyLayout {
+    static let nodeSize = CGSize(width: 400, height: 250)
+    private static let initialOffset = CGPoint(x: 120, y: 140)
+    private static let spacing = CGSize(width: 440, height: 300)
+    private static let columns = 3
+    private static let migrationTolerance: CGFloat = 0.5
+
+    static func frame(index: Int, canvasOrigin: CGPoint) -> CGRect {
+        let safeIndex = max(0, index)
+        let column = safeIndex % columns
+        let row = safeIndex / columns
+        return CGRect(
+            x: canvasOrigin.x + initialOffset.x + CGFloat(column) * spacing.width,
+            y: canvasOrigin.y + initialOffset.y + CGFloat(row) * spacing.height,
+            width: nodeSize.width,
+            height: nodeSize.height
+        )
+    }
+
+    /// Returns a canvas-relative frame only when the node still matches the exact
+    /// grid used before binding schema v2. Manually positioned nodes are preserved.
+    static func migratedLegacyFrame(_ frame: CGRect, canvasOrigin: CGPoint) -> CGRect? {
+        guard abs(frame.width - nodeSize.width) <= migrationTolerance,
+              abs(frame.height - nodeSize.height) <= migrationTolerance else { return nil }
+
+        let columnValue = (frame.minX - initialOffset.x) / spacing.width
+        let rowValue = (frame.minY - initialOffset.y) / spacing.height
+        let column = columnValue.rounded()
+        let row = rowValue.rounded()
+        guard column >= 0, column < CGFloat(columns), row >= 0,
+              abs(columnValue - column) <= migrationTolerance / spacing.width,
+              abs(rowValue - row) <= migrationTolerance / spacing.height else { return nil }
+
+        return frame.offsetBy(dx: canvasOrigin.x, dy: canvasOrigin.y)
+    }
+}
+
 @MainActor
 @Observable
 final class OrcaTerminalRegistry {
@@ -63,10 +100,18 @@ final class OrcaTerminalRegistry {
     func start(workspace: WorkspaceManager) {
         workspaces[workspace.id] = workspace
         if documents[workspace.id] == nil {
-            let document = (try? persistence.loadOrcaBindings(workspaceId: workspace.id))
+            var document = (try? persistence.loadOrcaBindings(workspaceId: workspace.id))
                 ?? OrcaTerminalBindingDocument(workspaceId: workspace.id)
+            let didMigrateLayout = migrateLegacyProxyLayout(
+                document: &document,
+                workspace: workspace
+            )
             documents[workspace.id] = document
             restoreRuntimeStates(from: document, workspace: workspace)
+            if didMigrateLayout {
+                persist(document)
+                Task { try? await workspace.save() }
+            }
         }
         guard pollingTask == nil else { return }
         pollingTask = Task { [weak self] in
@@ -194,6 +239,34 @@ final class OrcaTerminalRegistry {
                 errorMessage: nil
             )
         }
+    }
+
+    private func migrateLegacyProxyLayout(
+        document: inout OrcaTerminalBindingDocument,
+        workspace: WorkspaceManager
+    ) -> Bool {
+        guard document.schemaVersion < OrcaTerminalBindingDocument.currentSchemaVersion else {
+            return false
+        }
+
+        let boundNodeIds = Set(document.bindings.map(\.nodeId))
+        var movedNode = false
+        for index in workspace.nodes.indices {
+            let node = workspace.nodes[index]
+            guard boundNodeIds.contains(node.id),
+                  node.content.terminalContent?.agentType == "orca_external",
+                  let migratedFrame = OrcaProxyLayout.migratedLegacyFrame(
+                    node.frame,
+                    canvasOrigin: workspace.canvasOrigin
+                  ) else { continue }
+            workspace.nodes[index].frame = migratedFrame
+            workspace.nodes[index].lastModifiedAt = Date()
+            movedNode = true
+        }
+
+        document.schemaVersion = OrcaTerminalBindingDocument.currentSchemaVersion
+        workspace.isDirty = workspace.isDirty || movedNode
+        return true
     }
 
     private func reconcile(
@@ -343,14 +416,7 @@ final class OrcaTerminalRegistry {
         let externalCount = workspace.nodes.count {
             $0.content.terminalContent?.agentType == "orca_external"
         }
-        let column = externalCount % 3
-        let row = externalCount / 3
-        let frame = CGRect(
-            x: 120 + CGFloat(column) * 440,
-            y: 140 + CGFloat(row) * 300,
-            width: 400,
-            height: 250
-        )
+        let frame = OrcaProxyLayout.frame(index: externalCount, canvasOrigin: workspace.canvasOrigin)
         return CanvasNode(id: nodeId, frame: frame, content: .terminal(content))
     }
 
