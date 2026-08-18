@@ -1,7 +1,7 @@
 #!/bin/bash
-# 开发调试脚本：监听 swift build 产物变化，自动打包成 .app 并启动
-# 用法：bash scripts/dev.sh
-# 在 Xcode 里按 ⌘B Build，此脚本自动检测到新产物并重新打包启动
+# Development helper: watch swift build output, package it as an app, and relaunch automatically
+# Usage: bash scripts/dev.sh
+# Press ⌘B in Xcode; this script detects the new build, packages it, and relaunches the app
 
 set -e
 
@@ -31,7 +31,7 @@ package_and_launch() {
         --entitlements "$PROJECT_DIR/Sources/open-maestri.entitlements" \
         "$APP_DIR" 2>/dev/null
 
-    # 关闭旧实例
+    # Stop the previous instance
     pkill -x "open-maestri" 2>/dev/null || true
     sleep 0.3
 

@@ -1,7 +1,7 @@
 #!/bin/bash
-# build-maestri.sh — 本地 Release 打包脚本
-# 用法：bash scripts/build-maestri.sh [--launch]
-#   --launch   打包完成后自动启动 App
+# build-maestri.sh — local release packaging script
+# Usage: bash scripts/build-maestri.sh [--launch]
+#   --launch   Launch the app automatically after packaging
 
 set -euo pipefail
 
@@ -21,7 +21,7 @@ done
 echo "🔨 Building open-maestri app (host arch) + omaestri CLI (Universal Binary)..."
 cd "$PROJECT_DIR"
 
-# 主 app 使用 host 架构构建（依赖 Sparkle/SwiftTerm 的 dylib 不易做 universal）
+# Build the main app for the host architecture because the Sparkle/SwiftTerm dylibs are not easily made universal
 swift build -c release 2>&1
 
 if [ ! -f "$EXEC" ]; then
@@ -29,7 +29,7 @@ if [ ! -f "$EXEC" ]; then
   exit 1
 fi
 
-# CLI (omaestri) 编译为 Universal Binary（x86_64 + arm64），对标 Maestri 279KB universal binary
+# Build the omaestri CLI as a Universal Binary (x86_64 + arm64), matching Maestri's universal binary layout
 echo "▶ Building omaestri CLI as Universal Binary..."
 CLI_ARM64="$PROJECT_DIR/.build/arm64-apple-macosx/release/omaestri"
 CLI_X86="$PROJECT_DIR/.build/x86_64-apple-macosx/release/omaestri"
@@ -54,14 +54,14 @@ mkdir -p "$APP_BUNDLE/Contents/Frameworks"
 cp "$EXEC" "$APP_BUNDLE/Contents/MacOS/open-maestri"
 cp "$PROJECT_DIR/Sources/Info.plist" "$APP_BUNDLE/Contents/Info.plist"
 
-# 将 CLI 二进制复制到 app bundle Resources
+# Copy the CLI binary into the app bundle resources
 CLI_SRC="$BUILD_DIR/omaestri"
 APP_RESOURCES="$APP_BUNDLE/Contents/Resources"
 cp "$CLI_SRC" "$APP_RESOURCES/omaestri"
 echo "✅ omaestri copied to $APP_RESOURCES"
 
-# Assets（图标）—— 用 iconutil 直接转换，确保生成包含所有尺寸的完整 ICNS
-# actool 在此场景下 output-files 为空，导致生成的 ICNS 缺少 ic08/ic09/ic10 等关键尺寸
+# Assets (icons): convert with iconutil so the generated ICNS contains every required size
+# In this setup, actool returns an empty output-files list and omits key sizes such as ic08, ic09, and ic10
 ASSETS_SRC="$PROJECT_DIR/Sources/Assets.xcassets"
 ICONSET_DIR="$PROJECT_DIR/AppIcon.iconset"
 if [ -d "$ASSETS_SRC/AppIcon.appiconset" ]; then
@@ -74,7 +74,7 @@ if [ -d "$ASSETS_SRC/AppIcon.appiconset" ]; then
   echo "✅ AppIcon.icns compiled (${ICNS_SIZE} bytes)"
 fi
 
-# 本地化字符串：将 .xcstrings 编译为各语言 .lproj/Localizable.strings
+# Compile the .xcstrings catalog into each locale's .lproj/Localizable.strings file
 XCSTRINGS="$PROJECT_DIR/Sources/Resources/Localizable.xcstrings"
 if [ -f "$XCSTRINGS" ]; then
   echo "▶ Compiling localizations..."
@@ -123,15 +123,15 @@ if [ -d "$SPARKLE" ]; then
     "$APP_BUNDLE/Contents/Frameworks/Sparkle.framework" 2>/dev/null || true
 fi
 
-# SwiftTerm（若编译为独立 dylib 则复制）
+# Copy SwiftTerm if it was built as a standalone dylib
 for dylib in "$BUILD_DIR"/*.dylib; do
   [ -f "$dylib" ] && cp "$dylib" "$APP_BUNDLE/Contents/Frameworks/" || true
 done
 
-# SwiftTerm Metal shader bundle（NSBundle.module 所需）
-# swift build -c release 将 SwiftTerm 的 Metal 资源编译到 SwiftTerm_SwiftTerm.bundle
-# 该 bundle 与可执行文件同目录，需复制到 app bundle Resources 中，
-# 否则 MetalTerminalRenderer.candidateBundles() 中 Bundle.module 找不到 bundle 而触发 assertionFailure 崩溃
+# SwiftTerm Metal shader bundle required by NSBundle.module
+# swift build -c release compiles SwiftTerm's Metal resources into SwiftTerm_SwiftTerm.bundle
+# The bundle is emitted beside the executable and must be copied into the app bundle resources;
+# otherwise Bundle.module cannot find it in MetalTerminalRenderer.candidateBundles(), causing an assertion failure
 SWIFTTERM_BUNDLE="$HOST_BUILD_DIR/SwiftTerm_SwiftTerm.bundle"
 if [ -d "$SWIFTTERM_BUNDLE" ]; then
   cp -R "$SWIFTTERM_BUNDLE" "$APP_BUNDLE/Contents/Resources/"

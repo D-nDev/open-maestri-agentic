@@ -1,8 +1,8 @@
 #!/bin/bash
-# create-dmg.sh — 将已打包的 .app bundle 封装为 DMG 安装包
-# 用法：bash scripts/create-dmg.sh
-#   输入：build/open-maestri.app
-#   输出：build/Open.Maestri.dmg
+# create-dmg.sh — package an existing app bundle as a DMG installer
+# Usage: bash scripts/create-dmg.sh
+#   Input: build/open-maestri.app
+#   Output: build/Open.Maestri.dmg
 
 set -euo pipefail
 
