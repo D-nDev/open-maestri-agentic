@@ -56,6 +56,9 @@ final class LocalizationCatalogTests: XCTestCase {
         let rawHelp = try NSRegularExpression(
             pattern: #"\.help\(\s*\"[^\"]+\"\s*\)"#
         )
+        let rawMenuItem = try NSRegularExpression(
+            pattern: #"menuItem\(\s*\"[^\"]+\"\s*,"#
+        )
         var failures: [String] = []
 
         for file in try swiftSourceFiles() {
@@ -66,6 +69,9 @@ final class LocalizationCatalogTests: XCTestCase {
             }
             if rawHelp.firstMatch(in: source, range: range) != nil {
                 failures.append("\(file.path): raw .help text")
+            }
+            if rawMenuItem.firstMatch(in: source, range: range) != nil {
+                failures.append("\(file.path): raw context menu item")
             }
         }
 

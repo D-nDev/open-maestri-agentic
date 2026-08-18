@@ -67,6 +67,19 @@ enum OrcaTerminalDiscoveryPolicy {
     }
 }
 
+enum OrcaTerminalRetentionPolicy {
+    static let removalGracePeriod: TimeInterval = 6
+
+    static func shouldRemove(
+        unseenSince: Date?,
+        now: Date,
+        gracePeriod: TimeInterval = removalGracePeriod
+    ) -> Bool {
+        guard let unseenSince else { return false }
+        return now.timeIntervalSince(unseenSince) >= gracePeriod
+    }
+}
+
 @MainActor
 @Observable
 final class OrcaTerminalRegistry {
@@ -87,6 +100,7 @@ final class OrcaTerminalRegistry {
     private var bindingSaveTasks: [UUID: Task<Void, Never>] = [:]
     private var environmentFailureCounts: [String: Int] = [:]
     private var environmentRetryAfter: [String: Date] = [:]
+    private var unseenSince: [UUID: Date] = [:]
     private var lastEnvironmentRefresh = Date.distantPast
 
     private init() {
@@ -207,6 +221,7 @@ final class OrcaTerminalRegistry {
 
     func removeBinding(nodeId: UUID) {
         states.removeValue(forKey: nodeId)
+        unseenSince.removeValue(forKey: nodeId)
         for workspaceId in documents.keys {
             guard var document = documents[workspaceId] else { continue }
             let oldCount = document.bindings.count
@@ -377,6 +392,7 @@ final class OrcaTerminalRegistry {
                 lastUpdatedAt: Date(),
                 errorMessage: nil
             )
+            unseenSince.removeValue(forKey: nodeId)
             persist(document)
             if created {
                 Task { try? await workspace.save() }
@@ -404,6 +420,7 @@ final class OrcaTerminalRegistry {
             documents[workspaceId] = document
             for nodeId in removedNodeIds {
                 states.removeValue(forKey: nodeId)
+                unseenSince.removeValue(forKey: nodeId)
                 workspaces[workspaceId]?.removeExternallyManagedNodeFromAuthority(id: nodeId)
             }
             persist(document)
@@ -466,15 +483,47 @@ final class OrcaTerminalRegistry {
         let visible = Set(snapshots.flatMap { snapshot in
             snapshot.terminals.map { "\(snapshot.environment ?? "local")|\($0.handle)" }
         })
+        let now = Date()
+        var nodesToRemove: [UUID] = []
         for (nodeId, var state) in states {
             let environment = state.environment ?? "local"
-            guard successfulEnvironments.contains(environment),
-                  !visible.contains("\(environment)|\(state.handle)") else { continue }
+            guard successfulEnvironments.contains(environment) else { continue }
+            if visible.contains("\(environment)|\(state.handle)") {
+                unseenSince.removeValue(forKey: nodeId)
+                continue
+            }
+            if OrcaTerminalRetentionPolicy.shouldRemove(
+                unseenSince: unseenSince[nodeId],
+                now: now
+            ) {
+                nodesToRemove.append(nodeId)
+                continue
+            }
+            unseenSince[nodeId] = unseenSince[nodeId] ?? now
             state.connected = false
             state.writable = false
             state.status = "offline"
-            state.errorMessage = "Terminal not present in the current Orca runtime"
+            state.errorMessage = "orca.error.terminal_missing".localized
             states[nodeId] = state
+        }
+        for nodeId in nodesToRemove {
+            removeAuthoritativeBinding(nodeId: nodeId)
+        }
+    }
+
+    private func removeAuthoritativeBinding(nodeId: UUID) {
+        states.removeValue(forKey: nodeId)
+        unseenSince.removeValue(forKey: nodeId)
+        for workspaceId in Array(documents.keys) {
+            guard var document = documents[workspaceId],
+                  document.bindings.contains(where: { $0.nodeId == nodeId }) else { continue }
+            document.bindings.removeAll { $0.nodeId == nodeId }
+            documents[workspaceId] = document
+            workspaces[workspaceId]?.removeExternallyManagedNodeFromAuthority(id: nodeId)
+            persist(document)
+            if let workspace = workspaces[workspaceId] {
+                Task { try? await workspace.save() }
+            }
         }
     }
 

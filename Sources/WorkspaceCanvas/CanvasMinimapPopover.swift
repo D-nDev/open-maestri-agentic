@@ -6,6 +6,7 @@ struct CanvasMinimapPopover: View {
     let nodes: [CanvasNode]
     let canvasOrigin: CGPoint
     let zoom: CGFloat
+    let viewportSize: CGSize
     let onJumpTo: (CGPoint) -> Void
 
     /// Thumbnail fixed size
@@ -26,8 +27,16 @@ struct CanvasMinimapPopover: View {
     }
 
     private var minimapCanvas: some View {
-        let bounds = computeBounds()
-        let scale = computeScale(bounds: bounds)
+        let viewportFrame = CanvasMinimapLayout.viewportFrame(
+            origin: canvasOrigin,
+            viewportSize: viewportSize,
+            zoom: zoom
+        )
+        let bounds = CanvasMinimapLayout.contentBounds(
+            nodeFrames: nodes.map(\.frame),
+            viewportFrame: viewportFrame
+        )
+        let scale = CanvasMinimapLayout.scale(bounds: bounds, mapSize: mapSize)
 
         return ZStack(alignment: .topLeading) {
             // Light gray background (canvas area)
@@ -37,14 +46,17 @@ struct CanvasMinimapPopover: View {
 
             // Node color block
             ForEach(nodes, id: \.id) { node in
-                let rect = scaledRect(for: node.frame, bounds: bounds, scale: scale)
+                let rect = CanvasMinimapLayout.scaledRect(
+                    for: node.frame,
+                    bounds: bounds,
+                    scale: scale,
+                    mapSize: mapSize
+                )
                 Button {
                     // Click on a node → Position the canvas to center the node
-                    let viewportW: CGFloat = 800 / zoom
-                    let viewportH: CGFloat = 600 / zoom
                     let target = CGPoint(
-                        x: node.frame.midX - viewportW / 2,
-                        y: node.frame.midY - viewportH / 2
+                        x: node.frame.midX - viewportFrame.width / 2,
+                        y: node.frame.midY - viewportFrame.height / 2
                     )
                     onJumpTo(target)
                 } label: {
@@ -57,7 +69,12 @@ struct CanvasMinimapPopover: View {
             }
 
             // Current viewport indicator box
-            let viewportRect = scaledViewportRect(bounds: bounds, scale: scale)
+            let viewportRect = CanvasMinimapLayout.scaledRect(
+                for: viewportFrame,
+                bounds: bounds,
+                scale: scale,
+                mapSize: mapSize
+            )
             RoundedRectangle(cornerRadius: 2)
                 .stroke(Color.blue.opacity(0.6), lineWidth: 1.5)
                 .frame(width: viewportRect.width, height: viewportRect.height)
@@ -65,54 +82,6 @@ struct CanvasMinimapPopover: View {
         }
         .frame(width: mapSize.width, height: mapSize.height)
         .clipped()
-    }
-
-    // MARK: - Coordinate calculation
-
-    /// Calculate bounding boxes for all nodes (including some padding)
-    private func computeBounds() -> CGRect {
-        guard !nodes.isEmpty else { return .zero }
-        var minX = CGFloat.infinity, minY = CGFloat.infinity
-        var maxX = -CGFloat.infinity, maxY = -CGFloat.infinity
-        for node in nodes {
-            minX = min(minX, node.frame.minX)
-            minY = min(minY, node.frame.minY)
-            maxX = max(maxX, node.frame.maxX)
-            maxY = max(maxY, node.frame.maxY)
-        }
-        // Add padding
-        let pad: CGFloat = 100
-        return CGRect(x: minX - pad, y: minY - pad,
-                      width: maxX - minX + pad * 2,
-                      height: maxY - minY + pad * 2)
-    }
-
-    /// Compute scaling (keep aspect ratio fit to mapSize)
-    private func computeScale(bounds: CGRect) -> CGFloat {
-        guard bounds.width > 0, bounds.height > 0 else { return 1 }
-        return min(mapSize.width / bounds.width, mapSize.height / bounds.height)
-    }
-
-    /// Map canvas coordinates to thumbnail coordinates
-    private func scaledRect(for frame: CGRect, bounds: CGRect, scale: CGFloat) -> CGRect {
-        let x = (frame.minX - bounds.minX) * scale
-        let y = (frame.minY - bounds.minY) * scale
-        let w = frame.width * scale
-        let h = frame.height * scale
-        // Center offset
-        let totalW = bounds.width * scale
-        let totalH = bounds.height * scale
-        let offsetX = (mapSize.width - totalW) / 2
-        let offsetY = (mapSize.height - totalH) / 2
-        return CGRect(x: x + offsetX, y: y + offsetY, width: w, height: h)
-    }
-
-    /// The position of the current viewport in the thumbnail
-    private func scaledViewportRect(bounds: CGRect, scale: CGFloat) -> CGRect {
-        let vpW: CGFloat = 800 / zoom  // Estimating viewport width
-        let vpH: CGFloat = 600 / zoom  // Estimating viewport height
-        let vpFrame = CGRect(x: canvasOrigin.x, y: canvasOrigin.y, width: vpW, height: vpH)
-        return scaledRect(for: vpFrame, bounds: bounds, scale: scale)
     }
 
     /// Return the corresponding color according to the node type (consistent with the screenshot)
@@ -135,5 +104,51 @@ struct CanvasMinimapPopover: View {
         case .freehand:
             return Color(red: 0.6, green: 0.85, blue: 0.75)   // Light turquoise (hand-painted)
         }
+    }
+}
+
+enum CanvasMinimapLayout {
+    static func viewportFrame(origin: CGPoint, viewportSize: CGSize, zoom: CGFloat) -> CGRect {
+        let safeZoom = max(zoom, 0.01)
+        return CGRect(
+            origin: origin,
+            size: CGSize(
+                width: max(1, viewportSize.width) / safeZoom,
+                height: max(1, viewportSize.height) / safeZoom
+            )
+        )
+    }
+
+    static func contentBounds(
+        nodeFrames: [CGRect],
+        viewportFrame: CGRect,
+        padding: CGFloat = 100
+    ) -> CGRect {
+        let combined = nodeFrames.reduce(viewportFrame) { $0.union($1) }
+        return combined.insetBy(dx: -padding, dy: -padding)
+    }
+
+    static func scale(bounds: CGRect, mapSize: CGSize) -> CGFloat {
+        guard bounds.width > 0, bounds.height > 0 else { return 1 }
+        return min(mapSize.width / bounds.width, mapSize.height / bounds.height)
+    }
+
+    static func scaledRect(
+        for frame: CGRect,
+        bounds: CGRect,
+        scale: CGFloat,
+        mapSize: CGSize
+    ) -> CGRect {
+        let totalSize = CGSize(width: bounds.width * scale, height: bounds.height * scale)
+        let offset = CGPoint(
+            x: (mapSize.width - totalSize.width) / 2,
+            y: (mapSize.height - totalSize.height) / 2
+        )
+        return CGRect(
+            x: (frame.minX - bounds.minX) * scale + offset.x,
+            y: (frame.minY - bounds.minY) * scale + offset.y,
+            width: frame.width * scale,
+            height: frame.height * scale
+        )
     }
 }

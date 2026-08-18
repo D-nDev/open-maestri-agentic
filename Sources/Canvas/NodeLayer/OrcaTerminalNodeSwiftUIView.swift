@@ -15,7 +15,7 @@ struct OrcaTerminalNodeSwiftUIView: View {
     var body: some View {
         NodeShellView(
             nodeId: nodeId,
-            title: state?.title ?? fallbackContent.name,
+            title: localizedTitle,
             isSelected: isSelected,
             isLocked: isLocked,
             isCommunicating: false,
@@ -49,7 +49,7 @@ struct OrcaTerminalNodeSwiftUIView: View {
 
     @ViewBuilder
     private var environmentBadge: some View {
-        Text(state?.environmentLabel ?? "local")
+        Text(localizedEnvironment)
             .font(.system(size: 8, weight: .medium, design: .monospaced))
             .foregroundStyle(.secondary)
             .padding(.horizontal, 5)
@@ -61,7 +61,7 @@ struct OrcaTerminalNodeSwiftUIView: View {
         OrcaTerminalOutputView(nodeId: nodeId, text: outputText)
         .overlay(alignment: .topTrailing) {
             if let role = state?.role, !role.isEmpty {
-                Text(role)
+                Text(localizedRole(role))
                     .font(.system(size: 9, weight: .medium))
                     .padding(.horizontal, 6)
                     .padding(.vertical, 3)
@@ -97,7 +97,7 @@ struct OrcaTerminalNodeSwiftUIView: View {
             return "[Orca] \(error)"
         }
         let output = state?.output.joined(separator: "\n") ?? ""
-        return output.isEmpty ? "Waiting for Orca terminal output…" : output
+        return output.isEmpty ? "orca.output.waiting".localized : output
     }
 
     private var footerText: String {
@@ -112,5 +112,21 @@ struct OrcaTerminalNodeSwiftUIView: View {
         case "failed", "error", "orphaned": return .red
         default: return .secondary
         }
+    }
+
+    private var localizedTitle: String {
+        let title = state?.title ?? fallbackContent.name
+        return title.lowercased() == "coordinator" ? "orca.role.coordinator".localized : title
+    }
+
+    private var localizedEnvironment: String {
+        guard let environment = state?.environment, !environment.isEmpty else {
+            return "orca.environment.local".localized
+        }
+        return environment
+    }
+
+    private func localizedRole(_ role: String) -> String {
+        role.lowercased() == "coordinator" ? "orca.role.coordinator".localized : role
     }
 }

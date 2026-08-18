@@ -55,4 +55,44 @@ final class OrcaProxyLayoutTests: XCTestCase {
 
         XCTAssertNil(migrated)
     }
+
+    func testClosedTerminalIsRemovedOnlyAfterGracePeriod() {
+        let firstMissing = Date(timeIntervalSince1970: 100)
+
+        XCTAssertFalse(OrcaTerminalRetentionPolicy.shouldRemove(
+            unseenSince: nil,
+            now: firstMissing
+        ))
+        XCTAssertFalse(OrcaTerminalRetentionPolicy.shouldRemove(
+            unseenSince: firstMissing,
+            now: firstMissing.addingTimeInterval(5.9)
+        ))
+        XCTAssertTrue(OrcaTerminalRetentionPolicy.shouldRemove(
+            unseenSince: firstMissing,
+            now: firstMissing.addingTimeInterval(6)
+        ))
+    }
+
+    func testMinimapBoundsIncludeViewportAndNodes() {
+        let viewport = CGRect(x: 10_000, y: 8_000, width: 1_200, height: 800)
+        let node = CGRect(x: 10_400, y: 8_200, width: 400, height: 250)
+
+        let bounds = CanvasMinimapLayout.contentBounds(
+            nodeFrames: [node],
+            viewportFrame: viewport,
+            padding: 100
+        )
+
+        XCTAssertEqual(bounds, CGRect(x: 9_900, y: 7_900, width: 1_400, height: 1_000))
+    }
+
+    func testMinimapUsesActualViewportSize() {
+        let frame = CanvasMinimapLayout.viewportFrame(
+            origin: CGPoint(x: 500, y: 700),
+            viewportSize: CGSize(width: 1_600, height: 900),
+            zoom: 0.8
+        )
+
+        XCTAssertEqual(frame, CGRect(x: 500, y: 700, width: 2_000, height: 1_125))
+    }
 }

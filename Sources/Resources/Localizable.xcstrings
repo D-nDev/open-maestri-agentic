@@ -6449,6 +6449,172 @@
         }
       }
     },
+    "orca.context.copy_output": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy mirrored output"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制镜像输出"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar saída espelhada"
+          }
+        }
+      }
+    },
+    "orca.environment.local": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local"
+          }
+        }
+      }
+    },
+    "orca.error.terminal_missing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This terminal is no longer available in Orca."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此终端在 Orca 中已不可用。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este Terminal não está mais disponível no Orca."
+          }
+        }
+      }
+    },
+    "orca.output.waiting": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for Orca terminal output…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在等待 Orca 终端输出…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aguardando a saída do Terminal do Orca…"
+          }
+        }
+      }
+    },
+    "orca.role.coordinator": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coordinator"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "协调器"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coordenador"
+          }
+        }
+      }
+    },
+    "orca.status.completed": {
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Completed" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "已完成" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Concluído" } }
+      }
+    },
+    "orca.status.failed": {
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Failed" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "失败" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Falhou" } }
+      }
+    },
+    "orca.status.idle": {
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Idle" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "空闲" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Ocioso" } }
+      }
+    },
+    "orca.status.offline": {
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Offline" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "离线" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Offline" } }
+      }
+    },
+    "orca.status.queued": {
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Queued" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "已排队" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Na fila" } }
+      }
+    },
+    "orca.status.reconnecting": {
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Reconnecting" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "正在重新连接" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Reconectando" } }
+      }
+    },
+    "orca.status.running": {
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Running" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "运行中" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Em execução" } }
+      }
+    },
+    "orca.status.waiting": {
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Waiting" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "等待中" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Aguardando" } }
+      }
+    },
     "orca.send.interrupt_title": {
       "localizations": {
         "en": {

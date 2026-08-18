@@ -274,6 +274,13 @@ struct WorkspaceCanvasView: View {
 
     @ViewBuilder
     private var canvasBody: some View {
+        GeometryReader { geometry in
+            canvasBody(viewportSize: geometry.size)
+        }
+    }
+
+    @ViewBuilder
+    private func canvasBody(viewportSize: CGSize) -> some View {
         ZStack {
             canvasViewportRepresentable
             .ignoresSafeArea()
@@ -316,6 +323,7 @@ struct WorkspaceCanvasView: View {
                                 nodes: workspace.nodes,
                                 canvasOrigin: canvasOrigin,
                                 zoom: zoom,
+                                viewportSize: viewportSize,
                                 onJumpTo: { targetPoint in
                                     // Trigger CanvasViewportView smooth animation jump through Notification
                                     NotificationCenter.default.post(

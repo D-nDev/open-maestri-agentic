@@ -40,8 +40,8 @@ extension CanvasViewportView {
         switch node.content {
         case .terminal(let tc):
             if tc.agentType == "orca_external" {
-                menu.addItem(menuItem("Refresh from Orca", action: #selector(contextMenuReloadTerminal(_:)), id: id, icon: "arrow.clockwise"))
-                menu.addItem(menuItem("Copy mirrored output", action: #selector(contextMenuCopyTerminal(_:)), id: id, icon: "doc.on.doc", keyEquivalent: "c"))
+                menu.addItem(menuItem("orca.toolbar.refresh".localized, action: #selector(contextMenuReloadTerminal(_:)), id: id, icon: "arrow.clockwise"))
+                menu.addItem(menuItem("orca.context.copy_output".localized, action: #selector(contextMenuCopyTerminal(_:)), id: id, icon: "doc.on.doc", keyEquivalent: "c"))
                 menu.addItem(NSMenuItem.separator())
                 menu.addItem(menuItem("canvas.context.connect".localized, action: #selector(contextMenuConnect(_:)), id: id, icon: "arrow.trianglehead.branch"))
                 let lockTitle = node.isLocked ? "menu.unlock".localized : "menu.lock".localized
