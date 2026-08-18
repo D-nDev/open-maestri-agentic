@@ -391,7 +391,9 @@ final class OrcaTerminalRegistry {
                 parentWorkerId: agentic?.parentWorkerId ?? worker?.parentTaskId,
                 worktreePath: terminal.worktreePath,
                 branch: terminal.branch,
-                status: worker?.status ?? agentic?.status ?? (terminal.connected ? "running" : "offline"),
+                status: OrcaTerminalStatus.normalized(
+                    worker?.status ?? agentic?.status ?? (terminal.connected ? "running" : "offline")
+                ),
                 output: oldOutput.isEmpty ? terminal.preview.map { [$0] } ?? [] : oldOutput,
                 connected: terminal.connected,
                 writable: terminal.writable,
@@ -591,7 +593,7 @@ final class OrcaTerminalRegistry {
                     incoming: cleanLines
                 )
             }
-            state.status = snapshot.status
+            state.status = OrcaTerminalStatus.normalized(snapshot.status)
             state.connected = true
             state.errorMessage = nil
             state.lastUpdatedAt = Date()

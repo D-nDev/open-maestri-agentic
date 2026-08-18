@@ -110,6 +110,7 @@ struct WorkspaceSidebarView: View {
                                 Button("button.delete_group", role: .destructive) { deleteGroup(group) }
                             }
                     }
+                    .padding(.vertical, 2)
                 }
             }
 
@@ -119,6 +120,7 @@ struct WorkspaceSidebarView: View {
             }
         }
         .searchable(text: $searchText, placement: .sidebar, prompt: "workspace.search".localized)
+        .contentMargins(.top, 6, for: .scrollContent)
     }
 
     @ViewBuilder
@@ -129,6 +131,7 @@ struct WorkspaceSidebarView: View {
             terminalCount: ws?.terminalCount ?? 0,
             unreadCount: ws?.unreadActivityCount ?? 0
         )
+        .padding(.vertical, 2)
         .tag(entry.id)
         .contextMenu(menuItems: {
             buildContextMenu(for: entry, inGroup: groupId)

@@ -73,6 +73,13 @@ final class OrcaProxyLayoutTests: XCTestCase {
         ))
     }
 
+    func testAttemptStatusIsPresentedAsRunning() {
+        XCTAssertEqual(OrcaTerminalStatus.normalized("attempt-1"), "running")
+        XCTAssertEqual(OrcaTerminalStatus.normalized("attempt-42"), "running")
+        XCTAssertEqual(OrcaTerminalStatus.normalized("running"), "running")
+        XCTAssertEqual(OrcaTerminalStatus.normalized("completed"), "completed")
+    }
+
     func testMinimapBoundsIncludeViewportAndNodes() {
         let viewport = CGRect(x: 10_000, y: 8_000, width: 1_200, height: 800)
         let node = CGRect(x: 10_400, y: 8_200, width: 400, height: 250)

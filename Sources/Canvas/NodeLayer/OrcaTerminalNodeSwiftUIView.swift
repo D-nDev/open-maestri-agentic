@@ -35,7 +35,7 @@ struct OrcaTerminalNodeSwiftUIView: View {
     private var statusBadge: some View {
         HStack(spacing: 4) {
             OrcaActivityIndicator(color: statusColor, isActive: isActive)
-            Text(state?.status ?? "offline")
+            Text(displayStatus)
                 .font(.system(size: 9, weight: .semibold))
                 .lineLimit(1)
         }
@@ -56,7 +56,7 @@ struct OrcaTerminalNodeSwiftUIView: View {
     }
 
     private var outputView: some View {
-        OrcaTerminalOutputView(nodeId: nodeId, text: outputText, isActive: isActive)
+        OrcaTerminalOutputView(nodeId: nodeId, text: outputText)
         .overlay(alignment: .topTrailing) {
             if let role = state?.role, !role.isEmpty {
                 Text(localizedRole(role))
@@ -103,7 +103,7 @@ struct OrcaTerminalNodeSwiftUIView: View {
     }
 
     private var statusColor: Color {
-        switch state?.status.lowercased() {
+        switch displayStatus.lowercased() {
         case "running", "active", "working": return .green
         case "idle", "completed", "passed", "done": return .blue
         case "reconnecting", "waiting", "queued": return .orange
@@ -113,10 +113,14 @@ struct OrcaTerminalNodeSwiftUIView: View {
     }
 
     private var isActive: Bool {
-        switch state?.status.lowercased() {
+        switch displayStatus.lowercased() {
         case "running", "active", "working", "reconnecting", "waiting": return true
         default: return false
         }
+    }
+
+    private var displayStatus: String {
+        OrcaTerminalStatus.normalized(state?.status ?? "offline")
     }
 
     private var localizedTitle: String {
@@ -141,19 +145,9 @@ private struct OrcaActivityIndicator: View {
     let isActive: Bool
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1 / 30, paused: !isActive)) { context in
-            let elapsed = context.date.timeIntervalSinceReferenceDate
-            let wave = isActive ? (sin(elapsed * .pi * 2 / 1.25) + 1) / 2 : 0
-            ZStack {
-                Circle()
-                    .stroke(color.opacity(0.45 * wave), lineWidth: 1.5)
-                    .frame(width: 6, height: 6)
-                    .scaleEffect(1 + wave * 1.15)
-                Circle()
-                    .fill(color)
-                    .frame(width: 6, height: 6)
-            }
-        }
-        .frame(width: 10, height: 10)
+        Circle()
+            .fill(color.opacity(isActive ? 1 : 0.55))
+            .frame(width: 6, height: 6)
+            .frame(width: 10, height: 10)
     }
 }

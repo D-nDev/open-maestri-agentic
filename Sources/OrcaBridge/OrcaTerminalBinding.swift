@@ -47,6 +47,21 @@ struct OrcaTerminalRuntimeState: Equatable {
     var environmentLabel: String { environment ?? "local" }
 }
 
+enum OrcaTerminalStatus {
+    static func normalized(_ status: String) -> String {
+        let trimmed = status.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lowercased = trimmed.lowercased()
+        let attemptPrefix = "attempt-"
+        let attemptNumber = lowercased.dropFirst(attemptPrefix.count)
+        if lowercased.hasPrefix(attemptPrefix),
+           !attemptNumber.isEmpty,
+           attemptNumber.allSatisfy(\.isNumber) {
+            return "running"
+        }
+        return trimmed
+    }
+}
+
 enum OrcaNoteDeliveryPhase: String, Equatable {
     case waiting
     case sent

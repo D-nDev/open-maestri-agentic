@@ -33,7 +33,6 @@ final class OrcaTerminalScrollViewRegistry {
 struct OrcaTerminalOutputView: NSViewRepresentable {
     let nodeId: UUID
     let text: String
-    let isActive: Bool
 
     @MainActor
     final class Coordinator {
@@ -82,7 +81,6 @@ struct OrcaTerminalOutputView: NSViewRepresentable {
 
     @MainActor
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
-        updateBackground(of: scrollView)
         guard let textView = scrollView.documentView as? NSTextView,
               context.coordinator.lastText != text else { return }
 
@@ -123,10 +121,7 @@ struct OrcaTerminalOutputView: NSViewRepresentable {
     }
 
     private func updateBackground(of scrollView: NSScrollView) {
-        let base = NSColor.textBackgroundColor.withAlphaComponent(0.92)
-        scrollView.backgroundColor = isActive
-            ? NSColor.systemGreen.withAlphaComponent(0.045).blended(withFraction: 0.92, of: base) ?? base
-            : base
+        scrollView.backgroundColor = NSColor.textBackgroundColor.withAlphaComponent(0.92)
     }
 }
 
