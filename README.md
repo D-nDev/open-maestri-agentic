@@ -244,6 +244,14 @@ The `omaestri` script is automatically injected into connected terminals. It com
 | `omaestri portal click "Name" @ref` | Click element |
 | `omaestri portal fill "Name" @ref "value"` | Fill input field |
 
+### Orca visual control plane (this fork)
+
+Orca-managed local and remote terminals can be mirrored as controllable canvas
+nodes with cursor streaming, queue/interrupt delivery, connected-note context,
+restart reconciliation, and Agentic OS coordinator/subagent trees. See the
+[integration guide](docs/orca-integration.md) or the
+[Portuguese guide](docs/orca-integration.pt-BR.md).
+
 ## Compatibility
 
 open-maestri maintains full compatibility with Maestri v0.25.4:

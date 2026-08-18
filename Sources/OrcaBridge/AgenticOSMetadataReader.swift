@@ -49,22 +49,45 @@ struct AgenticOSMetadataReader {
         for line in content.split(separator: "\n") {
             guard let data = line.data(using: .utf8),
                   let event = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  safeString(event["type"]) == "worker_started",
+                  let type = safeString(event["type"]),
                   let runId = safeString(event["run_id"]),
-                  let workerId = safeString(event["worker_id"]),
-                  let handle = safeString(event["terminal_handle"]) else { continue }
+                  let workerId = safeString(event["worker_id"]) else { continue }
             let environment = safeString(event["environment"])
-            workers[key(environment: environment, handle: handle)] = AgenticWorkerMetadata(
-                runId: runId,
-                workerId: workerId,
-                parentWorkerId: safeString(event["parent_worker_id"]),
-                terminalHandle: handle,
-                role: safeString(event["role"]),
-                model: safeString(event["model"]),
-                status: safeString(event["status"]),
-                worktree: safeString(event["worktree"]) ?? safeString(event["project_dir"]),
-                environment: environment
-            )
+            switch type {
+            case "worker_started":
+                guard let handle = safeString(event["terminal_handle"]) else { continue }
+                let storageKey = key(environment: environment, handle: handle)
+                let existing = workers[storageKey]
+                workers[storageKey] = AgenticWorkerMetadata(
+                    runId: runId,
+                    workerId: workerId,
+                    parentWorkerId: safeString(event["parent_worker_id"])
+                        ?? existing?.parentWorkerId,
+                    terminalHandle: handle,
+                    role: safeString(event["role"]) ?? existing?.role,
+                    model: safeString(event["model"]) ?? existing?.model,
+                    status: safeString(event["status"]) ?? existing?.status,
+                    worktree: safeString(event["worktree"])
+                        ?? safeString(event["project_dir"])
+                        ?? existing?.worktree,
+                    environment: environment ?? existing?.environment
+                )
+            case "worker_status", "worker_done":
+                guard let status = safeString(event["status"]) else { continue }
+                let matchingKeys = workers.compactMap { storageKey, worker -> String? in
+                    guard worker.runId == runId, worker.workerId == workerId,
+                          environment == nil || worker.environment == environment else { return nil }
+                    return storageKey
+                }
+                for storageKey in matchingKeys {
+                    workers[storageKey]?.status = status
+                    if let model = safeString(event["model"]) {
+                        workers[storageKey]?.model = model
+                    }
+                }
+            default:
+                continue
+            }
         }
     }
 

@@ -2,6 +2,37 @@ import XCTest
 @testable import open_maestri
 
 final class OrcaCLIClientTests: XCTestCase {
+    func testPendingAgenticEventsRebuildLatestWorkerState() throws {
+        let temporary = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let bridge = temporary.appendingPathComponent(
+            "state-store/bridges/maestri",
+            isDirectory: true
+        )
+        try FileManager.default.createDirectory(at: bridge, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: temporary) }
+        let events = """
+        {"type":"worker_started","run_id":"run-1","worker_id":"backend","parent_worker_id":"coordinator","terminal_handle":"term-1","role":"Backend","model":"grok"}
+        {"type":"worker_status","run_id":"run-1","worker_id":"backend","status":"reviewing","model":"terra"}
+        {"type":"worker_done","run_id":"run-1","worker_id":"backend","status":"completed"}
+
+        """
+        try events.write(
+            to: bridge.appendingPathComponent("pending.jsonl"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let workers = AgenticOSMetadataReader(environment: [
+            "AGENTIC_OS_HOME": temporary.path,
+        ]).loadWorkers()
+
+        XCTAssertEqual(workers.count, 1)
+        XCTAssertEqual(workers.first?.parentWorkerId, "coordinator")
+        XCTAssertEqual(workers.first?.status, "completed")
+        XCTAssertEqual(workers.first?.model, "terra")
+    }
+
     func testDecodesLiveTerminalListContract() throws {
         let executor = RecordingOrcaExecutor()
         executor.outputs = [OrcaCommandOutput(
