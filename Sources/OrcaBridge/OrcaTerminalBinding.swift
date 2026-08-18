@@ -1,7 +1,9 @@
 import Foundation
 
 struct OrcaTerminalBindingDocument: Codable, Equatable {
-    var schemaVersion = 1
+    static let currentSchemaVersion = 2
+
+    var schemaVersion = Self.currentSchemaVersion
     var workspaceId: UUID
     var bindings: [OrcaTerminalBinding] = []
 }
