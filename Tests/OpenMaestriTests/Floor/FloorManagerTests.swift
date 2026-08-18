@@ -6,16 +6,16 @@ final class FloorManagerTests: XCTestCase {
     private var testDir: String!
 
     override func setUpWithError() throws {
-        // 创建临时 git repo 用于测试
+        // Create temporary git repo for testing
         testDir = NSTemporaryDirectory() + "open-maestri-floor-test-\(UUID().uuidString)"
         try FileManager.default.createDirectory(atPath: testDir, withIntermediateDirectories: true)
-        // 初始化 git repo
+        // Initialize git repo
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
         process.arguments = ["init"]
         process.currentDirectoryURL = URL(fileURLWithPath: testDir)
         try process.run(); process.waitUntilExit()
-        // 创建初始提交（git worktree 需要至少一个提交）
+        // Create initial commit (git worktree requires at least one commit)
         let touch = Process()
         touch.executableURL = URL(fileURLWithPath: "/usr/bin/touch")
         touch.arguments = [testDir + "/README.md"]
@@ -40,13 +40,13 @@ final class FloorManagerTests: XCTestCase {
         try? FileManager.default.removeItem(atPath: testDir)
     }
 
-    // MARK: - Floor 创建
+    // MARK: - Floor creation
 
     func testCreateFloorCreatesWorktreeDirectory() throws {
         let floor = try fm.createFloor(name: "test-floor", branchName: "feature/test", workingDirectory: testDir)
         XCTAssertTrue(FileManager.default.fileExists(atPath: floor.worktreePath),
                       "Floor worktree 目录应被创建")
-        // 清理
+        // Cleanup
         try? fm.removeFloor(floor, workingDirectory: testDir)
     }
 
@@ -77,7 +77,7 @@ final class FloorManagerTests: XCTestCase {
 
     func testHookEnvironmentVariablesContainRequiredKeys() throws {
         let floor = try fm.createFloor(name: "hook-floor", branchName: "hook-branch", workingDirectory: testDir)
-        // 通过 HooksManager 验证环境变量格式（不实际执行钩子，只验证变量生成）
+        // Verify environment variable format through HooksManager (does not actually execute the hook, only verifies variable generation)
         XCTAssertFalse(floor.worktreePath.isEmpty)
         XCTAssertFalse(floor.branchName.isEmpty)
         try? fm.removeFloor(floor, workingDirectory: testDir)

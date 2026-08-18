@@ -1,8 +1,8 @@
 import Foundation
 import OSLog
 
-/// 文件系统目录监控器（FSEvents-based）
-/// 检测到变化时回调，供 FileTreeStateStore 触发 reload
+/// File System Directory Monitor (FSEvents-based)
+/// Callback when changes are detected for FileTreeStateStore to trigger reload
 final class DirectoryWatcher {
     private let logger = Logger.make(category: "DirectoryWatcher")
     private var source: DispatchSourceFileSystemObject?
@@ -20,7 +20,7 @@ final class DirectoryWatcher {
         stop()
     }
 
-    // MARK: - 启动监控
+    // MARK: - Start monitoring
 
     func start() {
         stop()
@@ -48,7 +48,7 @@ final class DirectoryWatcher {
         logger.debug("Watching directory: \(self.path)")
     }
 
-    // MARK: - 停止监控
+    // MARK: - Stop monitoring
 
     func stop() {
         source?.cancel()

@@ -5,7 +5,7 @@ import CoreGraphics
 @MainActor
 final class CanvasNodeRendererTests: XCTestCase {
 
-    // MARK: - 辅助
+    // MARK: - Auxiliary
 
     private func makeCanvas() -> CanvasViewportView {
         let view = CanvasViewportView(frame: CGRect(x: 0, y: 0, width: 1200, height: 800))
@@ -32,10 +32,10 @@ final class CanvasNodeRendererTests: XCTestCase {
         )
     }
 
-    // MARK: - 增量同步
-    // 注意：新的 CanvasNodeRenderer 使用单个 CanvasNodesView（NSHostingView）渲染所有节点，
-    // 不再为每个节点创建独立的 TerminalNodeView/NoteNodeView NSView 子类，
-    // 因此相关断言已迁移为验证 CanvasNodesView 的存在及 workspace 节点数量。
+    // MARK: - Incremental synchronization
+    // NOTE: The new CanvasNodeRenderer renders all nodes using a single CanvasNodesView (NSHostingView),
+    // Separate TerminalNodeView/NoteNodeView NSView subclasses are no longer created for each node.
+    // Therefore the related assertions have been moved to verify the existence of CanvasNodesView and the number of workspace nodes.
 
     func testSyncAddsNewNode() {
         let canvas = makeCanvas()
@@ -46,9 +46,9 @@ final class CanvasNodeRendererTests: XCTestCase {
         ws.addNode(node)
         renderer.sync(nodes: ws.nodes, workspace: ws)
 
-        // 渲染后 workspace 应包含该节点
+        // The workspace should contain this node after rendering
         XCTAssertEqual(ws.nodes.count, 1, "一个 Terminal 节点应存在于 workspace")
-        // CanvasNodesView（NSHostingView）应作为子视图存在
+        // CanvasNodesView (NSHostingView) should exist as a subview
         XCTAssertTrue(canvas.subviews.contains { $0 is CanvasNodesView },
                       "CanvasNodesView 应作为 NSHostingView 容器存在于画布")
     }
@@ -79,7 +79,7 @@ final class CanvasNodeRendererTests: XCTestCase {
         renderer.sync(nodes: ws.nodes, workspace: ws)
         renderer.sync(nodes: ws.nodes, workspace: ws)
 
-        // 多次 sync 后 workspace 节点数不变，CanvasNodesView 仍只有一个
+        // After multiple syncs, the number of workspace nodes remains unchanged, and there is still only one CanvasNodesView
         XCTAssertEqual(ws.nodes.count, 1, "重复 sync 不应改变 workspace 节点数")
         XCTAssertEqual(canvas.subviews.filter { $0 is CanvasNodesView }.count, 1,
                        "重复 sync 不应创建多个 CanvasNodesView")
@@ -99,7 +99,7 @@ final class CanvasNodeRendererTests: XCTestCase {
                       "CanvasNodesView 应存在于画布")
     }
 
-    // MARK: - 拖拽回写
+    // MARK: - Drag and drop writeback
 
     func testOnFrameChangedUpdatesWorkspaceNode() {
         let canvas = makeCanvas()
@@ -110,11 +110,11 @@ final class CanvasNodeRendererTests: XCTestCase {
         ws.addNode(node)
         renderer.sync(nodes: ws.nodes, workspace: ws)
 
-        // 新渲染器通过 CanvasViewportView 拖拽回调更新 workspace，节点本身仍应存在
+        // New renderer updates workspace via CanvasViewportView drag callback, node itself should still exist
         XCTAssertNotNil(ws.nodes.first { $0.id == node.id }, "节点仍应存在于 workspace")
     }
 
-    // MARK: - 连线渲染
+    // MARK: - Wired Rendering
 
     func testSyncConnectionsRendersTerminalConnection() {
         let canvas = makeCanvas()

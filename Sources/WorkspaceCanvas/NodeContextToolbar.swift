@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - 连接信息（工具栏传递用）
+// MARK: - Connection information (for toolbar transfer)
 
 struct ToolbarConnectionItem: Identifiable {
     let id: UUID
@@ -8,7 +8,7 @@ struct ToolbarConnectionItem: Identifiable {
     let peerIcon: String
 }
 
-// MARK: - 选中节点浮动工具栏
+// MARK: - Selected node floating toolbar
 
 struct NodeContextToolbar: View {
     let onEdit: () -> Void
@@ -47,7 +47,7 @@ struct NodeContextToolbar: View {
     }
 }
 
-// MARK: - 连接数量徽章按钮
+// MARK: - Connect quantity badge button
 
 struct ConnectionBadgeButton: View {
     let connections: [ToolbarConnectionItem]
@@ -84,7 +84,7 @@ struct ConnectionBadgeButton: View {
     }
 }
 
-// MARK: - 连接列表 Popover
+// MARK: - Connection List Popover
 
 struct ConnectionListPopover: View {
     let connections: [ToolbarConnectionItem]
@@ -112,7 +112,7 @@ struct ConnectionListPopover: View {
     }
 }
 
-// MARK: - 连接列表行
+// MARK: - Join list rows
 
 private struct ConnectionRow: View {
     let item: ToolbarConnectionItem
@@ -150,7 +150,7 @@ private struct ConnectionRow: View {
     }
 }
 
-// MARK: - FileTree 选中节点浮动工具栏
+// MARK: - FileTree selected node floating toolbar
 
 struct FileTreeContextToolbar: View {
     let onRevealInFinder: () -> Void

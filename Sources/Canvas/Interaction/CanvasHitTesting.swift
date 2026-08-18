@@ -2,31 +2,31 @@ import AppKit
 
 extension CanvasViewportView {
 
-    // MARK: - 语义化命中测试
+    // MARK: - Semantic hit testing
 
-    /// 将画布坐标 point 映射到语义化命中区域
-    /// 优先级：选中节点外扩 resize 热区 > 节点内容区（header/footer/content）> 未选中节点内缩 resize > 空白
-    /// 纯几何计算，不依赖 BaseNodeView 或子视图 hitTest（避免无限递归）
+    /// Map canvas coordinate point to semantic hit area
+    /// Priority: Selected nodes expand resize hot area > node content area (header/footer/content) > unselected nodes shrink resize > blank
+    /// Pure geometric calculation, does not rely on BaseNodeView or subview hitTest (avoid infinite recursion)
     func hitTestCanvas(at loc: CGPoint) -> CanvasHitTestResult {
-        // 鼠标位移小于阈值时直接返回缓存结果（避免 60fps 下每帧两次 O(n) 遍历）
+        // Directly return the cached result when the mouse displacement is less than the threshold (avoiding two O(n) traversals per frame at 60fps)
         let dx = loc.x - _hitTestCachedPoint.x
         let dy = loc.y - _hitTestCachedPoint.y
         if dx * dx + dy * dy < Self._hitTestReuseThreshold * Self._hitTestReuseThreshold {
             return _hitTestCachedResult
         }
 
-        // Pass 0：shape 节点旋转手柄命中检测（优先级最高）
+        // Pass 0: shape node rotation handle hit detection (highest priority)
         for node in sortedNodesByZIndexDesc where selectedNodeIds.contains(node.id) {
             guard case .shape(let sc) = node.content else { continue }
             let screenFrame = canvasRectToScreen(node.frame)
             let nodeCenter = CGPoint(x: screenFrame.midX, y: screenFrame.midY)
 
-            // 旋转手柄在节点顶边中点上方 (lineLength=20 + dotRadius=5) = 25pt（未旋转坐标系）
+            // Rotation handle above midpoint of node top edge (lineLength=20 + dotRadius=5) = 25pt (unrotated coordinate system)
             let handleOffsetY: CGFloat = 25
             let unrotatedHandleX = screenFrame.midX
             let unrotatedHandleY = screenFrame.minY - handleOffsetY
 
-            // 将手柄位置从节点局部坐标旋转到屏幕坐标
+            // Rotate handle position from node local coordinates to screen coordinates
             let dx0 = unrotatedHandleX - nodeCenter.x
             let dy0 = unrotatedHandleY - nodeCenter.y
             let cosA = cos(sc.rotation)
@@ -45,14 +45,14 @@ extension CanvasViewportView {
             }
         }
 
-        // Pass 1：对已选中节点先检测外扩 resize 热区（在节点边框外侧，不与内容冲突）
+        // Pass 1: First detect the external resize hot area of the selected node (outside the node border and does not conflict with the content)
         for node in sortedNodesByZIndexDesc where selectedNodeIds.contains(node.id) {
             guard !isNodeLocked(node.id) else { continue }
-            // text/drawing 节点不支持 resize，尺寸由内容自适应
+            // The text/drawing node does not support resize, and the size is adaptive based on the content.
             if case .text    = node.content { continue }
             if case .shape(let sc) = node.content, sc.rotation != 0 { continue }
             let screenFrame = canvasRectToScreen(node.frame)
-            // 外扩热区：以 selectionOutset + resizeHaloWidth 向外膨胀
+            // External expansion hot area: expand outward with selectionOutset + resizeHaloWidth
             let halo = Self.resizeHaloWidth
             let expandedFrame = screenFrame.insetBy(dx: -halo, dy: -halo)
             guard expandedFrame.contains(loc) && !screenFrame.insetBy(dx: Self.resizeInnerDeadZone, dy: Self.resizeInnerDeadZone).contains(loc) else { continue }
@@ -64,11 +64,11 @@ extension CanvasViewportView {
             }
         }
 
-        // Pass 2：正常节点内部命中测试
+        // Pass 2: Normal node internal hit test
         for node in sortedNodesByZIndexDesc {
             let screenFrame = canvasRectToScreen(node.frame)
 
-            // stroke/freehand 节点：路径距离命中（不用矩形，只有靠近实际线段才算命中）
+            // stroke/freehand node: path distance hit (no rectangle is used, only close to the actual line segment is considered a hit)
             if case .stroke(let sc) = node.content {
                 let hitRadius: CGFloat = max(6, sc.strokeWidth * zoom * 0.5 + 4)
                 guard screenFrame.insetBy(dx: -hitRadius, dy: -hitRadius).contains(loc) else { continue }
@@ -114,7 +114,7 @@ extension CanvasViewportView {
                 y: loc.y - screenFrame.minY
             )
 
-            // header 在节点顶部（y 向下：minY 是顶边，localPt.y 小 = 顶部）
+            // header at top of node (y down: minY is top edge, localPt.y small = top)
             let scaledHeaderHeight = CanvasNodeConstants.headerHeight * zoom
             if localPt.y <= scaledHeaderHeight {
                 let r = CanvasHitTestResult.nodeHeader(node.id)
@@ -122,7 +122,7 @@ extension CanvasViewportView {
                 return r
             }
 
-            // footer 在节点底部（仅终端节点有 footer）
+            // footer at the bottom of the node (only terminal nodes have footer)
             if case .terminal = node.content {
                 let scaledFooterHeight = CanvasNodeConstants.footerHeight * zoom
                 if localPt.y >= screenFrame.height - scaledFooterHeight {
@@ -141,28 +141,28 @@ extension CanvasViewportView {
         return r
     }
 
-    // MARK: - Resize 热区常量
+    // MARK: - Resize hot zone constant
 
-    /// 外扩 resize 热区总宽度（屏幕像素，不受 zoom 影响）
-    /// 蓝色虚线框距节点边缘 selectionOutset(3pt)，热区再向内延伸到此宽度
+    /// Expansion resize the total width of the hot zone (screen pixels, not affected by zoom)
+    /// The blue dotted frame is selectedOutset(3pt) from the edge of the node, and the hot zone extends inward to this width
     private static let resizeHaloWidth: CGFloat = 10
-    /// 节点内部死区：在此范围内的点击不触发外扩 resize，直接进入内容区交互
+    /// Node internal dead zone: Clicks within this range do not trigger external expansion resize and directly enter the content area for interaction
     private static let resizeInnerDeadZone: CGFloat = 0
 
-    /// 外扩模式：热区在节点边缘 [-halo, +halo] 范围内（以节点 screenFrame 为基准，localPt 允许负值）
-    /// 角点优先，其次四边；仅在靠近边缘的条带内响应
+    /// Expansion mode: hot zone is within the [-halo, +halo] range of the node edge (based on the node screenFrame, localPt allows negative values)
+    /// Corners first, edges second; respond only within strips close to edges
     private func outerResizeEdge(at localPt: CGPoint, nodeSize: CGSize, halo: CGFloat) -> ResizeEdge? {
         let w = nodeSize.width
         let h = nodeSize.height
         guard w > halo * 4 && h > halo * 4 else { return nil }
 
-        // 热区条带：距各边缘 halo 范围内（localPt 相对 screenFrame.origin，可为负）
+        // Hot zone strip: within halo range from each edge (localPt relative to screenFrame.origin, can be negative)
         let nearLeft   = localPt.x < halo
         let nearRight  = localPt.x > w - halo
         let nearTop    = localPt.y < halo
         let nearBottom = localPt.y > h - halo
 
-        // 至少靠近一条边才响应
+        // Respond only if it is close to at least one edge
         guard nearLeft || nearRight || nearTop || nearBottom else { return nil }
 
         if nearTop    && nearLeft  { return .topLeft }
@@ -176,16 +176,16 @@ extension CanvasViewportView {
         return nil
     }
 
-    // MARK: - 节点锁定查询
+    // MARK: - Node Lock Query
 
-    /// O(1) Set 查找，由 lockedNodeIds 缓存维护（替代原 O(n) 线性扫描）
+    /// O(1) Set lookup maintained by lockedNodeIds cache (replaces original O(n) linear scan)
     func isNodeLocked(_ id: UUID) -> Bool {
         lockedNodeIds.contains(id)
     }
 
-    // MARK: - 选中逻辑
+    // MARK: - Select logic
 
-    /// 根据修饰键更新 selectedNodeIds，并将选中节点提升到最高层
+    /// Update selectedNodeIds according to the modifier key and promote the selected node to the highest level
     func updateSelection(_ id: UUID, modifiers: NSEvent.ModifierFlags) {
         if modifiers.contains(.command) {
             if selectedNodeIds.contains(id) {
@@ -197,19 +197,19 @@ extension CanvasViewportView {
             if !selectedNodeIds.contains(id) {
                 selectedNodeIds = [id]
             }
-            // 如果节点已在选中集合内（批量选中状态），mouseUp 时再收窄
+            // If the node is already in the selected set (batch selected state), narrow it again during mouseUp
         }
-        // 将选中的节点提升到最高层级，确保重叠时操作正确
+        // Promote the selected node to the highest level to ensure correct operation when overlapping
         bringNodesToFront([id])
     }
 
-    /// fileTree 内容区点击时由 CanvasNodesView 主动调用，触发节点选中流程
-    /// （内容区事件被 NSOutlineView/NSCollectionView 消费，不会到达 CanvasInteractionHandler.mouseDown）
+    /// When the fileTree content area is clicked, it is actively called by CanvasNodesView to trigger the node selection process.
+    /// (Content area events are consumed by NSOutlineView/NSCollectionView and will not reach CanvasInteractionHandler.mouseDown)
     func selectFileTreeNode(at loc: CGPoint, modifiers: NSEvent.ModifierFlags) {
         let hit = hitTestCanvas(at: loc)
         switch hit {
         case .nodeContent(let id, _), .nodeHeader(let id), .nodeFooter(let id):
-            // 连线模式下点击不可连接节点：取消连线模式，保留原选中状态
+            // Clicking on an unconnectable node in connection mode: cancels connection mode and retains the original selected state.
             if isInConnectingMode || connectingFromNodeId != nil {
                 let isConnectable = currentNodes.first(where: { $0.id == id })?.content.isConnectable ?? true
                 if !isConnectable {
@@ -228,9 +228,9 @@ extension CanvasViewportView {
         }
     }
 
-    // MARK: - 几何辅助：路径距离命中检测
+    // MARK: - Geometry Assist: Path Distance Hit Detection
 
-    /// 点到线段的最短距离
+    /// The shortest distance from a point to a line segment
     private func distanceToSegment(_ p: CGPoint, a: CGPoint, b: CGPoint) -> CGFloat {
         let dx = b.x - a.x
         let dy = b.y - a.y
@@ -240,7 +240,7 @@ extension CanvasViewportView {
         return hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy))
     }
 
-    /// 点到二次贝塞尔曲线的近似最短距离（20 段线性采样）
+    /// Approximate shortest distance from point to quadratic Bezier curve (20 segments linear sampling)
     private func distanceToQuadBezier(_ p: CGPoint, p0: CGPoint, p1: CGPoint, p2: CGPoint) -> CGFloat {
         let steps = 20
         var minDist = CGFloat.greatestFiniteMagnitude

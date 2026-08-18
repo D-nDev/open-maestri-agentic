@@ -1,10 +1,10 @@
 import XCTest
 @testable import open_maestri
 
-// Story 1.4 + 1.5 AC：WorkspaceManager 持久化测试
+// Story 1.4 + 1.5 AC: WorkspaceManager persistence testing
 final class WorkspaceManagerTests: XCTestCase {
 
-    // MARK: - 初始化
+    // MARK: - Initialization
 
     func testInitFromEntry() {
         let entry = WorkspaceEntry(name: "Test WS", workingDirectory: "/projects/test")
@@ -21,7 +21,7 @@ final class WorkspaceManagerTests: XCTestCase {
         XCTAssertEqual(manager.canvasZoom, 1.0)
     }
 
-    // MARK: - 节点管理
+    // MARK: - Node Management
 
     func testAddNode() {
         let manager = WorkspaceManager(name: "WS", workingDirectory: "/tmp")
@@ -91,7 +91,7 @@ final class WorkspaceManagerTests: XCTestCase {
         XCTAssertEqual(manager.nodes[0].frame.size.width, 500, accuracy: 0.01)
     }
 
-    // MARK: - 持久化（Story 1.5 AC）
+    // MARK: - Persistence (Story 1.5 AC)
 
     func testSaveAndLoad() async throws {
         let pm = PersistenceManager.shared
@@ -108,10 +108,10 @@ final class WorkspaceManagerTests: XCTestCase {
         manager.canvasZoom = 1.5
         manager.canvasOrigin = CGPoint(x: 9850, y: 8550)
 
-        // 保存
+        // Save
         try await manager.save()
 
-        // 加载验证
+        // Load verification
         let loaded = WorkspaceManager(id: wsId, name: "PersistTest", workingDirectory: "/tmp")
         try loaded.load()
 
@@ -119,7 +119,7 @@ final class WorkspaceManagerTests: XCTestCase {
         XCTAssertEqual(loaded.canvasZoom, 1.5, accuracy: 0.01)
         XCTAssertEqual(loaded.canvasOrigin.x, 9850, accuracy: 0.01)
 
-        // 清理
+        // Cleanup
         try? FileManager.default.removeItem(at: pm.workspaceDirURL(id: wsId))
     }
 
@@ -143,7 +143,7 @@ final class WorkspaceManagerTests: XCTestCase {
 
     func testNoteRegistryThreadSafety() async {
         let reg = NoteRegistry.shared
-        // 并发写入不应崩溃
+        // Concurrent writes should not crash
         await withTaskGroup(of: Void.self) { group in
             for i in 0..<100 {
                 group.addTask {
@@ -151,7 +151,7 @@ final class WorkspaceManagerTests: XCTestCase {
                 }
             }
         }
-        // 清理
+        // Cleanup
         for i in 0..<100 { reg.unregister(name: "note\(i)") }
     }
 }

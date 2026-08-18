@@ -20,7 +20,7 @@ final class NoteHandler {
         }
     }
 
-    // MARK: - read（FR35, FR36）
+    // MARK: - Read (FR35, FR36)
 
     private func handleRead(args: [String], terminalId: UUID?) -> String {
         guard args.count >= 3 else {
@@ -39,7 +39,7 @@ final class NoteHandler {
         }
     }
 
-    // MARK: - write（FR35 AC：完整替换 Note 内容，画布实时更新）
+    // MARK: - write (FR35 AC: complete replacement of Note content, canvas updated in real time)
 
     private func handleWrite(args: [String], terminalId: UUID?) -> String {
         guard args.count >= 4 else {
@@ -61,7 +61,7 @@ final class NoteHandler {
         }
     }
 
-    // MARK: - edit（FR35 AC：替换第一个匹配文本）
+    // MARK: - edit (FR35 AC: replace first matching text)
 
     private func handleEdit(args: [String], terminalId: UUID?) -> String {
         guard args.count >= 5 else {
@@ -83,14 +83,14 @@ final class NoteHandler {
         }
     }
 
-    // MARK: - create（FR35 AC：在画布创建新 Note 并连接当前终端）
+    // MARK: - create (FR35 AC: Create a new Note in the canvas and connect the current terminal)
 
     private func handleCreate(args: [String], terminalId: UUID?) async -> String {
         let initialContent = args.count >= 3 ? args[2] : ""
         let noteName = "Note-\(UUID().uuidString.prefix(8))"
         let pm = PersistenceManager.shared
 
-        // 通过 terminalId 查找所属工作区，写入正确的 workspaces/{id}/notes/ 目录
+        // Find the workspace it belongs to through terminalId and write the correct workspaces/{id}/notes/ directory
         let workspaceId: UUID?
         if let tid = terminalId {
             workspaceId = await MainActor.run { TerminalManager.shared.terminalWorkspaceMap[tid] }
@@ -103,7 +103,7 @@ final class NoteHandler {
             if let wsId = workspaceId {
                 notesDir = pm.notesDirURL(workspaceId: wsId)
             } else {
-                // 无法确定工作区时 fallback 到全局目录（不应发生）
+                // Fallback to global directory when workspace cannot be determined (should not happen)
                 notesDir = pm.appDataURL.appendingPathComponent("notes")
             }
             try FileManager.default.createDirectory(at: notesDir, withIntermediateDirectories: true)
@@ -117,19 +117,19 @@ final class NoteHandler {
         }
     }
 
-    // MARK: - Note 路径解析
+    // MARK: - Note path analysis
 
-    /// 通过 Note 名称解析文件路径
-    /// 解析策略（优先级顺序）：
-    /// 1. 从 NoteRegistry（运行时缓存）查找已注册的 Note
-    /// 2. 在 ~/.open-maestri/ 下扫描 notes/ 目录匹配文件名
+    /// Resolving file paths through Note names
+    /// Parsing strategy (priority order):
+    /// 1. Find registered Notes from NoteRegistry (runtime cache)
+    /// 2. Scan the notes/ directory under ~/.open-maestri/ for matching file names
     private func resolveNotePath(name: String, terminalId: UUID?) -> String? {
-        // 策略 1：从 NoteRegistry 查找
+        // Strategy 1: Find from NoteRegistry
         if let path = NoteRegistry.shared.path(forName: name) {
             return path
         }
 
-        // 策略 2：扫描所有工作区的 notes 目录
+        // Strategy 2: Scan the notes directory of all workspaces
         let pm = PersistenceManager.shared
         let wsDir = pm.appDataURL.appendingPathComponent("workspaces")
         let fm = FileManager.default
@@ -143,7 +143,7 @@ final class NoteHandler {
                 for path in candidates {
                     if fm.fileExists(atPath: path) { return path }
                 }
-                // 模糊匹配：文件名包含 name
+                // Fuzzy match: file name contains name
                 if let files = try? fm.contentsOfDirectory(atPath: notesDir.path) {
                     if let match = files.first(where: {
                         $0.lowercased().contains(name.lowercased()) && $0.hasSuffix(".md")
@@ -154,7 +154,7 @@ final class NoteHandler {
             }
         }
 
-        // 策略 3：全局 notes 目录（fallback）
+        // Strategy 3: Global notes directory (fallback)
         let globalNotesPath = pm.appDataURL.appendingPathComponent("notes/\(name).md").path
         if fm.fileExists(atPath: globalNotesPath) { return globalNotesPath }
 
@@ -162,10 +162,10 @@ final class NoteHandler {
     }
 }
 
-// MARK: - NoteRegistry（运行时 Note 路径缓存）
+// MARK: - NoteRegistry (runtime Note path cache)
 
-/// Note 节点路径注册表，由画布在创建/连接 Note 时更新
-/// 允许 NoteHandler 在 HTTP 线程中查询 Note 路径而不需要 @MainActor
+/// Note node path registry, updated by canvas when creating/connecting Note
+/// Allow NoteHandler to query Note paths in the HTTP thread without requiring @MainActor
 final class NoteRegistry {
     static let shared = NoteRegistry()
     private var registry: [String: String] = [:]        // name → filePath
@@ -185,7 +185,7 @@ final class NoteRegistry {
         if let nodeId { nodeIdRegistry.removeValue(forKey: nodeId) }
     }
 
-    /// 通过 nodeId 反查 name 后完整删除两个映射（节点删除时调用）
+    /// Completely delete the two mappings after checking name through nodeId (called when node is deleted)
     func unregisterByNodeId(_ nodeId: UUID) {
         lock.lock(); defer { lock.unlock() }
         if let name = nodeIdRegistry.removeValue(forKey: nodeId) {

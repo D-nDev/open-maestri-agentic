@@ -1,7 +1,7 @@
 import AppKit
 import WebKit
 
-// MARK: - Portal UIDelegate（处理 _blank 新窗口）
+// MARK: - Portal UIDelegate (handle _blank new window)
 
 final class PortalUIDelegate: NSObject, WKUIDelegate {
     let portalId: UUID
@@ -16,7 +16,7 @@ final class PortalUIDelegate: NSObject, WKUIDelegate {
         for navigationAction: WKNavigationAction,
         windowFeatures: WKWindowFeatures
     ) -> WKWebView? {
-        // target="_blank" 或 window.open()：在画布上新建 Portal 节点
+        // target="_blank" or window.open(): Create a new Portal node on the canvas
         guard let url = navigationAction.request.url else { return nil }
         let urlString = url.absoluteString
         NotificationCenter.default.post(
@@ -28,7 +28,7 @@ final class PortalUIDelegate: NSObject, WKUIDelegate {
     }
 }
 
-// MARK: - Portal NavigationDelegate（处理自签名证书和重定向）
+// MARK: - Portal NavigationDelegate (handles self-signed certificates and redirects)
 
 final class PortalNavigationDelegate: NSObject, WKNavigationDelegate {
     let portalId: UUID
@@ -42,7 +42,7 @@ final class PortalNavigationDelegate: NSObject, WKNavigationDelegate {
         didReceive challenge: URLAuthenticationChallenge,
         completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
     ) {
-        // 允许自签名证书（开发环境常见）
+        // Allow self-signed certificates (common in development environments)
         if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
            let trust = challenge.protectionSpace.serverTrust {
             completionHandler(.useCredential, URLCredential(trust: trust))
@@ -64,7 +64,7 @@ final class PortalNavigationDelegate: NSObject, WKNavigationDelegate {
     }
 }
 
-/// Portal WKWebView 包装（直接 NSView，用于嵌入画布节点）
+/// Portal WKWebView wrapper (direct NSView, for embedding canvas nodes)
 final class PortalWebView: NSView {
     private(set) var webView: WKWebView?
 

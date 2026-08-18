@@ -1,8 +1,8 @@
 import Foundation
 import OSLog
 
-/// git 状态和操作提供者
-/// 通过 Process 调用系统 git 命令
+/// git status and operations provider
+/// Call system git command through Process
 final class GitStatusProvider {
     private let logger = Logger.make(category: "GitStatusProvider")
 
@@ -12,20 +12,20 @@ final class GitStatusProvider {
         self.workingDirectory = workingDirectory
     }
 
-    // MARK: - git 仓库检测
+    // MARK: - git warehouse detection
 
     var isGitRepository: Bool {
         let gitDir = URL(fileURLWithPath: workingDirectory).appendingPathComponent(".git")
         return FileManager.default.fileExists(atPath: gitDir.path)
     }
 
-    // MARK: - 当前分支
+    // MARK: - Current branch
 
     func currentBranch() throws -> String {
         try run(["rev-parse", "--abbrev-ref", "HEAD"]).trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    // MARK: - 状态
+    // MARK: - Status
 
     func status() throws -> [(path: String, status: GitFileStatus)] {
         let output = try run(["status", "--porcelain"])
@@ -48,7 +48,7 @@ final class GitStatusProvider {
             }
     }
 
-    // MARK: - git 操作
+    // MARK: - git operations
 
     func commit(message: String, files: [String]) throws {
         if !files.isEmpty {
@@ -73,7 +73,7 @@ final class GitStatusProvider {
         try run(["diff"])
     }
 
-    // MARK: - 内部 git 执行
+    // MARK: - internal git execution
 
     @discardableResult
     private func run(_ args: [String]) throws -> String {

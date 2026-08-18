@@ -2,7 +2,7 @@ import Foundation
 import CoreGraphics
 import AppKit
 
-/// 应用全局常量
+/// Apply global constants
 enum Constants {
     static let schemaVersion = 2
     static let appDataDirectoryName = ".open-maestri"
@@ -35,7 +35,7 @@ enum Constants {
     static let serverRestartDelay: TimeInterval = 3.0
 }
 
-/// 键盘按键代码常量（macOS 物理键码，与语言无关）
+/// Keyboard key code constants (macOS physical key codes, language independent)
 enum CanvasKeyCode {
     static let space: UInt16 = 49
     static let tab: UInt16 = 48

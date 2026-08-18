@@ -3,20 +3,20 @@ import WebKit
 
 extension CanvasViewportView {
 
-    // MARK: - 终端鼠标坐标修正
+    // MARK: - Terminal mouse coordinate correction
 
-    /// 修正转发给终端视图的鼠标事件坐标。
+    /// Fix mouse event coordinates forwarded to terminal views.
     ///
-    /// 问题背景：节点通过 SwiftUI `.scaleEffect(zoom)` 缩放，这是 CALayer transform，
-    /// 不影响 NSView 的 frame/bounds。因此 SwiftTerm 内部的
-    /// `convert(event.locationInWindow, from: nil)` 基于 NSView 层级计算坐标时
-    /// 不考虑 layer transform，导致映射到错误的终端行列位置。
+    /// Problem background: Nodes are scaled through SwiftUI `.scaleEffect(zoom)`, which is the CALayer transform,
+    /// Does not affect NSView's frame/bounds. So inside SwiftTerm
+    /// `convert(event.locationInWindow, from: nil)` when calculating coordinates based on NSView hierarchy
+    /// The layer transform is not considered, resulting in mapping to the wrong terminal row and column position.
     ///
-    /// 修正方案：
-    /// 1. 从画布屏幕坐标计算鼠标在终端内容区的相对位置（已缩放）
-    /// 2. 除以 zoom 得到终端视图的本地坐标（未缩放）
-    /// 3. 用 terminalView 自身的 convert(to: nil) 反向合成正确的窗口坐标
-    ///    使 SwiftTerm 的 convert(from: nil) 能正确还原到本地坐标
+    /// Correction plan:
+    /// 1. Calculate the relative position of the mouse in the terminal content area from the canvas screen coordinates (zoomed)
+    /// 2. Divide by zoom to get the local coordinates of the terminal view (unzoomed)
+    /// 3. Use terminalView’s own convert(to: nil) to reversely synthesize the correct window coordinates
+    ///    Make SwiftTerm's convert(from: nil) correctly restore to local coordinates
     func correctedWindowLocation(for event: NSEvent, nodeId: UUID, terminalView: NSView) -> CGPoint {
         let loc = convert(event.locationInWindow, from: nil)
 
@@ -27,26 +27,26 @@ extension CanvasViewportView {
         let screenFrame = canvasRectToScreen(node.frame)
         let scaledHeaderHeight = CanvasNodeConstants.headerHeight * zoom
 
-        // 终端节点有 footer，需要减去；加上 divider（约 1pt 缩放后）
+        // The terminal node has a footer and needs to be subtracted; add a divider (about 1pt after scaling)
         let scaledDividerHeight: CGFloat = 1.0 * zoom
 
-        // 鼠标在节点内容区中的相对位置（屏幕坐标，已乘以 zoom）
+        // Relative position of the mouse in the node's content area (screen coordinates, multiplied by zoom)
         let relX = loc.x - screenFrame.minX
         let relY = loc.y - screenFrame.minY - scaledHeaderHeight - scaledDividerHeight
 
-        // 转为终端视图本地坐标（未缩放）
-        // SwiftTerm TerminalView 是非 flipped 的（y 从底部向上），需要翻转 y 轴
+        // Convert to terminal view local coordinates (unscaled)
+        // SwiftTerm TerminalView is not flipped (y from bottom up) and needs to flip the y axis
         let tvHeight = terminalView.bounds.height
         let localX = relX / zoom
         let localY = tvHeight - (relY / zoom)
 
-        // 用 terminalView 自身的坐标系统转回窗口坐标
-        // 这样 SwiftTerm 调用 convert(locationInWindow, from: nil) 时得到 (localX, localY)
+        // Use terminalView's own coordinate system to convert back to window coordinates
+        // In this way, SwiftTerm gets (localX, localY) when calling convert(locationInWindow, from: nil)
         return terminalView.convert(CGPoint(x: localX, y: localY), to: nil)
     }
 
-    /// Portal WKWebView 坐标修正
-    /// WKWebView 是 flipped 坐标系（y 从上到下），且 Portal 节点有 header + navBar + divider 偏移
+    /// Portal WKWebView coordinate correction
+    /// WKWebView is a flipped coordinate system (y from top to bottom), and the Portal node has header + navBar + divider offset
     func correctedWindowLocationForWebView(for event: NSEvent, nodeId: UUID, webView: NSView) -> CGPoint {
         let loc = convert(event.locationInWindow, from: nil)
 
@@ -55,25 +55,25 @@ extension CanvasViewportView {
         }
 
         let screenFrame = canvasRectToScreen(node.frame)
-        // Portal 内容区偏移：header(32) + navBar padding(6) + navBar height(28) + padding(6) + divider(1) = 73
+        // Portal content area offset: header(32) + navBar padding(6) + navBar height(28) + padding(6) + divider(1) = 73
         let contentTopOffset: CGFloat = 73.0
         let scaledContentTop = contentTopOffset * zoom
 
-        // 鼠标在 WebView 内容区中的相对位置（屏幕坐标）
+        // Relative position of the mouse in the WebView content area (screen coordinates)
         let relX = loc.x - screenFrame.minX
         let relY = loc.y - screenFrame.minY - scaledContentTop
 
-        // 转为 WebView 本地坐标（未缩放）
-        // WKWebView 是 flipped（y 从上到下），与屏幕坐标系一致（AppKit 的 y 向下）
+        // Convert to WebView local coordinates (unscaled)
+        // WKWebView is flipped (y from top to bottom) consistent with the screen coordinate system (AppKit's y from down)
         let localX = relX / zoom
         let localY = relY / zoom
 
-        // 用 webView 自身坐标系统转回窗口坐标
+        // Use webView's own coordinate system to convert back to window coordinates
         return webView.convert(CGPoint(x: localX, y: localY), to: nil)
     }
 
-    /// NSTextView 坐标修正（Shape 节点）
-    /// Shape 节点无 header/footer，NSTextView 覆盖整个节点 frame，只需减去 frame 原点
+    /// NSTextView coordinate correction (Shape node)
+    /// Shape node has no header/footer, NSTextView covers the entire node frame, just subtract the frame origin
     func correctedWindowLocationForShapeTextView(for event: NSEvent, nodeId: UUID, textView: NSView) -> CGPoint {
         let loc = convert(event.locationInWindow, from: nil)
 
@@ -92,8 +92,8 @@ extension CanvasViewportView {
         return textView.convert(CGPoint(x: localX, y: localY), to: nil)
     }
 
-    /// NSTextView 坐标修正（Note 节点）
-    /// NSTextView 默认 isFlipped=true（y 从上到下），与屏幕坐标系一致，不需要翻转 y 轴
+    /// NSTextView coordinate correction (Note node)
+    /// NSTextView defaults to isFlipped=true (y from top to bottom), which is consistent with the screen coordinate system and does not require flipping the y axis.
     func correctedWindowLocationForTextView(for event: NSEvent, nodeId: UUID, textView: NSView) -> CGPoint {
         let loc = convert(event.locationInWindow, from: nil)
 
@@ -105,11 +105,11 @@ extension CanvasViewportView {
         let scaledHeaderHeight = CanvasNodeConstants.headerHeight * zoom
         let scaledDividerHeight: CGFloat = 1.0 * zoom
 
-        // 鼠标在 NSTextView 内容区中的相对位置（屏幕坐标）
+        // Relative position of the mouse in the NSTextView content area (screen coordinates)
         let relX = loc.x - screenFrame.minX
         let relY = loc.y - screenFrame.minY - scaledHeaderHeight - scaledDividerHeight
 
-        // NSTextView 是 flipped（y 从上到下），与屏幕坐标方向一致，直接除以 zoom
+        // NSTextView is flipped (y from top to bottom), consistent with the screen coordinate direction, divided directly by zoom
         let localX = relX / zoom
         let localY = relY / zoom
 

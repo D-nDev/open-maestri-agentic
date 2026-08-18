@@ -1,7 +1,7 @@
 import Foundation
 import OSLog
 
-/// SSH 反向隧道服务（FR59-60，配合 SSHManager）
+/// SSH reverse tunnel service (FR59-60, with SSHManager)
 final class SSHTunnelService {
     static let shared = SSHTunnelService()
     private let logger = Logger.make(category: "SSHTunnelService")

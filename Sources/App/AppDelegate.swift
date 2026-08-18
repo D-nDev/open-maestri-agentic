@@ -3,16 +3,16 @@ import AppKit
 import Foundation
 import Sparkle
 
-/// AppDelegate 处理应用生命周期事件
+/// AppDelegate handles application life cycle events
 class AppDelegate: NSObject, NSApplicationDelegate {
     private let logger = Logger.make(category: "AppDelegate")
     weak var appState: AppState?
 
-    // MARK: - Sparkle 自动更新
+    // MARK: - Sparkle automatic update
     private var updaterController: SPUStandardUpdaterController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // 1. InterAgentServer 必须在任何终端创建前启动（消除 port=0 竞态）
+        // 1. InterAgentServer must be started before any terminal is created (eliminates port=0 race condition)
         do {
             try InterAgentServer.shared.start()
             logger.info("InterAgentServer started on port \(InterAgentServer.shared.port)")
@@ -20,19 +20,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             logger.error("InterAgentServer failed to start: \(error)")
         }
 
-        // 2. 写入 omaestri skill 到用户全局 ~/.claude/skills/（幂等，后台执行避免阻塞主线程）
+        // 2. Write omaestri skill to the user global ~/.claude/skills/ (idempotent, background execution to avoid blocking the main thread)
         DispatchQueue.global(qos: .userInitiated).async {
             SkillInjector.shared.installSkillsIfNeeded()
         }
 
-        // 3. 配置主窗口样式（透明 title bar，让画布充满窗口）
+        // 3. Configure the main window style (transparent title bar, let the canvas fill the window)
         DispatchQueue.main.async {
             WindowStateObserver.shared.configureMainWindow()
         }
 
-        // 4. Sparkle 自动更新
-        // startingUpdater: false — 禁止启动时自动检查，避免 appcast/签名未就绪时弹出错误弹窗。
-        // 用户可在 Settings → General 手动触发 checkForUpdates()。
+        // 4. Sparkle automatic update
+        // startingUpdater: false — Disable automatic checking at startup to avoid error pop-ups when appcast/signature is not ready.
+        // Users can manually trigger checkForUpdates() in Settings → General.
         updaterController = SPUStandardUpdaterController(
             startingUpdater: false,
             updaterDelegate: nil,
@@ -45,12 +45,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         logger.debug("Application should terminate — starting graceful shutdown")
         guard let appState else { return .terminateNow }
 
-        // 1. 立刻停止所有可能阻塞主线程的子系统
+        // 1. Immediately stop all subsystems that may block the main thread
         appState.stopAutosave()
         InterAgentServer.shared.stop()
         RoutineScheduler.shared.stopAllTimers()
 
-        // 2. 在主线程快照所有 @Observable 状态为纯值类型（O(n) 拷贝，无 I/O）
+        // 2. Snapshot all @Observable states in the main thread as pure value types (O(n) copy, no I/O)
         let payloads: [(id: UUID, doc: WorkspaceDocument)] = appState.workspaces.map { ws in
             (ws.id, WorkspaceDocument(payload: ws.snapshotPayload()))
         }
@@ -64,7 +64,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }()
         let manifest = appState.manifest
 
-        // 3. 后台线程做 I/O，完成后回调 reply
+        // 3. The background thread does I/O and calls back reply after completion.
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             let pm = PersistenceManager.shared
             for item in payloads {
@@ -76,19 +76,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             do { try pm.saveAppState(stateData) }
             catch { self?.logger.error("Failed to save app state on terminate: \(error)") }
             self?.logger.debug("Graceful shutdown save completed")
-            // 通知 AppKit 可以安全退出了
+            // Notify AppKit that it is safe to exit
             DispatchQueue.main.async {
                 sender.reply(toApplicationShouldTerminate: true)
             }
         }
 
-        // 告诉 AppKit "稍后回复"，不阻塞主线程
+        // Tell AppKit to "reply later" without blocking the main thread
         return .terminateLater
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        // 所有清理已在 applicationShouldTerminate 完成
-        // 此处仅做最终资源释放（PTY 进程等）
+        // All cleanup completed in applicationShouldTerminate
+        // Only final resource release is done here (PTY process, etc.)
         logger.debug("Application will terminate — final cleanup")
         TerminalManager.shared.shutdown()
     }
@@ -97,7 +97,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 
-    // MARK: - 检查更新（供 Settings 调用）
+    // MARK: - Check for updates (called by Settings)
     func checkForUpdates() {
         updaterController?.checkForUpdates(nil)
     }

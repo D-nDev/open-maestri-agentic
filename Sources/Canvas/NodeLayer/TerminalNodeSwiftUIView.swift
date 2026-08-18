@@ -53,7 +53,7 @@ struct TerminalNodeSwiftUIView: View {
         }
         .onAppear {
             needsAttention = AttentionNotifier.shared.needsAttention(terminalId: content.id)
-            // 初始化当前目录：优先从 session 读取，否则使用配置的 workingDirectory
+            // Initialize the current directory: read from session first, otherwise use the configured workingDirectory
             if let session = TerminalManager.shared.terminals[content.id],
                let dir = session.currentDirectory {
                 currentDirectory = dir
@@ -80,7 +80,7 @@ struct TerminalNodeSwiftUIView: View {
         }
         .onChange(of: isSelected) { _, selected in
             if selected {
-                // 选中时清除注意力标记
+                // Clear attention markers when selected
                 AttentionNotifier.shared.clearAttention(terminalId: content.id)
             }
         }
@@ -88,7 +88,7 @@ struct TerminalNodeSwiftUIView: View {
 
     // MARK: - Header Accessory
 
-    /// 最右侧：Maestro 标记 + 注意力圆点
+    /// Far right: Maestro mark + attention dot
     @ViewBuilder
     private var headerRightAccessory: some View {
         HStack(spacing: 4) {
@@ -125,15 +125,15 @@ struct TerminalNodeSwiftUIView: View {
         }
     }
 
-    /// 解析角色名称和颜色（从 preferences 缓存读取，确保颜色与角色设置一致）
+    /// Parse character names and colors (read from preferences cache to ensure colors are consistent with character settings)
     private var resolvedRoleInfo: (name: String, color: String)? {
         guard let roleId = content.assignedRoleId else { return nil }
-        // 从 preferences 缓存查找角色完整信息（PersistenceManager 内部有缓存，不触发 IO）
+        // Find the complete information of the role from the preferences cache (there is a cache inside the PersistenceManager and does not trigger IO)
         let prefs = PersistenceManager.shared.loadPreferencesSync()
         if let role = prefs.rolePresets.first(where: { $0.id == roleId }) {
             return (role.name, role.color)
         }
-        // 回退：从 session roleName + content.color
+        // Fallback: from session roleName + content.color
         if let session = TerminalManager.shared.terminals[content.id],
            let name = session.roleName {
             return (name, content.color)

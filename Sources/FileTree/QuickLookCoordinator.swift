@@ -1,7 +1,7 @@
 import AppKit
 import QuickLookUI
 
-/// Quick Look 预览协调器（图片/PDF 预览）
+/// Quick Look Preview Coordinator (Image/PDF Preview)
 final class QuickLookCoordinator: NSObject, QLPreviewPanelDataSource, QLPreviewPanelDelegate {
     static let shared = QuickLookCoordinator()
     var previewURL: URL?

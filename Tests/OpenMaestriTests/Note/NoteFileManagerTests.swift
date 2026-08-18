@@ -15,7 +15,7 @@ final class NoteFileManagerTests: XCTestCase {
         try? FileManager.default.removeItem(at: tmpDir)
     }
 
-    // MARK: - 读写基础
+    // MARK: - Basics of reading and writing
 
     func testWriteAndRead() throws {
         let path = tmpDir.appendingPathComponent("test.md").path
@@ -32,11 +32,11 @@ final class NoteFileManagerTests: XCTestCase {
         let path = tmpDir.appendingPathComponent("atomic.md").path
         try nm.write(filePath: path, content: "atomic content")
         XCTAssertTrue(FileManager.default.fileExists(atPath: path))
-        // 临时文件应该已被清理
+        // Temporary files should have been cleaned up
         XCTAssertFalse(FileManager.default.fileExists(atPath: path + ".tmp"))
     }
 
-    // MARK: - 行范围读取
+    // MARK: - Row range read
 
     func testReadWithLineRangeHeader() throws {
         let path = tmpDir.appendingPathComponent("lines.md").path
@@ -59,7 +59,7 @@ final class NoteFileManagerTests: XCTestCase {
         XCTAssertFalse(result.contains("Line 8"))
     }
 
-    // MARK: - 局部编辑
+    // MARK: - Partial editing
 
     func testEditReplacesFirstOccurrence() throws {
         let path = tmpDir.appendingPathComponent("edit.md").path
@@ -75,7 +75,7 @@ final class NoteFileManagerTests: XCTestCase {
         XCTAssertThrowsError(try nm.edit(filePath: path, oldText: "notfound", newText: "x"))
     }
 
-    // MARK: - 文件名清理
+    // MARK: - File name cleaning
 
     func testSanitizedFilenameCreate() throws {
         let wsId = UUID()

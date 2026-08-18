@@ -1,7 +1,7 @@
 import Foundation
 import OSLog
 
-/// 连接类型
+/// Connection type
 enum ConnectionType {
     case terminalToTerminal
     case terminalToNote
@@ -10,15 +10,15 @@ enum ConnectionType {
     case noteToNote
 }
 
-/// 连接状态
+/// Connection status
 enum ConnectionStatus {
-    case idle           // 灰色虚线
-    case communicating  // 绿色 glow
-    case disconnected   // 红色虚线
-    case error          // 错误
+    case idle           // Gray dashed line
+    case communicating  // green glow
+    case disconnected   // Red dashed line
+    case error          // Error
 }
 
-/// 运行时连接记录（内存中，序列化版本在 WorkspacePayload）
+/// Runtime connection record (in memory, serialized version in WorkspacePayload)
 struct ActiveConnection {
     let id: UUID
     let nodeIdA: UUID
@@ -27,7 +27,7 @@ struct ActiveConnection {
     var status: ConnectionStatus = .idle
 }
 
-/// 连接生命周期管理器（@MainActor，画布状态修改必须在主线程）
+/// Connection life cycle manager (@MainActor, canvas state modification must be in the main thread)
 @MainActor
 final class ConnectionManager {
     static let shared = ConnectionManager()
@@ -37,9 +37,9 @@ final class ConnectionManager {
 
     private init() {}
 
-    // MARK: - 建立连接
+    // MARK: - Establish connection
 
-    /// 建立 Terminal↔Terminal 连接，自动注入 Skill
+    /// Establish Terminal↔Terminal connection and automatically inject Skill
     func connectTerminals(
         idA: UUID, idB: UUID,
         serverPort: UInt16,
@@ -55,7 +55,7 @@ final class ConnectionManager {
         let active = ActiveConnection(id: conn.id, nodeIdA: idA, nodeIdB: idB, type: .terminalToTerminal)
         connections[conn.id] = active
 
-        // 向双端注入 Skill（FR29）
+        // Inject Skill into both ends (FR29)
         let host = "\(Constants.interAgentServerHost):\(serverPort)"
         SkillInjector.shared.inject(to: idA, host: host)
         SkillInjector.shared.inject(to: idB, host: host)
@@ -64,7 +64,7 @@ final class ConnectionManager {
         return conn
     }
 
-    /// 建立 Terminal↔Terminal 连接（同时持久化到 workspace）
+    /// Establish Terminal↔Terminal connection (while persisting to workspace)
     func connectTerminals(
         idA: UUID, idB: UUID,
         serverPort: UInt16,
@@ -76,7 +76,7 @@ final class ConnectionManager {
         return conn
     }
 
-    /// 建立 Terminal↔Note 连接（同时持久化到 workspace）
+    /// Establish Terminal↔Note connection (while persisting to workspace)
     func connectTerminalToNote(
         terminalId: UUID, noteNodeId: UUID,
         ropePoints: [[Double]] = [],
@@ -87,7 +87,7 @@ final class ConnectionManager {
         return conn
     }
 
-    /// 建立 Terminal↔Portal 连接（同时持久化到 workspace）
+    /// Establish Terminal↔Portal connection (while persisting to workspace)
     func connectTerminalToPortal(
         terminalId: UUID, portalNodeId: UUID,
         ropePoints: [[Double]] = [],
@@ -98,7 +98,7 @@ final class ConnectionManager {
         return conn
     }
 
-    /// 建立 Terminal↔Note 连接
+    /// Establish Terminal↔Note connection
     func connectTerminalToNote(terminalId: UUID, noteNodeId: UUID, ropePoints: [[Double]] = []) -> NoteConnection {
         let conn = NoteConnection(
             id: UUID(), terminalId: terminalId, noteNodeId: noteNodeId,
@@ -110,7 +110,7 @@ final class ConnectionManager {
         return conn
     }
 
-    /// 建立 Terminal↔Portal 连接
+    /// Establish Terminal↔Portal connection
     func connectTerminalToPortal(terminalId: UUID, portalNodeId: UUID, ropePoints: [[Double]] = []) -> PortalConnection {
         let conn = PortalConnection(
             id: UUID(), terminalId: terminalId, portalNodeId: portalNodeId,
@@ -121,7 +121,7 @@ final class ConnectionManager {
         return conn
     }
 
-    /// 建立 Note↔Note 连接（Note Chaining）
+    /// Establish Note↔Note connection (Note Chaining)
     func connectNoteToNote(noteNodeIdA: UUID, noteNodeIdB: UUID, ropePoints: [[Double]] = []) -> NoteToNoteConnection {
         let conn = NoteToNoteConnection(
             noteNodeIdA: noteNodeIdA, noteNodeIdB: noteNodeIdB,
@@ -133,7 +133,7 @@ final class ConnectionManager {
         return conn
     }
 
-    /// 建立 Portal↔Portal 连接（共享 session）
+    /// Establish Portal↔Portal connection (shared session)
     func connectPortalToPortal(portalIdA: UUID, portalIdB: UUID, ropePoints: [[Double]] = []) -> PortalToPortalConnection {
         let conn = PortalToPortalConnection(
             portalIdA: portalIdA, portalIdB: portalIdB,
@@ -145,7 +145,7 @@ final class ConnectionManager {
         return conn
     }
 
-    // MARK: - 断开连接
+    // MARK: - Disconnect
 
     /// Removes an active connection by ID and posts `connectionStatusChanged`.
     func disconnect(id: UUID) {
@@ -159,7 +159,7 @@ final class ConnectionManager {
         toRemove.forEach { connections.removeValue(forKey: $0.id) }
     }
 
-    // MARK: - 状态更新
+    // MARK: - Status update
 
     func updateStatus(_ status: ConnectionStatus, for connectionId: UUID) {
         connections[connectionId]?.status = status
@@ -167,7 +167,7 @@ final class ConnectionManager {
 
     func markCommunicating(_ connectionId: UUID) {
         updateStatus(.communicating, for: connectionId)
-        // 150ms 后恢复 idle（FR: 通信结束后渐变回灰色）
+        // Restore idle after 150ms (FR: Gradient back to gray after communication ends)
         Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(150))
             if connections[connectionId]?.status == .communicating {
@@ -176,7 +176,7 @@ final class ConnectionManager {
         }
     }
 
-    // MARK: - 查询
+    // MARK: - Query
 
     func connections(for nodeId: UUID) -> [ActiveConnection] {
         connections.values.filter { $0.nodeIdA == nodeId || $0.nodeIdB == nodeId }
@@ -186,14 +186,14 @@ final class ConnectionManager {
         connections(for: nodeId).map { $0.nodeIdA == nodeId ? $0.nodeIdB : $0.nodeIdA }
     }
 
-    // MARK: - 工作区恢复
+    // MARK: - Workspace recovery
 
-    /// 从持久化的工作区数据重建所有运行时连接（应用启动 / 工作区切换时调用）
-    /// 不重新生成连接 ID，直接复用持久化的 UUID，保证 CLI 查询结果稳定
+    /// Rebuild all runtime connections from persisted workspace data (called on app startup/workspace switch)
+    /// Do not regenerate the connection ID, directly reuse the persistent UUID to ensure stable CLI query results
     func restoreConnections(from workspace: WorkspaceManager, serverPort: UInt16) {
         let host = "\(Constants.interAgentServerHost):\(serverPort)"
 
-        // 删除与此工作区节点相关的旧连接（避免多工作区污染）
+        // Delete old connections related to this workspace node (to avoid multi-workspace pollution)
         let wsNodeIds = Set(workspace.nodes.map { $0.id })
         let toRemove = connections.values.filter {
             wsNodeIds.contains($0.nodeIdA) || wsNodeIds.contains($0.nodeIdB)
@@ -263,7 +263,7 @@ final class ConnectionManager {
         }
     }
 
-    // MARK: - 工具
+    // MARK: - Tools
 
     private func buildDefaultRopePoints() -> [[Double]] {
         Array(repeating: [0.0, 0.0], count: Constants.ropeControlPointCount)

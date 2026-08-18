@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - 新建 Portal Sheet
+// MARK: - New Portal Sheet
 
 struct NewPortalSheet: View {
     @Environment(\.dismiss) private var dismiss

@@ -1,7 +1,7 @@
 import SwiftUI
 import AppKit
 
-// MARK: - Shape 专属浮动工具栏
+// MARK: - Shape exclusive floating toolbar
 
 struct ShapeContextToolbar: View {
     let nodeId: UUID
@@ -14,7 +14,7 @@ struct ShapeContextToolbar: View {
     @State private var showFillStylePicker = false
     @State private var isDeleteHovered = false
 
-    /// 主题色（边框和填充共用同一颜色来源）
+    /// Theme color (border and fill share the same color source)
     private var themeColor: Color {
         NoteColorPickerPopover.colorFromString(content.strokeColor)
     }
@@ -53,7 +53,7 @@ struct ShapeContextToolbar: View {
         )
     }
 
-    // MARK: - 主题色（边框 + 填充同步）
+    // MARK: - theme color (border + fill sync)
 
     private var themeColorButton: some View {
         Button {
@@ -78,7 +78,7 @@ struct ShapeContextToolbar: View {
         }
     }
 
-    // MARK: - 边框粗细步进器
+    // MARK: - Border thickness stepper
 
     private var strokeWidthStepper: some View {
         HStack(spacing: 2) {
@@ -112,7 +112,7 @@ struct ShapeContextToolbar: View {
         }
     }
 
-    // MARK: - 边框风格
+    // MARK: - Border style
 
     private var strokeStyleButton: some View {
         Button {
@@ -136,7 +136,7 @@ struct ShapeContextToolbar: View {
         }
     }
 
-    // MARK: - 填充风格
+    // MARK: - fill style
 
     private var fillStyleButton: some View {
         Button {
@@ -160,7 +160,7 @@ struct ShapeContextToolbar: View {
         }
     }
 
-    // MARK: - 字体大小步进器
+    // MARK: - Font size stepper
 
     private var fontSizeStepper: some View {
         HStack(spacing: 2) {
@@ -198,7 +198,7 @@ struct ShapeContextToolbar: View {
         }
     }
 
-    // MARK: - 删除
+    // MARK: - Delete
 
     private var deleteButton: some View {
         Button { onDelete() } label: {
@@ -219,7 +219,7 @@ struct ShapeContextToolbar: View {
         )
     }
 
-    // MARK: - 分隔线
+    // MARK: - divider
 
     private var toolbarSeparator: some View {
         Rectangle()
@@ -229,7 +229,7 @@ struct ShapeContextToolbar: View {
     }
 }
 
-// MARK: - 边框风格 Popover
+// MARK: - Border style Popover
 
 struct ShapeStrokeStylePopover: View {
     let selected: ShapeStrokeStyle
@@ -278,7 +278,7 @@ struct ShapeStrokeStylePopover: View {
     }
 }
 
-// MARK: - 填充风格 Popover
+// MARK: - Fill style Popover
 
 struct ShapeFillStylePopover: View {
     let selected: ShapeFillStyle

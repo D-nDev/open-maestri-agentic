@@ -2,15 +2,15 @@ import XCTest
 import CoreGraphics
 @testable import open_maestri
 
-// Story 2.3 AC：磁吸瓦片对齐测试
+// Story 2.3 AC: Magnetic tile alignment test
 final class TileSnappingTests: XCTestCase {
 
-    // MARK: - 基础吸附
+    // MARK: - Basic adsorption
 
     func testSnapToNearbyNodeEdge() {
-        // 拖动节点的左边与目标节点右边接近时，应自动对齐
-        let dragging = CGRect(x: 202, y: 100, width: 200, height: 150)  // x 比目标右边多 2
-        let other = CGRect(x: 0, y: 100, width: 200, height: 150)       // 目标右边 x=200
+        // When the left side of the dragged node is close to the right side of the target node, it should be automatically aligned
+        let dragging = CGRect(x: 202, y: 100, width: 200, height: 150)  // x is 2 more than the right side of the target
+        let other = CGRect(x: 0, y: 100, width: 200, height: 150)       // Target right x=200
 
         let (snapped, guidelines) = TileSnapping.snap(draggingFrame: dragging, against: [other])
 
@@ -19,8 +19,8 @@ final class TileSnappingTests: XCTestCase {
     }
 
     func testNoXSnapWhenTooFar() {
-        // X 方向距离 50 > 阈值 12，不应 X 方向吸附
-        // Y 轴故意错开，避免 Y 方向意外吸附
+        // X-direction distance 50 > threshold 12, no X-direction adsorption
+        // The Y axis is deliberately staggered to avoid accidental adsorption in the Y direction
         let dragging = CGRect(x: 250, y: 500, width: 200, height: 150)
         let other = CGRect(x: 0, y: 0, width: 200, height: 150)
 
@@ -37,9 +37,9 @@ final class TileSnappingTests: XCTestCase {
     }
 
     func testSnapVerticalAlignment() {
-        // 上边与目标下边接近
-        let dragging = CGRect(x: 100, y: 308, width: 200, height: 150)  // y=308，目标下边 y=300
-        let other = CGRect(x: 100, y: 100, width: 200, height: 200)     // 下边 y=300
+        // The upper edge is close to the lower edge of the target
+        let dragging = CGRect(x: 100, y: 308, width: 200, height: 150)  // y=308, y=300 below the target
+        let other = CGRect(x: 100, y: 100, width: 200, height: 200)     // Lower y=300
 
         let (snapped, guidelines) = TileSnapping.snap(draggingFrame: dragging, against: [other])
 
@@ -61,7 +61,7 @@ final class TileSnappingTests: XCTestCase {
     func testSnapWithMultipleNodes() {
         let dragging = CGRect(x: 408, y: 100, width: 200, height: 150)
         let node1 = CGRect(x: 0, y: 100, width: 200, height: 150)
-        let node2 = CGRect(x: 200, y: 100, width: 200, height: 150)  // 右边 x=400，距离 8
+        let node2 = CGRect(x: 200, y: 100, width: 200, height: 150)  // Right x=400, distance 8
 
         let (snapped, _) = TileSnapping.snap(draggingFrame: dragging, against: [node1, node2])
 

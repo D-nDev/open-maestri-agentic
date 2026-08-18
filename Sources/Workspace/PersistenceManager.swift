@@ -1,14 +1,14 @@
 import Foundation
 import OSLog
 
-/// 数据持久化管理器
-/// 所有文件 I/O 必须通过此类进行（ScrollbackStore 除外，性能原因）
+/// Data persistence manager
+/// All file I/O must go through this class (except ScrollbackStore, for performance reasons)
 final class PersistenceManager {
     static let shared = PersistenceManager()
 
     private let logger = Logger.make(category: "PersistenceManager")
 
-    /// 应用数据根目录 ~/.open-maestri/
+    /// Application data root directory ~/.open-maestri/
     var appDataURL: URL {
         FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(Constants.appDataDirectoryName)
@@ -57,7 +57,7 @@ final class PersistenceManager {
 
     private init() {}
 
-    // MARK: - 目录初始化
+    // MARK: - Directory initialization
 
     func ensureDirectoriesExist() throws {
         let dirs: [URL] = [
@@ -82,7 +82,7 @@ final class PersistenceManager {
         }
     }
 
-    // MARK: - 通用原子 Codable I/O
+    // MARK: - Universal Atomic Codable I/O
 
     /// Encodes `value` to JSON and writes it atomically to `url` on a background task.
     func save<T: Encodable>(_ value: T, to url: URL) async throws {
@@ -108,10 +108,10 @@ final class PersistenceManager {
         return try load(type, from: url)
     }
 
-    // MARK: - 版本迁移钩子
+    // MARK: - Version migration hook
 
     private func migrating<T: Decodable>(data: Data, type: T.Type) throws -> T {
-        // 如果是 WorkspaceDocument，检查 schemaVersion
+        // In case of WorkspaceDocument, check schemaVersion
         if type == WorkspaceDocument.self {
             if let raw = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let version = raw["schemaVersion"] as? Int,
@@ -123,10 +123,10 @@ final class PersistenceManager {
         return try decoder.decode(type, from: data)
     }
 
-    // MARK: - 原子写入
+    // MARK: - Atomic write
 
     private func atomicWrite(_ data: Data, to url: URL) throws {
-        // 确保父目录存在
+        // Make sure the parent directory exists
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(),
             withIntermediateDirectories: true
@@ -135,7 +135,7 @@ final class PersistenceManager {
         try data.write(to: tmp, options: .atomic)
 
         if FileManager.default.fileExists(atPath: url.path) {
-            // 目标文件已存在：使用 replaceItem 保证原子性（含崩溃恢复语义）
+            // Target file already exists: use replaceItem to ensure atomicity (including crash recovery semantics)
             _ = try FileManager.default.replaceItem(
                 at: url,
                 withItemAt: tmp,
@@ -143,12 +143,12 @@ final class PersistenceManager {
                 resultingItemURL: nil
             )
         } else {
-            // 目标文件不存在（首次创建）：直接 move tmp 到目标路径
+            // The target file does not exist (created for the first time): directly move tmp to the target path
             try FileManager.default.moveItem(at: tmp, to: url)
         }
     }
 
-    // MARK: - 高层工作区 API（Story 1.3/1.5 使用）
+    // MARK: - High-level workspace API (used by Story 1.3/1.5)
 
     func loadWorkspace(id: UUID) throws -> WorkspaceDocument {
         let url = workspaceURL(id: id)
@@ -179,9 +179,9 @@ final class PersistenceManager {
         try saveSync(state, to: appStateURL)
     }
 
-    // MARK: - 偏好内存缓存（避免重复磁盘 I/O）
+    // MARK: - Prefer memory cache (avoid duplicate disk I/O)
 
-    /// 内存缓存：首次读取后保留，避免每次创建终端都触发同步磁盘读取
+    /// Memory cache: retained after first read to avoid triggering synchronous disk read every time a terminal is created
     private var _cachedPreferences: Preferences?
     private let _prefLock = NSLock()
 
@@ -199,14 +199,14 @@ final class PersistenceManager {
         return prefs
     }
 
-    /// 同步无抛出版本，供 HTTP 线程调用（返回默认值而非崩溃）
+    /// Synchronous no-throw version for calls from HTTP threads (returns default instead of crashing)
     func loadPreferencesSync() -> Preferences {
         (try? loadPreferences()) ?? Preferences()
     }
 
     func savePreferences(_ prefs: Preferences) throws {
         try saveSync(prefs, to: preferencesURL)
-        // 写入后同步更新内存缓存，保证后续读取拿到最新值
+        // Synchronously update the memory cache after writing to ensure that subsequent reads get the latest value
         _prefLock.lock()
         _cachedPreferences = prefs
         _prefLock.unlock()

@@ -1,7 +1,7 @@
 import SwiftUI
 import OSLog
 
-/// Landing（合并到目标分支）确认界面
+/// Landing (merge into target branch) confirmation interface
 struct LandingView: View {
     let floor: Floor
     let workingDirectory: String
@@ -68,12 +68,12 @@ struct LandingView: View {
     }
 
     private func loadDiff() {
-        // 提前在 @MainActor 上捕获值，避免在 Task.detached 内跨 actor 访问
+        // Capture values on @MainActor ahead of time to avoid cross-actor access within Task.detached
         let branchName = floor.branchName
         let dir = workingDirectory
         Task.detached(priority: .userInitiated) {
             let result = (try? runGit(["diff", "--stat", branchName], in: dir)) ?? ""
-            let noDiff = await "git.no_diff".localized  // @MainActor 属性需要 await
+            let noDiff = await "git.no_diff".localized  // @MainActor property requires await
             await MainActor.run { diffText = result.isEmpty ? noDiff : result }
         }
     }
@@ -81,7 +81,7 @@ struct LandingView: View {
     private func performLand() {
         isLanding = true
         landError = nil
-        // 提前在 @MainActor 上捕获值，避免在 Task.detached 内跨 actor 访问
+        // Capture values on @MainActor ahead of time to avoid cross-actor access within Task.detached
         let capturedFloor = floor
         let branch = targetBranch
         let dir = workingDirectory
@@ -104,8 +104,8 @@ struct LandingView: View {
         }
     }
 
-    // nonisolated：此方法不访问任何 self 属性，无需在 @MainActor 上运行
-    // 允许从 Task.detached 直接调用而不阻塞主线程
+    // nonisolated: This method does not access any self properties and does not need to be run on @MainActor
+    // Allow direct calls from Task.detached without blocking the main thread
     @discardableResult
     nonisolated private func runGit(_ args: [String], in directory: String) throws -> String {
         let process = Process()

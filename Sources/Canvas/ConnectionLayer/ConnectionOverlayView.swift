@@ -1,17 +1,17 @@
 import AppKit
 
-/// 所有连线的渲染层 NSView（Story 5.1 AC）
-/// - 覆盖在画布上方，通过 draw(_:) 用 RopePathRenderer 绘制所有活跃连接
-/// - 连线以物理绳索动画渲染（悬链线，21 个控制点，Story 5.1 AC）
-/// - 颜色状态编码：灰色（空闲）→ 绿色 glow（通信中）→ 红色（断开）（UX-DR5）
-/// - 支持 hover 高亮和右键删除连线
+/// Render layer NSView for all wires (Story 5.1 AC)
+/// - Overlay on top of the canvas and draw all active connections with a RopePathRenderer via draw(_:)
+/// - Wires rendered with physical rope animation (catenary, 21 control points, Story 5.1 AC)
+/// - Color status coding: gray (idle) → green glow (communicating) → red (disconnected) (UX-DR5)
+/// - Support hover highlighting and right-click deletion of connections
 final class ConnectionOverlayView: NSView {
     override var isFlipped: Bool { true }
 
-    // MARK: - 数据源
+    // MARK: - Data source
 
-    /// 当前需要绘制的连接列表（由画布在节点移动/连接变化时更新）
-    /// 仅当连线数据实际变化时才触发重绘（避免 viewport pan/zoom 时的冗余重绘）
+    /// List of connections that currently need to be drawn (updated by the canvas when nodes move/connections change)
+    /// Only trigger redraw when wire data actually changes (avoid redundant redraw when viewport pan/zoom)
     var connections: [RenderableConnection] = [] {
         didSet {
             guard connectionsDidChange(old: oldValue, new: connections) else { return }
@@ -19,14 +19,14 @@ final class ConnectionOverlayView: NSView {
         }
     }
 
-    /// 快速判断连线数据是否有实际变化
-    /// 比较策略：数量 → 各连线 id + 首尾中点（覆盖 95% 场景，避免逐点全量比较）
+    /// Quickly determine whether there are actual changes in connection data
+    /// Comparison strategy: Quantity → Each connection id + start and end midpoint (covers 95% of scenarios, avoiding point-by-point full comparison)
     private func connectionsDidChange(old: [RenderableConnection], new: [RenderableConnection]) -> Bool {
         guard old.count == new.count else { return true }
         for i in old.indices {
             let o = old[i], n = new[i]
             if o.id != n.id || o.status != n.status { return true }
-            // 比较首点、尾点、中点三个采样位置
+            // Compare the three sampling positions of the first point, the last point and the middle point
             guard o.screenPoints.count == n.screenPoints.count,
                   !o.screenPoints.isEmpty else { return o.screenPoints.count != n.screenPoints.count }
             let midIdx = o.screenPoints.count / 2
@@ -39,36 +39,36 @@ final class ConnectionOverlayView: NSView {
         return false
     }
 
-    /// 浮点坐标比较（容差 0.5 像素，避免亚像素抖动触发重绘）
+    /// Floating point coordinate comparison (0.5 pixel tolerance to avoid sub-pixel jitter triggering redraws)
     private func pointsEqual(_ a: CGPoint, _ b: CGPoint) -> Bool {
         abs(a.x - b.x) < 0.5 && abs(a.y - b.y) < 0.5
     }
 
-    /// 当前 hover 高亮的连线 ID
+    /// The connection ID currently highlighted by hover
     private var highlightedConnectionId: UUID? {
         didSet {
             if oldValue != highlightedConnectionId { needsDisplay = true }
         }
     }
 
-    /// 连线删除回调（传入连线 UUID）
+    /// Connection delete callback (incoming connection UUID)
     var onDeleteConnection: ((UUID) -> Void)?
 
-    /// 连线命中检测容差（像素）
+    /// Wire hit detection tolerance (pixels)
     private static let hitTolerance: CGFloat = 8.0
 
-    // MARK: - 临时连线数据（连线工具拖动期间由 CanvasViewportView 同步）
+    // MARK: - Temporary connection data (synchronized by CanvasViewportView during dragging of the connection tool)
 
-    /// 临时连线起点节点的屏幕坐标 frame
+    /// Screen coordinate frame of the temporary connection starting point node
     var tempConnectionFromFrame: CGRect? = nil {
         didSet { if oldValue != tempConnectionFromFrame { needsDisplay = true } }
     }
-    /// 临时连线终点（鼠标当前屏幕坐标）
+    /// Temporary connection end point (mouse current screen coordinates)
     var tempConnectionToPoint: CGPoint? = nil {
         didSet { if oldValue != tempConnectionToPoint { needsDisplay = true } }
     }
 
-    // MARK: - 初始化
+    // MARK: - Initialization
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -85,7 +85,7 @@ final class ConnectionOverlayView: NSView {
     }
 
     private func setupTracking() {
-        // 初始 tracking area，会在 updateTrackingAreas 中刷新
+        // Initial tracking area will be refreshed in updateTrackingAreas
     }
 
     override func updateTrackingAreas() {
@@ -99,7 +99,7 @@ final class ConnectionOverlayView: NSView {
         ))
     }
 
-    // MARK: - 鼠标事件
+    // MARK: - Mouse events
 
     override func mouseMoved(with event: NSEvent) {
         let loc = convert(event.locationInWindow, from: nil)
@@ -116,7 +116,7 @@ final class ConnectionOverlayView: NSView {
         NSCursor.arrow.set()
     }
 
-    /// 右键点击连线弹出删除菜单
+    /// Right-click on the connection to pop up the delete menu
     override func rightMouseDown(with event: NSEvent) {
         let loc = convert(event.locationInWindow, from: nil)
         guard let connId = connectionId(at: loc) else {
@@ -141,20 +141,20 @@ final class ConnectionOverlayView: NSView {
         highlightedConnectionId = nil
     }
 
-    /// 让鼠标事件穿透到下层（仅在连线上方时拦截）
+    /// Let mouse events penetrate to the lower layer (only intercept when above the connection)
     override func hitTest(_ point: NSPoint) -> NSView? {
         let localPoint = convert(point, from: superview)
         if connectionId(at: localPoint) != nil {
             return self
         }
-        return nil  // 穿透到下层
+        return nil  // Penetrate to the lower layer
     }
 
-    // MARK: - 连线命中检测
+    // MARK: - Connection hit detection
 
-    /// 查找距离指定点最近的连线（在容差范围内）
-    /// - Parameter point: 本视图坐标系中的点
-    /// - Returns: 命中的连线 UUID，nil 表示未命中
+    /// Find the closest connection (within tolerance) to a specified point
+    /// - Parameter point: Point in the coordinate system of this view
+    /// - Returns: hit connection UUID, nil means miss
     func connectionId(at point: CGPoint) -> UUID? {
         var bestId: UUID?
         var bestDist: CGFloat = Self.hitTolerance
@@ -169,7 +169,7 @@ final class ConnectionOverlayView: NSView {
         return bestId
     }
 
-    /// 计算点到折线段的最小距离
+    /// Calculate the minimum distance from a point to a polyline segment
     private func minDistance(from point: CGPoint, to polyline: [CGPoint]) -> CGFloat {
         guard polyline.count >= 2 else { return .greatestFiniteMagnitude }
         var minDist: CGFloat = .greatestFiniteMagnitude
@@ -180,7 +180,7 @@ final class ConnectionOverlayView: NSView {
         return minDist
     }
 
-    /// 点到线段的距离
+    /// Distance from point to line segment
     private func distanceToSegment(point: CGPoint, a: CGPoint, b: CGPoint) -> CGFloat {
         let dx = b.x - a.x
         let dy = b.y - a.y
@@ -194,14 +194,14 @@ final class ConnectionOverlayView: NSView {
         return hypot(point.x - projX, point.y - projY)
     }
 
-    // MARK: - 绘制（Story 5.1 AC：连线实时重新计算悬链线，60fps）
+    // MARK: - Draw (Story 5.1 AC: real-time recalculation of catenary lines, 60fps)
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
-        // dirtyRect 裁剪：仅绘制 bounding box 与 dirtyRect 相交的连线
-        let inflatedDirty = dirtyRect.insetBy(dx: -10, dy: -10) // 扩展少许容差避免边缘截断
+        // dirtyRect clipping: only draw the connection line where the bounding box intersects dirtyRect
+        let inflatedDirty = dirtyRect.insetBy(dx: -10, dy: -10) // Extend slight tolerance to avoid edge truncation
         for conn in connections {
-            // 快速 bounding box 检测：用首尾中三点估算连线包围盒
+            // Fast bounding box detection: estimate the connected bounding box using three points in the first and last
             guard !conn.screenPoints.isEmpty else { continue }
             let bbox = boundingBox(of: conn.screenPoints)
             guard inflatedDirty.intersects(bbox) else { continue }
@@ -209,33 +209,33 @@ final class ConnectionOverlayView: NSView {
             let isHighlighted = conn.id == highlightedConnectionId
             RopePathRenderer.draw(points: conn.screenPoints, status: conn.status, isHighlighted: isHighlighted)
 
-            // 状态文字（正在注入 Skill... / Skill 已注入双端）
+            // Status text (Injecting Skill.../Skill has been injected into both ends)
             if let label = conn.statusLabel, let mid = RopePathRenderer.midpoint(of: conn.screenPoints) {
                 drawLabel(label, at: mid)
             }
         }
 
-        // 临时连线绘制（连线工具拖动时）
+        // Temporary connection drawing (when dragging the connection tool)
         drawTemporaryConnectionLine()
     }
 
-    // MARK: - 临时连线绘制
+    // MARK: - Temporary line drawing
 
-    /// 绘制连线工具拖动时的临时虚线（直线）
+    /// Temporary dashed line (straight line) when dragging with the Draw Connection tool
     private func drawTemporaryConnectionLine() {
         guard let fromFrame = tempConnectionFromFrame else { return }
 
-        // 鼠标未移动时，绘制四个边缘连接点指示器
+        // Draw four edge connection point indicators when mouse is not moving
         guard let toPoint = tempConnectionToPoint else {
             drawEdgeConnectors(on: fromFrame)
             return
         }
 
-        // 计算从节点边缘出发的锚点（向鼠标方向与边框的交点）
+        // Calculate the anchor point starting from the edge of the node (towards the intersection point with the border in the direction of the mouse)
         let fromCenter = CGPoint(x: fromFrame.midX, y: fromFrame.midY)
         let fromPoint = Self.edgeAnchor(of: fromFrame, center: fromCenter, toward: toPoint)
 
-        // 绘制虚线直线
+        // Draw a dashed straight line
         let path = NSBezierPath()
         path.move(to: fromPoint)
         path.line(to: toPoint)
@@ -244,41 +244,41 @@ final class ConnectionOverlayView: NSView {
         NSColor.systemBlue.withAlphaComponent(0.8).setStroke()
         path.stroke()
 
-        // 起点连接点指示器（在节点边缘出发点画小圆圈）
+        // Start connection point indicator (draw a small circle at the starting point on the edge of the node)
         drawConnectorDot(at: fromPoint)
 
-        // 终点指示器（鼠标位置画小圆圈）
+        // End point indicator (draw a small circle at the mouse position)
         drawConnectorDot(at: toPoint, color: NSColor.systemBlue.withAlphaComponent(0.5))
 
-        // 源节点边框高亮（淡蓝色）
+        // Source node border highlight (light blue)
         let borderPath = NSBezierPath(roundedRect: fromFrame, xRadius: 6, yRadius: 6)
         borderPath.lineWidth = 1.5
         NSColor.systemBlue.withAlphaComponent(0.4).setStroke()
         borderPath.stroke()
     }
 
-    /// 在节点四个边缘中点绘制连接点圆圈（连线模式激活但鼠标未移动时）
+    /// Draw a connection point circle at the midpoint of the four edges of the node (when wire mode is activated but the mouse is not moved)
     private func drawEdgeConnectors(on frame: CGRect) {
         let midPoints = [
-            CGPoint(x: frame.midX, y: frame.minY),  // 上
-            CGPoint(x: frame.midX, y: frame.maxY),  // 下
-            CGPoint(x: frame.minX, y: frame.midY),  // 左
-            CGPoint(x: frame.maxX, y: frame.midY),  // 右
+            CGPoint(x: frame.midX, y: frame.minY),  // on
+            CGPoint(x: frame.midX, y: frame.maxY),  // Next
+            CGPoint(x: frame.minX, y: frame.midY),  // Left
+            CGPoint(x: frame.maxX, y: frame.midY),  // Right
         ]
 
-        // 节点边框高亮
+        // Node border highlighting
         let borderPath = NSBezierPath(roundedRect: frame, xRadius: 6, yRadius: 6)
         borderPath.lineWidth = 1.5
         NSColor.systemBlue.withAlphaComponent(0.4).setStroke()
         borderPath.stroke()
 
-        // 四个连接点
+        // Four connection points
         for pt in midPoints {
             drawConnectorDot(at: pt)
         }
     }
 
-    /// 绘制连接器圆点（蓝色外圈 + 白色内圈）
+    /// Draw connector dots (blue outer ring + white inner ring)
     private func drawConnectorDot(at point: CGPoint, color: NSColor = .systemBlue) {
         let outerRadius: CGFloat = 5.0
         let innerRadius: CGFloat = 2.5
@@ -297,9 +297,9 @@ final class ConnectionOverlayView: NSView {
         NSBezierPath(ovalIn: innerRect).fill()
     }
 
-    // MARK: - 边缘锚点计算
+    // MARK: - Edge anchor point calculation
 
-    /// 计算从节点边框出发的锚点（从 frame 中心向 target 方向做射线，返回与边框的交点）
+    /// Calculate the anchor point starting from the node border (make a ray from the frame center to the target direction and return the intersection with the border)
     static func edgeAnchor(of frame: CGRect, center: CGPoint, toward target: CGPoint) -> CGPoint {
         let dx = target.x - center.x
         let dy = target.y - center.y
@@ -321,7 +321,7 @@ final class ConnectionOverlayView: NSView {
         return CGPoint(x: center.x + dx * t, y: center.y + dy * t)
     }
 
-    /// 计算控制点序列的 axis-aligned bounding box
+    /// Calculate axis-aligned bounding box of control point sequence
     private func boundingBox(of points: [CGPoint]) -> CGRect {
         var minX = CGFloat.greatestFiniteMagnitude
         var minY = CGFloat.greatestFiniteMagnitude
@@ -346,7 +346,7 @@ final class ConnectionOverlayView: NSView {
         attributed.draw(at: CGPoint(x: point.x - 40, y: point.y + 4))
     }
 
-    // MARK: - 更新连线位置（节点拖动时实时调用）
+    // MARK: - Update the connection position (called in real time when the node is dragged)
 
     func updateConnection(id: UUID, screenPoints: [CGPoint]) {
         if let idx = connections.firstIndex(where: { $0.id == id }) {
@@ -372,10 +372,10 @@ final class ConnectionOverlayView: NSView {
     }
 }
 
-/// 可渲染连接数据（画布坐标已转换为屏幕坐标）
+/// Renderable connection data (canvas coordinates converted to screen coordinates)
 struct RenderableConnection {
     let id: UUID
-    var screenPoints: [CGPoint]  // 21 个控制点（已转换为屏幕坐标）
+    var screenPoints: [CGPoint]  // 21 control points (converted to screen coordinates)
     var status: ConnectionStatus
-    var statusLabel: String?     // nil 表示不显示标签
+    var statusLabel: String?     // nil means do not display the label
 }

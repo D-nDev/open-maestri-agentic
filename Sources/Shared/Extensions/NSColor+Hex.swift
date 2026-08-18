@@ -1,7 +1,7 @@
 import AppKit
 
 extension NSColor {
-    /// 将 NSColor 转为 "#RRGGBB" 格式字符串
+    /// Convert NSColor to "#RRGGBB" format string
     var hexString: String {
         guard let rgb = self.usingColorSpace(.deviceRGB) else { return "#FEFDE8" }
         let r = Int(rgb.redComponent * 255)
@@ -10,7 +10,7 @@ extension NSColor {
         return String(format: "#%02X%02X%02X", r, g, b)
     }
 
-    /// 从 hex 字符串创建 NSColor（支持 "#RRGGBB" 和 "#RRGGBBAA" 格式）
+    /// Create NSColor from hex string (supports "#RRGGBB" and "#RRGGBBAA" formats)
     convenience init?(hex: String) {
         let h = hex.hasPrefix("#") ? String(hex.dropFirst()) : hex
         var val: UInt64 = 0

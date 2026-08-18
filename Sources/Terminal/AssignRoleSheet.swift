@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// 分配角色 Sheet（从右键菜单 "Assign Role" 触发）
-/// 展示可用角色列表，支持分配和取消分配
+/// Assign Role Sheet (triggered from the right-click menu "Assign Role")
+/// Display list of available roles, support assignment and unassignment
 struct AssignRoleSheet: View {
     let roles: [RolePreset]
     let currentRoleId: UUID?
@@ -43,7 +43,7 @@ struct AssignRoleSheet: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 2) {
-                        // 取消分配选项（仅当已有角色时显示）
+                        // Unassign option (shown only if role already exists)
                         if currentRoleId != nil {
                             Button {
                                 onUnassign()
@@ -72,7 +72,7 @@ struct AssignRoleSheet: View {
                                 .padding(.vertical, 4)
                         }
 
-                        // 角色列表
+                        // Role list
                         ForEach(roles) { role in
                             let isCurrentRole = role.id == currentRoleId
                             Button {
@@ -101,7 +101,7 @@ struct AssignRoleSheet: View {
 
                                     Spacer()
 
-                                    // 当前已分配标记
+                                    // Tags are currently assigned
                                     if isCurrentRole {
                                         Image(systemName: "checkmark.circle.fill")
                                             .font(.system(size: 14))

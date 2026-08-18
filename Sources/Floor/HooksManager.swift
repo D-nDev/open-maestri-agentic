@@ -1,7 +1,7 @@
 import Foundation
 import OSLog
 
-/// Floor Hooks 执行器（Setup/Run/Teardown 生命周期）
+/// Floor Hooks executor (Setup/Run/Teardown life cycle)
 final class HooksManager {
     static let shared = HooksManager()
     private let logger = Logger.make(category: "HooksManager")

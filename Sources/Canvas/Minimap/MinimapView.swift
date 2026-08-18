@@ -1,35 +1,35 @@
 import AppKit
 import CoreGraphics
 
-/// 右下角 Minimap（Story 2.4 AC）
-/// - 显示当前画布全貌缩略图，蓝框标记视口位置
-/// - 点击任意位置：视口跳转到对应区域（300ms 动画）
-/// - 实时更新（节点移动/添加时）
+/// Lower right corner Minimap (Story 2.4 AC)
+/// - Display a thumbnail of the current canvas, with a blue box marking the viewport position
+/// - Click anywhere: the viewport jumps to the corresponding area (300ms animation)
+/// - Live updates (when nodes are moved/added)
 final class MinimapView: NSView {
     override var isFlipped: Bool { true }
 
-    // MARK: - 数据
+    // MARK: - data
 
-    /// 所有节点的画布 frame
+    /// Canvas frame for all nodes
     var nodeFrames: [CGRect] = [] { didSet { needsDisplay = true } }
 
-    /// 当前视口（画布坐标）
+    /// Current viewport (canvas coordinates)
     var viewportRect: CGRect = .zero { didSet { needsDisplay = true } }
 
-    /// 画布有效区域（所有节点的 bounding box，带 padding）
+    /// Effective area of canvas (bounding box of all nodes, with padding)
     var canvasBounds: CGRect = CGRect(x: 9600, y: 8300, width: 600, height: 600)
 
-    /// 点击跳转回调（传入目标画布原点）
+    /// Click jump callback (pass in the origin of the target canvas)
     var onJumpTo: ((CGPoint) -> Void)?
 
-    // MARK: - 外观
+    // MARK: - Appearance
 
     private let backgroundColor = NSColor.black.withAlphaComponent(0.75)
     private let nodeColor = NSColor.white.withAlphaComponent(0.5)
     private let viewportColor = NSColor.systemBlue.withAlphaComponent(0.3)
     private let viewportBorderColor = NSColor.systemBlue
 
-    // MARK: - 初始化
+    // MARK: - Initialization
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -49,7 +49,7 @@ final class MinimapView: NSView {
         layer?.borderWidth = 0.5
     }
 
-    // MARK: - 绘制
+    // MARK: - draw
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
@@ -60,7 +60,7 @@ final class MinimapView: NSView {
 
         let scale = minimapScale()
 
-        // 绘制节点矩形
+        // Draw node rectangle
         nodeColor.setFill()
         for nodeFrame in nodeFrames {
             let mapped = mapToMinimap(nodeFrame, scale: scale)
@@ -68,7 +68,7 @@ final class MinimapView: NSView {
             path.fill()
         }
 
-        // 绘制视口蓝框
+        // Draw the viewport blue box
         let mappedViewport = mapToMinimap(viewportRect, scale: scale)
         viewportColor.setFill()
         NSBezierPath(roundedRect: mappedViewport, xRadius: 2, yRadius: 2).fill()
@@ -78,7 +78,7 @@ final class MinimapView: NSView {
         borderPath.stroke()
     }
 
-    // MARK: - 坐标映射
+    // MARK: - Coordinate mapping
 
     private func minimapScale() -> CGFloat {
         let scaleX = bounds.width / canvasBounds.width
@@ -105,7 +105,7 @@ final class MinimapView: NSView {
         return CGPoint(x: cx, y: cy)
     }
 
-    // MARK: - 点击跳转（Story 2.4 AC：300ms 动画）
+    // MARK: - Click to jump (Story 2.4 AC: 300ms animation)
 
     override func mouseDown(with event: NSEvent) {
         let click = convert(event.locationInWindow, from: nil)
@@ -113,9 +113,9 @@ final class MinimapView: NSView {
         onJumpTo?(canvasPoint)
     }
 
-    // MARK: - 外部更新 API
+    // MARK: - External update API
 
-    /// 根据当前节点列表和视口更新 Minimap
+    /// Update Minimap based on current node list and viewport
     func update(nodes: [CGRect], viewport: CGRect) {
         if nodes.isEmpty {
             canvasBounds = CGRect(x: 9600, y: 8300, width: 800, height: 600)

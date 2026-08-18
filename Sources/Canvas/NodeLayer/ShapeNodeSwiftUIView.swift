@@ -10,7 +10,7 @@ struct ShapeNodeSwiftUIView: View {
     var onClose: ((UUID) -> Void)?
 
     @State private var isEditing = false
-    // 用 content.text 初始化，避免有文字的历史节点首次渲染为空
+    // Initialize with content.text to prevent historical nodes with text from being rendered empty for the first time
     @State private var editText: String
 
     init(
@@ -27,18 +27,18 @@ struct ShapeNodeSwiftUIView: View {
         self.zoom = zoom
         self.onContentChange = onContentChange
         self.onClose = onClose
-        // @State 的初始值只在视图首次创建时生效
+        // The initial value of @State only takes effect when the view is first created
         self._editText = State(initialValue: content.text)
     }
 
     var body: some View {
         ZStack {
-            // 图形层
+            // Graphics layer
             shapeCanvas
 
-            // ShapeTextEditor 始终存在，NSTextView 始终注册在 ShapeTextViewRegistry。
-            // isEditing 控制 isEditable/isSelectable，非编辑态下文字只读显示。
-            // 这样 mouseDown 时无论有无文字都能直接转发坐标修正事件，无需 Placeholder。
+            // ShapeTextEditor always exists and NSTextView is always registered in ShapeTextViewRegistry.
+            // isEditing controls isEditable/isSelectable, and the text is read-only in non-editing mode.
+            // In this way, the coordinate correction event can be forwarded directly when mouseDown is performed, regardless of whether there is text or not, without the need for Placeholder.
             ShapeTextEditor(
                 text: $editText,
                 nodeId: nodeId,
@@ -56,7 +56,7 @@ struct ShapeNodeSwiftUIView: View {
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            // 选中控制点层
+            // Select control point layer
             if isSelected {
                 controlPointsLayer
             }
@@ -88,7 +88,7 @@ struct ShapeNodeSwiftUIView: View {
         .allowsHitTesting(false)
     }
 
-    // MARK: - 颜色解析
+    // MARK: - Color Analysis
 
     private func resolveColor(_ str: String) -> Color {
         NoteColorPickerPopover.colorFromString(str)
@@ -101,7 +101,7 @@ struct ShapeNodeSwiftUIView: View {
         return Color(darkened)
     }
 
-    // MARK: - 图形层
+    // MARK: - Graphics layer
 
     private var shapeCanvas: some View {
         Canvas { context, size in
@@ -181,7 +181,7 @@ struct ShapeNodeSwiftUIView: View {
         }
     }
 
-    // MARK: - 控制点层
+    // MARK: - Control point layer
 
     private var controlPointsLayer: some View {
         GeometryReader { geo in
@@ -232,7 +232,7 @@ struct ShapeNodeSwiftUIView: View {
     }
 }
 
-// MARK: - Shape NSTextView 全局注册表
+// MARK: - Shape NSTextView global registry
 
 final class ShapeTextViewRegistry {
     static let shared = ShapeTextViewRegistry()
@@ -256,15 +256,15 @@ final class ShapeTextViewRegistry {
     }
 }
 
-// MARK: - 文字编辑器
+// MARK: - Text Editor
 
-/// Shape 节点文字编辑器。始终渲染、始终注册 NSTextView。
-/// - 非编辑态（isEditing=false）：isEditable=false，文字只读显示，透明背景。
-/// - 编辑态（isEditing=true）：isEditable=true，接受键盘输入。
+/// Shape node text editor. Always render, always register NSTextView.
+/// - Non-editable state (isEditing=false): isEditable=false, the text is read-only and the background is transparent.
+/// - Editing state (isEditing=true): isEditable=true, accept keyboard input.
 ///
-/// 由于 NSTextView 始终存在，CanvasInteractionHandler 的 mouseDown 路径永远能在
-/// ShapeTextViewRegistry 中查到 tv，直接用 correctedWindowLocationForShapeTextView
-/// 转发坐标修正后的事件，光标定位由 NSTextView 原生处理（与 Note 节点完全一致）。
+/// Since NSTextView always exists, the mouseDown path of CanvasInteractionHandler can always be in
+/// Find tv in ShapeTextViewRegistry, use correctedWindowLocationForShapeTextView directly
+/// Forward the event after coordinate correction, and the cursor positioning is handled natively by NSTextView (exactly the same as the Note node).
 private struct ShapeTextEditor: NSViewRepresentable {
     @Binding var text: String
     let nodeId: UUID
@@ -301,12 +301,12 @@ private struct ShapeTextEditor: NSViewRepresentable {
 
     func updateNSView(_ scrollView: CenteredTextScrollView, context: Context) {
         guard let tv = scrollView.documentView as? NSTextView else { return }
-        // 同步 coordinator.parent，确保 textDidEndEditing 回调持有最新闭包和绑定
+        // Synchronize coordinator.parent to ensure the textDidEndEditing callback holds the latest closures and bindings
         context.coordinator.parent = self
         tv.font = .systemFont(ofSize: fontSize)
         tv.textColor = textColor
-        // isEditable 从 true→false 时，AppKit 会再次触发 textDidEndEditing。
-        // 先把 delegate 置 nil 再改 isEditable，断开回调链，防止 onCommit 被重复调用。
+        // AppKit triggers textDidEndEditing again when isEditable goes from true→false.
+        // First set the delegate to nil and then change isEditable to break the callback chain to prevent onCommit from being called repeatedly.
         if tv.isEditable && !isEditing {
             tv.delegate = nil
             tv.isEditable = false
@@ -315,7 +315,7 @@ private struct ShapeTextEditor: NSViewRepresentable {
         } else {
             applyEditingState(tv: tv, isEditing: isEditing)
         }
-        // 非编辑焦点时同步外部内容变化
+        // Synchronize external content changes when not editing focus
         if tv.window?.firstResponder !== tv && tv.string != text {
             tv.string = text
         }
@@ -358,7 +358,7 @@ private struct ShapeTextEditor: NSViewRepresentable {
     }
 }
 
-// MARK: - 垂直居中 ScrollView
+// MARK: - Vertically center ScrollView
 
 final class CenteredTextScrollView: NSScrollView {
 

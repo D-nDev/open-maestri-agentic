@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 全局设置窗口（Story 1.6 实现完整内容）
+/// Global settings window (Story 1.6 implements complete content)
 struct SettingsWindow: View {
     @Environment(AppState.self) private var appState
 

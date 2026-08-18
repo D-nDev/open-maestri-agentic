@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Git 操作面板（Commit/Pull/Push 等）
+/// Git operation panel (Commit/Pull/Push, etc.)
 struct GitOperationsPanel: View {
     let gitProvider: GitStatusProvider
     @State private var commitMessage = ""
@@ -9,7 +9,7 @@ struct GitOperationsPanel: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // 分支名
+            // Branch name
             HStack {
                 Image(systemName: "arrow.triangle.branch")
                 Text(currentBranch.isEmpty ? "git.branch.unknown".localized : currentBranch)

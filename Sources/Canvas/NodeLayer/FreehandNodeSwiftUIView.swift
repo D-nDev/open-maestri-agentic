@@ -20,7 +20,7 @@ struct FreehandNodeSwiftUIView: View {
         .allowsHitTesting(false)
     }
 
-    // MARK: - 渲染主体
+    // MARK: - Rendering body
 
     private var freehandCanvas: some View {
         Canvas { context, size in
@@ -64,7 +64,7 @@ struct FreehandNodeSwiftUIView: View {
         return path
     }
 
-    // MARK: - 选中控制点层（8个 resize 控制点；旋转手柄暂不显示，待旋转交互实现后启用）
+    // MARK: - Select the control point layer (8 resize control points; the rotation handle is not displayed temporarily and will be enabled after the rotation interaction is implemented)
 
     private var controlPointsLayer: some View {
         GeometryReader { geo in
@@ -82,7 +82,7 @@ struct FreehandNodeSwiftUIView: View {
                     controlDot(at: CGPoint(x: 0,   y: h/2), r: r)
                     controlDot(at: CGPoint(x: w,   y: h/2), r: r)
                 }
-                // 旋转手柄暂不显示，待旋转交互实现后启用
+                // The rotation handle is not displayed temporarily and will be enabled after the rotation interaction is implemented.
             }
         }
     }
@@ -95,7 +95,7 @@ struct FreehandNodeSwiftUIView: View {
             .position(point)
     }
 
-    // MARK: - 颜色解析
+    // MARK: - Color Analysis
 
     private func resolveColor(_ str: String) -> Color {
         NoteColorPickerPopover.colorFromString(str)

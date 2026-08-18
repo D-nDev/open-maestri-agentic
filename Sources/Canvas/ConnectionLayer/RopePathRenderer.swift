@@ -1,12 +1,12 @@
 import AppKit
 import CoreGraphics
 
-/// 绳索路径渲染器
-/// 根据 21 个悬链线控制点生成平滑 NSBezierPath，支持连接状态颜色编码（UX-DR5）
+/// Rope Path Renderer
+/// Generate smooth NSBezierPath based on 21 catenary control points, support connection status color coding (UX-DR5)
 struct RopePathRenderer {
 
-    // MARK: - 颜色状态编码（UX-DR5）
-    // 灰色（空闲）→ 绿色 glow（通信中）→ 橙色（断开）→ 红色（错误）
+    // MARK: - Color status encoding (UX-DR5)
+    // Gray (idle) → green glow (communicating) → orange (disconnected) → red (error)
 
     static func strokeColor(for status: ConnectionStatus) -> NSColor {
         switch status {
@@ -26,14 +26,14 @@ struct RopePathRenderer {
 
     static func isDashed(for status: ConnectionStatus) -> Bool {
         switch status {
-        case .communicating: return false           // 通信中：实线，视觉上更突出
-        case .idle, .disconnected, .error: return true  // 空闲/断开/错误：虚线
+        case .communicating: return false           // In communication: solid line, more visually prominent
+        case .idle, .disconnected, .error: return true  // Idle/Disconnected/Error: Dashed Line
         }
     }
 
-    // MARK: - 路径生成
+    // MARK: - Path generation
 
-    /// 从 21 个控制点生成平滑 Catmull-Rom 样条曲线
+    /// Generate smooth Catmull-Rom spline from 21 control points
     static func bezierPath(from points: [CGPoint]) -> NSBezierPath {
         guard points.count >= 2 else { return NSBezierPath() }
         let path = NSBezierPath()
@@ -58,7 +58,7 @@ struct RopePathRenderer {
         return path
     }
 
-    /// 从序列化的 [[Double]] 点数组生成路径
+    /// Generate path from serialized [[Double]] point array
     static func bezierPath(from rawPoints: [[Double]]) -> NSBezierPath {
         let pts = rawPoints.compactMap { arr -> CGPoint? in
             guard arr.count >= 2 else { return nil }
@@ -67,14 +67,14 @@ struct RopePathRenderer {
         return bezierPath(from: pts)
     }
 
-    // MARK: - 绘制
+    // MARK: - draw
 
-    /// 绘制连接线（状态颜色 + 虚线 + glow）
+    /// Draw connection line (state color + dashed line + glow)
     static func draw(points: [CGPoint], status: ConnectionStatus, isHighlighted: Bool = false) {
         guard !points.isEmpty else { return }
         let path = bezierPath(from: points)
 
-        // 主线条
+        // Main line
         let color = isHighlighted ? NSColor.systemBlue : strokeColor(for: status)
         color.setStroke()
         path.lineWidth = isHighlighted ? 2.5 : lineWidth(for: status)
@@ -82,7 +82,7 @@ struct RopePathRenderer {
         path.lineJoinStyle = .round
 
         if isHighlighted {
-            // hover 时使用蓝色虚线
+            // Use blue dashed line when hovering
             let pattern: [CGFloat] = [6, 4]
             path.setLineDash(pattern, count: 2, phase: 0)
         } else if isDashed(for: status) {
@@ -92,7 +92,7 @@ struct RopePathRenderer {
         path.stroke()
     }
 
-    // MARK: - 中点（用于显示状态文字）
+    // MARK: - Midpoint (used to display status text)
 
     static func midpoint(of points: [CGPoint]) -> CGPoint? {
         guard !points.isEmpty else { return nil }

@@ -151,7 +151,7 @@ extension WorkspaceCanvasView {
         workspace.addNode(node)
         let wsId = workspace.id
         Task { @MainActor in
-            // 有角色时写入 role 文件并在 role 子目录启动
+            // When there is a role, write the role file and start it in the role subdirectory
             let startDir: String
             if let role {
                 RoleInjector.shared.prepareRoleDirectory(roleId: role.id, rolePreset: role, workingDirectory: dir)
@@ -183,7 +183,7 @@ extension WorkspaceCanvasView {
         Task { try? await workspace.save() }
     }
 
-    /// 节点类型对应的默认尺寸
+    /// Default size corresponding to node type
     func defaultNodeSize(for nodeType: String) -> CGSize {
         switch nodeType {
         case "terminal": return CGSize(width: 600, height: 400)
@@ -199,7 +199,7 @@ extension WorkspaceCanvasView {
         }
     }
 
-    /// 根据 baseName 生成唯一终端名称，始终带序号，如 "Claude Code #1"、"Claude Code #2"
+    /// Generate unique terminal name based on baseName, always with serial number, such as "Claude Code #1", "Claude Code #2"
     func nextTerminalName(baseName: String) -> String {
         let existingNames = Set(workspace.nodes.compactMap { node -> String? in
             guard case .terminal(let tc) = node.content else { return nil }
@@ -213,7 +213,7 @@ extension WorkspaceCanvasView {
         }
     }
 
-    /// 根据现有节点名称查重，生成不冲突的递增编号名称（删除节点后不会产生重复）
+    /// Check for duplication based on existing node names and generate non-conflicting incremental number names (no duplication will occur after deleting nodes)
     func nextNodeName(for nodeType: String) -> String {
         let prefix: String
         switch nodeType {

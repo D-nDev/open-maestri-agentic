@@ -86,7 +86,7 @@ struct TextFieldRepresentable: NSViewRepresentable {
         tf.cell?.isScrollable = true
         tf.cell?.wraps = false
         tf.delegate = context.coordinator
-        // 首次创建时请求聚焦，仅触发一次
+        // Request focus when first created, only triggered once
         DispatchQueue.main.async {
             tf.window?.makeFirstResponder(tf)
         }
@@ -94,9 +94,9 @@ struct TextFieldRepresentable: NSViewRepresentable {
     }
 
     func updateNSView(_ tf: NSTextField, context: Context) {
-        // 样式（字体/颜色）始终应用，即使编辑中
+        // Styles (font/color) are always applied even when editing
         applyStyle(to: tf)
-        // 文字内容只在非编辑中同步（避免覆盖用户正在输入的内容）
+        // Text content is synchronized only in non-editing (to avoid overwriting what the user is typing)
         if tf.currentEditor() == nil {
             tf.stringValue = content.text
         }
@@ -130,14 +130,14 @@ struct TextFieldRepresentable: NSViewRepresentable {
         let newColor = NSColor(hex: content.color) ?? NSColor.labelColor
         if tf.textColor != newColor { tf.textColor = newColor }
 
-        // 编辑中：同步更新 field editor（NSTextView）的 typingAttributes，
-        // 否则 tf.font/textColor 修改对正在编辑的文字不可见
+        // Editing: Synchronously update the typingAttributes of field editor (NSTextView),
+        // Otherwise the tf.font/textColor modification is not visible to the text being edited
         if let editor = tf.currentEditor() as? NSTextView {
             var attrs = editor.typingAttributes
             attrs[.font] = newFont
             attrs[.foregroundColor] = newColor
             editor.typingAttributes = attrs
-            // 对已有文字全量应用新样式
+            // Apply new style to existing text in full
             let range = NSRange(location: 0, length: editor.string.count)
             editor.textStorage?.addAttributes([.font: newFont, .foregroundColor: newColor], range: range)
         }

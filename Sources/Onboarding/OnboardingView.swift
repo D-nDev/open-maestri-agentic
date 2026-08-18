@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 分层 Onboarding 视图（UX-DR12，三步引导）
+/// Layered Onboarding View (UX-DR12, three-step boot)
 struct OnboardingView: View {
     @Binding var hasCompleted: Bool
     @State private var step = 0

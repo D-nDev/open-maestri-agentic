@@ -1,12 +1,12 @@
 import Foundation
 import WebKit
 
-/// Portal 可访问性树构建（用于 omaestri portal snapshot）
+/// Portal accessibility tree building (for omaestri portal snapshot)
 final class PortalSnapshotService {
     static let shared = PortalSnapshotService()
     private init() {}
 
-    /// 构建可访问性树（返回 @e1, @e2 元素引用）
+    /// Build accessibility tree (returns @e1, @e2 element references)
     func buildAccessibilityTree(for webView: WKWebView) async -> String {
         let js = """
         (function() {

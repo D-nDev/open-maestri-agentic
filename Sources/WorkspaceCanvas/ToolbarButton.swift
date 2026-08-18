@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - 二级工具栏按钮（自定义 hover tooltip）
+// MARK: - Secondary toolbar button (custom hover tooltip)
 
 struct ContextToolbarButton: View {
     let icon: String

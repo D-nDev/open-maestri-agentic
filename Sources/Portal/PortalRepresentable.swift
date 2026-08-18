@@ -2,7 +2,7 @@ import SwiftUI
 import AppKit
 import WebKit
 
-/// PortalWebView 的 SwiftUI 包装
+/// SwiftUI wrapper for PortalWebView
 struct PortalRepresentable: NSViewRepresentable {
     let portalId: UUID
     let url: String

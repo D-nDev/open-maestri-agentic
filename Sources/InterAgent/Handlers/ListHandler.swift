@@ -14,13 +14,13 @@ final class ListHandler {
 
         var sections: [String] = []
 
-        // "You:" 段：当前终端自身名称
+        // "You:" section: current terminal's own name
         if let selfSession = tm.terminals[tid] {
             let selfName = selfSession.agentName ?? selfSession.displayName ?? (selfSession.command.isEmpty ? "Shell" : selfSession.command)
             sections.append("You:\n  - name: \"\(selfName)\"")
         }
 
-        // 按类型分组连接（对标 Maestri 输出格式）
+        // Group connections by type (against Maestri output format)
         var agents:  [String] = []
         var notes:   [String] = []
         var portals: [String] = []
@@ -67,7 +67,7 @@ final class ListHandler {
         return sections.joined(separator: "\n\n")
     }
 
-    // MARK: - 名称解析
+    // MARK: - name resolution
 
     @MainActor
     private func resolveNoteName(nodeId: UUID) -> String {

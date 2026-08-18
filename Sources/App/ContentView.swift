@@ -37,7 +37,7 @@ struct ContentView: View {
                     workspace: ws,
                     backgroundMode: appState.preferences.canvasBackground
                 )
-                .id(ws.id)  // 工作区切换时强制重建 Canvas，但 PTY 通过 TerminalManager.providers 持续存活
+                .id(ws.id)  // Canvas is forced to rebuild when switching workspaces, but PTY persists through TerminalManager.providers
             } else {
                 EmptyCanvasPlaceholder()
             }

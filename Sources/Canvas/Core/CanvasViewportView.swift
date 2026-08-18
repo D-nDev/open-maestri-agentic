@@ -1,14 +1,14 @@
 import AppKit
 import OSLog
 
-/// 无限画布主 NSView
-/// - 坐标系原点约 (9800, 8500)，即"无限"画布中心区域
-/// - 通过 origin + zoom 变换映射到屏幕坐标
-/// - 所有节点作为子 NSView 直接添加
+/// Infinite canvas master NSView
+/// - The origin of the coordinate system is approximately (9800, 8500), which is the "infinite" canvas center area
+/// - Map to screen coordinates via origin + zoom transformation
+/// - All nodes are added directly as child NSView
 final class CanvasViewportView: NSView {
     private let logger = Logger.make(category: "CanvasViewportView")
 
-    // MARK: - 状态
+    // MARK: - Status
 
     var canvasOrigin: CGPoint = Constants.canvasInitialOrigin {
         didSet {
@@ -30,71 +30,71 @@ final class CanvasViewportView: NSView {
         }
     }
 
-    /// 画布背景模式（从 Preferences 读取）
+    /// Canvas background mode (read from Preferences)
     var backgroundMode: String = "dotGrid" {
         didSet {
             backgroundView?.backgroundMode = backgroundMode
         }
     }
 
-    // MARK: - 分层视图
+    // MARK: - Layered View
 
     private var backgroundView: CanvasBackground?
     var drawingLayerView: DrawingLayerView?
     var drawingOverlayView: DrawingOverlayView?
     private(set) var snapGuideView: MagneticSnapGuideView?
-    /// 连线 overlay 视图（由 CanvasNodeRenderer 创建后注册，用于绘制临时连线）
+    /// Connection overlay view (registered after being created by CanvasNodeRenderer, used to draw temporary connections)
     weak var connectionOverlayView: ConnectionOverlayView?
 
-    /// 节点视图映射（nodeId → NSView）
+    /// Node view mapping (nodeId → NSView)
     private(set) var nodeViews: [UUID: NSView] = [:]
-    /// 反向映射（NSView 指针 → nodeId），用于 O(1) 反查（hitTest 热路径）
+    /// Reverse mapping (NSView pointer → nodeId) for O(1) reverse lookup (hitTest hot path)
     var viewToNodeId: [ObjectIdentifier: UUID] = [:]
 
-    /// 当前选中的节点 ID 集合
+    /// Currently selected node ID set
     var selectedNodeIds: Set<UUID> = [] {
         didSet {
-            // 选中状态变化时使 hitTestCanvas 缓存失效（resize 热区范围随选中状态变化）
+            // Invalidate hitTestCanvas cache when selected state changes (resize hot area range changes with selected state)
             _hitTestCachedPoint = CGPoint(x: -1e9, y: -1e9)
             updateSelectionVisuals()
             reportSelectionChange()
         }
     }
 
-    // MARK: - hitTestCanvas 结果缓存（避免 60fps 鼠标移动时重复遍历）
+    // MARK: - hitTestCanvas result caching (to avoid repeated traversal when mouse moves at 60fps)
     var _hitTestCachedPoint: CGPoint = CGPoint(x: -1e9, y: -1e9)
     var _hitTestCachedResult: CanvasHitTestResult = .canvas
     static let _hitTestReuseThreshold: CGFloat = 2.0
 
-    // MARK: - 回调
+    // MARK: - callback
 
     var onViewportChanged: ((CGPoint, CGFloat) -> Void)?
-    /// 画布平移/缩放后立即回调（用于连线层实时重渲染，不经过 SwiftUI 回路）
+    /// Callback immediately after canvas pan/zoom (used for real-time re-rendering of the connection layer without going through the SwiftUI loop)
     var onViewportPanned: (() -> Void)?
     var onDeleteSelectedNodes: (() -> Void)?
     var onFocusSelectedNode: (() -> Void)?
-    var onNodeJumpNumbersRequested: ((Bool) -> Void)? // true=显示, false=隐藏
-    /// 选中节点变化时回调（选中 ID 集合, 第一个选中节点的屏幕 frame or nil）
+    var onNodeJumpNumbersRequested: ((Bool) -> Void)? // true=show, false=hide
+    /// Callback when the selected node changes (selected ID set, screen frame or nil of the first selected node)
     var onSelectionChanged: ((Set<UUID>, CGRect?) -> Void)?
 
-    // MARK: - 连线工具状态
-    /// 连线起点节点 ID（nil = 未开始连线）
+    // MARK: - Connection tool status
+    /// Connection starting point node ID (nil = connection not started)
     var connectingFromNodeId: UUID? = nil {
         didSet {
             needsDisplay = true
             syncTemporaryConnectionToOverlay()
         }
     }
-    /// 连线时鼠标当前屏幕坐标（用于绘制临时连线）
+    /// Current screen coordinates of the mouse when connecting (used to draw temporary connections)
     var connectionDragPoint: CGPoint? = nil {
         didSet {
             syncTemporaryConnectionToOverlay()
         }
     }
-    /// 连线完成回调（传入两个节点 UUID，调用者判断类型）
+    /// Connection completion callback (input two node UUIDs, the caller determines the type)
     var onConnectionCreated: ((UUID, UUID) -> Void)? = nil
 
-    /// 是否处于连线工具激活状态（由 CanvasViewportRepresentable 根据 isConnecting 设置）
+    /// Whether the connection tool is active (set by CanvasViewportRepresentable according to isConnecting)
     var isInConnectingMode: Bool = false {
         didSet {
             if isInConnectingMode { activateConnectionMode() }
@@ -102,10 +102,10 @@ final class CanvasViewportView: NSView {
         }
     }
 
-    /// 外部激活连线模式（由 CanvasViewportRepresentable 在 isConnecting=true 时调用）
+    /// External activation of connected mode (called by CanvasViewportRepresentable when isConnecting=true)
     func activateConnectionMode() {
-        // 如果尚未设置连线起点但有选中节点，自动将首个选中节点设为起点
-        // （L 键入口已提前设置 connectingFromNodeId，此处不覆盖）
+        // If the starting point of the connection has not been set but there is a selected node, the first selected node will be automatically set as the starting point.
+        // (The L key entry has been set connectingFromNodeId in advance and will not be covered here)
         if connectingFromNodeId == nil, let firstSelected = selectedNodeIds.first {
             connectingFromNodeId = firstSelected
         }
@@ -123,7 +123,7 @@ final class CanvasViewportView: NSView {
         NSCursor.arrow.set()
     }
 
-    /// 将临时连线状态同步到 ConnectionOverlayView（确保临时连线绘制在正确的视图层级）
+    /// Synchronize temporary connection state to ConnectionOverlayView (make sure temporary connections are drawn at the correct view level)
     func syncTemporaryConnectionToOverlay() {
         guard let overlay = connectionOverlayView else { return }
         if let fromId = connectingFromNodeId,
@@ -137,43 +137,43 @@ final class CanvasViewportView: NSView {
         }
     }
 
-    /// 节点内容类型查询（由 CanvasNodeRenderer 在创建节点后注册）
+    /// Node content type query (registered by CanvasNodeRenderer after node creation)
     var nodeContentTypes: [UUID: String] = [:]  // nodeId → "terminal"|"stickyNote"|"portal"|"fileTree"
 
-    /// 节点 SwiftUI 容器（由 CanvasNodeRenderer 创建后注册，供 hitTestCanvas 使用）
+    /// Node SwiftUI container (created and registered by CanvasNodeRenderer for use by hitTestCanvas)
     weak var nodesHostingView: CanvasNodesView?
 
-    /// 当前画布节点列表（由 CanvasNodeRenderer.sync() 同步，供 hitTestCanvas 使用）
-    /// 注意：赋值时自动触发排序缓存更新。高频帧内 frame 更新请使用 updateNodeFrameInPlace。
+    /// Current canvas node list (synchronized by CanvasNodeRenderer.sync() for use by hitTestCanvas)
+    /// Note: Sort cache update is automatically triggered when assignment. For high-frequency intra-frame frame updates, please use updateNodeFrameInPlace.
     var currentNodes: [CanvasNode] = [] {
         didSet {
             guard !_skipSortOnDidSet else { return }
             invalidateSortedNodesCache()
         }
     }
-    /// 内部标志：为 true 时 currentNodes.didSet 跳过排序（仅 frame 变化时使用）
+    /// Internal flag: currentNodes.didSet skips sorting when true (only used when frame changes)
     private var _skipSortOnDidSet = false
 
-    /// 按 zIndex 升序预排序的节点缓存（供 SwiftUI 渲染 + hitTest 使用，避免每帧 O(n log n)）
+    /// Node cache pre-sorted by zIndex in ascending order (for use by SwiftUI rendering + hitTest to avoid O(n log n) per frame)
     private(set) var sortedNodesByZIndex: [CanvasNode] = []
-    /// 按 zIndex 降序预排序的节点缓存（供 hitTest 从前到后命中检测使用）
+    /// Node cache pre-sorted by zIndex descending (for use by hitTest front-to-back hit detection)
     private(set) var sortedNodesByZIndexDesc: [CanvasNode] = []
-    /// 锁定节点 ID 集合（O(1) 查找缓存，由 invalidateSortedNodesCache + updateNodeLockedInPlace 同步）
-    /// 注意：CanvasHitTesting 扩展（独立文件）需要访问此属性，不能用 private
+    /// Locking node ID collection (O(1) lookup cache, synchronized by invalidateSortedNodesCache + updateNodeLockedInPlace)
+    /// Note: CanvasHitTesting extension (stand-alone file) needs to access this property and cannot be used private
     var lockedNodeIds: Set<UUID> = []
 
-    /// 视口裁剪缓存：避免 layout() 每帧重新遍历所有节点
+    /// Viewport crop cache: avoid layout() re-traversing all nodes every frame
     private var _cachedViewportNodes: [CanvasNode] = []
     private var _cachedViewportOrigin: CGPoint = .zero
     private var _cachedViewportZoom: CGFloat = 0
     private var _viewportCacheDirty: Bool = true
-    /// 视口缓存容差：origin 变化小于此值（画布坐标）时不重新裁剪，避免微小平移触发 O(n) 遍历
+    /// Viewport cache tolerance: Do not re-crop when origin changes less than this value (canvas coordinates) to avoid small translation triggering O(n) traversal
     private static let viewportCacheTolerance: CGFloat = 50.0
 
-    /// pan/zoom 时 rootView 节流：上次更新 rootView 的时间戳
-    /// 连续 pan/zoom 期间最多 60fps（每 16ms 最多一次 rootView 更新），避免每帧重建 SwiftUI 树
+    /// rootView throttling during pan/zoom: timestamp of last updated rootView
+    /// Maximum 60fps during continuous pan/zoom (max one rootView update every 16ms) to avoid rebuilding the SwiftUI tree every frame
     private var _lastRootViewUpdateTime: TimeInterval = 0
-    private static let rootViewUpdateMinInterval: TimeInterval = 1.0 / 60.0  // 60fps 上限
+    private static let rootViewUpdateMinInterval: TimeInterval = 1.0 / 60.0  // 60fps cap
 
     private func invalidateSortedNodesCache() {
         sortedNodesByZIndex = currentNodes.sorted { $0.zIndex < $1.zIndex }
@@ -181,15 +181,15 @@ final class CanvasViewportView: NSView {
         lockedNodeIds = Set(currentNodes.compactMap { $0.isLocked ? $0.id : nil })
     }
 
-    /// 强制使视口裁剪缓存失效（供 CanvasNodeRenderer.sync() 在直接写 rootView 后调用，
-    /// 保证 _cachedViewportNodes 与实际渲染的节点集合保持一致，
-    /// 防止拖拽分支用旧白名单过滤导致新增节点消失）
+    /// Force the viewport clipping cache to be invalidated (for CanvasNodeRenderer.sync() to be called after writing directly to rootView,
+    /// Ensure that _cachedViewportNodes is consistent with the actual rendered node collection,
+    /// Prevent new nodes from disappearing due to old whitelist filtering when dragging branches)
     func invalidateViewportCache() {
         _viewportCacheDirty = true
     }
 
-    /// 仅更新指定节点的 frame（不触发全量 sort，因为 zIndex 未变）
-    /// 用于拖动/resize 等高频场景，避免每帧 O(n log n) + O(n) 数组拷贝
+    /// Only update the frame of the specified node (full sort is not triggered because zIndex has not changed)
+    /// Used for high-frequency scenes such as dragging/resize to avoid O(n log n) + O(n) array copy per frame
     func updateNodeFrameInPlace(id: UUID, frame: CGRect) {
         _skipSortOnDidSet = true
         for i in currentNodes.indices where currentNodes[i].id == id {
@@ -197,7 +197,7 @@ final class CanvasViewportView: NSView {
             break
         }
         _skipSortOnDidSet = false
-        // 同步更新排序缓存中对应条目的 frame（zIndex 不变所以位置不变）
+        // Synchronously update the frame of the corresponding entry in the sort cache (zIndex remains unchanged, so the position remains unchanged)
         for i in sortedNodesByZIndex.indices where sortedNodesByZIndex[i].id == id {
             sortedNodesByZIndex[i].frame = frame
             break
@@ -208,7 +208,7 @@ final class CanvasViewportView: NSView {
         }
     }
 
-    /// 原地更新指定节点的 isLocked（不触发全量 sort，同步排序缓存 + O(1) 锁定集合 + 视口缓存）
+    /// Update isLocked of the specified node in place (does not trigger full sort, synchronizes sort cache + O(1) locked set + viewport cache)
     func updateNodeLockedInPlace(id: UUID, isLocked: Bool) {
         _skipSortOnDidSet = true
         for i in currentNodes.indices where currentNodes[i].id == id {
@@ -224,7 +224,7 @@ final class CanvasViewportView: NSView {
             sortedNodesByZIndexDesc[i].isLocked = isLocked
             break
         }
-        // 增量同步 O(1) 查找缓存（避免全量重建）
+        // Incremental sync O(1) lookup cache (avoids full rebuild)
         if isLocked {
             lockedNodeIds.insert(id)
         } else {
@@ -233,7 +233,7 @@ final class CanvasViewportView: NSView {
         _viewportCacheDirty = true
     }
 
-    /// 原地更新指定节点的 content（不触发全量 sort，同步排序缓存 + 视口缓存）
+    /// Update the content of the specified node in place (does not trigger full sort, synchronizes sort cache + viewport cache)
     func updateNodeContentInPlace(id: UUID, content: NodeContent) {
         _skipSortOnDidSet = true
         for i in currentNodes.indices where currentNodes[i].id == id {
@@ -252,7 +252,7 @@ final class CanvasViewportView: NSView {
         _viewportCacheDirty = true
     }
 
-    /// 批量更新多个节点的 frame（不触发全量 sort）
+    /// Update frames of multiple nodes in batches (without triggering full sort)
     func updateNodeFramesInPlace(frames: [UUID: CGRect]) {
         _skipSortOnDidSet = true
         for i in currentNodes.indices {
@@ -261,7 +261,7 @@ final class CanvasViewportView: NSView {
             }
         }
         _skipSortOnDidSet = false
-        // 同步更新排序缓存
+        // Synchronously update the sort cache
         for i in sortedNodesByZIndex.indices {
             if let newFrame = frames[sortedNodesByZIndex[i].id] {
                 sortedNodesByZIndex[i].frame = newFrame
@@ -274,60 +274,60 @@ final class CanvasViewportView: NSView {
         }
     }
 
-    /// 节点拖动中帧级回调（连线物理引擎用此更新端点）
-    /// 参数：被拖动节点的 ID 集合
+    /// Frame-level callback during node dragging (the connection physics engine uses this to update the endpoint)
+    /// Parameter: ID collection of the dragged node
     var onNodeFramesDuringDrag: ((Set<UUID>) -> Void)?
 
-    /// option+拖拽复制节点回调
+    /// option+drag copy node callback
     var onDuplicateNode: ((UUID) -> Void)?
 
-    /// 右键菜单：关闭节点回调（由 CanvasNodeRenderer 设置）
+    /// Right-click menu: Close node callback (set by CanvasNodeRenderer)
     var onContextMenuClose: ((UUID) -> Void)?
-    /// 右键菜单：重命名节点回调（由 CanvasNodeRenderer 设置）
+    /// Right-click menu: Rename node callback (set by CanvasNodeRenderer)
     var onContextMenuRename: ((UUID) -> Void)?
-    /// 右键菜单：锁定/解锁节点回调（由 CanvasNodeRenderer 设置）
+    /// Right-click menu: Lock/unlock node callback (set by CanvasNodeRenderer)
     var onContextMenuLockToggle: ((UUID) -> Void)?
-    /// 右键菜单：编辑终端（弹出 EditTerminalSheet）
+    /// Right-click menu: Edit Terminal (EditTerminalSheet pops up)
     var onContextMenuEditTerminal: ((UUID) -> Void)?
-    /// 右键菜单：开始连接
+    /// Right-click menu: Start connecting
     var onContextMenuConnect: ((UUID) -> Void)?
-    /// 右键菜单：分配角色（Terminal 专属）
+    /// Right-click menu: Assign role (Terminal exclusive)
     var onContextMenuAssignRole: ((UUID) -> Void)?
-    /// 右键菜单：切换 Maestro 模式（Terminal 专属）
+    /// Right-click menu: Switch Maestro mode (Terminal exclusive)
     var onContextMenuToggleMaestro: ((UUID) -> Void)?
-    /// 右键菜单：清除缓冲区（Terminal 专属）
+    /// Right-click menu: Clear buffer (Terminal exclusive)
     var onContextMenuClearBuffer: ((UUID) -> Void)?
-    /// 右键菜单：重新加载终端（Terminal 专属）
+    /// Right-click menu: Reload terminal (Terminal exclusive)
     var onContextMenuReloadTerminal: ((UUID) -> Void)?
-    /// 右键菜单：拷贝终端内容（Terminal 专属）
+    /// Right-click menu: Copy terminal content (Terminal exclusive)
     var onContextMenuCopyTerminal: ((UUID) -> Void)?
-    /// 右键菜单：切换监控活动（Terminal 专属）
+    /// Right-click menu: Switch monitoring activities (Terminal exclusive)
     var onContextMenuToggleMonitor: ((UUID) -> Void)?
 
-    // MARK: - 画布空白区域右键菜单回调
+    // MARK: - Right-click menu callback in blank area of canvas
 
-    /// 右键菜单：在画布指定位置创建指定类型节点（nodeType, canvasPoint）
+    /// Right-click menu: Create a node of the specified type (nodeType, canvasPoint) at the specified position on the canvas
     /// nodeType: "terminal", "stickyNote", "portal", "fileTree", "text", "linkedFile"
     var onCanvasContextCreateNode: ((String, CGPoint) -> Void)?
-    /// 右键菜单：在画布指定位置创建终端节点（presetIndex, canvasPoint）
+    /// Right-click menu: Create a terminal node at the specified position on the canvas (presetIndex, canvasPoint)
     var onCanvasContextCreateTerminal: ((Int, CGPoint) -> Void)?
-    /// 右键菜单：粘贴（画布坐标）
+    /// Right-click menu: Paste (canvas coordinates)
     var onCanvasContextPaste: ((CGPoint) -> Void)?
-    /// Agent 预设列表（供画布右键菜单 Terminal 子菜单使用）
+    /// Agent default list (for use by canvas right-click menu Terminal submenu)
     var agentPresets: [AgentPreset] = []
 
-    /// 节点 zIndex 变化回调（节点ID → 新 zIndex），由 WorkspaceManager 持久化
+    /// Node zIndex change callback (node ID → new zIndex), persisted by WorkspaceManager
     var onNodeZIndexChanged: ((UUID, Int) -> Void)?
 
-    // MARK: - 节点层级管理
+    // MARK: - Node level management
 
-    /// 将指定节点提升到最高层级（zIndex 最大值 + 1）
+    /// Promote the specified node to the highest level (zIndex maximum value + 1)
     func bringNodesToFront(_ ids: Set<UUID>) {
         guard !ids.isEmpty else { return }
         let maxZ = currentNodes.map { $0.zIndex }.max() ?? 0
 
-        // 判断是否已经独占最高层：选中节点的 zIndex 都等于 maxZ，
-        // 且没有其他未选中节点也在 maxZ（即选中节点已是唯一最高层）
+        // Determine whether the highest level has been exclusively occupied: the zIndex of the selected node is equal to maxZ,
+        // And there are no other unselected nodes in maxZ (that is, the selected node is the only highest level)
         let otherNodesAtMax = currentNodes.contains { node in
             !ids.contains(node.id) && node.zIndex >= maxZ
         }
@@ -345,19 +345,19 @@ final class CanvasViewportView: NSView {
                 changed = true
             }
         }
-        // 层级变化后重建排序缓存（下标赋值不触发 didSet，必须手动刷新）
+        // Rebuild the sort cache after level changes (subscript assignment does not trigger didSet and must be refreshed manually)
         if changed {
             invalidateSortedNodesCache()
             _viewportCacheDirty = true
-            // 标记需要 layout，确保下一次 layout() 用新 zIndex 顺序重建 rootView
+            // Marking requires layout, ensuring that the next time layout() rebuilds the rootView with the new zIndex order
             needsLayout = true
-            // 与 updateSelectionVisuals() 在同一 RunLoop Turn 触发时合并为单次投递，
-            // 避免双重 SwiftUI 树重建
+            // Combined with updateSelectionVisuals() into a single delivery when triggered by the same RunLoop Turn,
+            // Avoid double SwiftUI tree rebuild
             scheduleSelectionChangedNotification()
         }
     }
 
-    // MARK: - 初始化
+    // MARK: - Initialization
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -450,16 +450,16 @@ final class CanvasViewportView: NSView {
         )
     }
 
-    /// 平滑动画跳转到指定画布原点（供 Minimap 点击等外部调用）
+    /// Smooth animation jumps to the specified canvas origin (for external calls such as Minimap clicks)
     func animateOriginTo(_ target: CGPoint, duration: TimeInterval = 0.3) {
         animateOrigin(from: canvasOrigin, to: target, startTime: CACurrentMediaTime(), duration: duration)
     }
 
-    // MARK: - 坐标系
+    // MARK: - Coordinate system
 
     override var isFlipped: Bool { true }
 
-    // MARK: - 第一响应者
+    // MARK: - First Responder
 
     override var acceptsFirstResponder: Bool { true }
 
@@ -469,17 +469,17 @@ final class CanvasViewportView: NSView {
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        // 确保成为第一响应者以接收手势事件（magnify/scrollWheel）
-        // 只在 window 没有 attached sheet 时才抢焦点，避免 Sheet 弹出期间键盘事件被错误路由
+        // Ensure to be the first responder to receive gesture events (magnify/scrollWheel)
+        // Only grab focus when the window has no attached sheet to avoid incorrect routing of keyboard events during Sheet pop-up.
         if window?.attachedSheet == nil {
             window?.makeFirstResponder(self)
         }
         installScrollEventMonitor()
     }
 
-    // MARK: - 滚动事件路由（Local Event Monitor）
+    // MARK: - Scroll Event Routing (Local Event Monitor)
 
-    /// 通过 local event monitor 拦截 scrollWheel / magnify 事件
+    /// Interception of scrollWheel / magnify events via local event monitor
     /// Terminal content always receives scrolling under the pointer, regardless of selection.
     /// Other scrollable content receives the event when its node is selected;
     /// headers, footers, and empty space continue navigating the canvas.
@@ -498,12 +498,12 @@ final class CanvasViewportView: NSView {
         guard let myWindow = self.window else { return event }
         if let eventWindow = event.window, eventWindow !== myWindow { return event }
 
-        // 用画布坐标系的 frame 判断鼠标是否在本视图（画布）范围内
-        // 避免依赖 hitTest + isDescendant（NSHostingView 的 flipped 视图会导致误判）
+        // Use the frame of the canvas coordinate system to determine whether the mouse is within the scope of this view (canvas)
+        // Avoid relying on hitTest + isDescendant (NSHostingView’s flipped view can lead to misjudgment)
         let locInCanvas = convert(event.locationInWindow, from: nil)
         guard bounds.contains(locInCanvas) else { return event }
 
-        // magnify 始终由画布处理（捏合缩放画布视口）
+        // magnify is always handled by canvas (pinch zoom canvas viewport)
         if event.type == .magnify {
             self.magnify(with: event)
             return nil
@@ -526,12 +526,12 @@ final class CanvasViewportView: NSView {
             }
         }
 
-        // 用 canvasFrame 做命中测试：不依赖 nodeViews（NSHostingView 迁移后为空）
+        // Use canvasFrame for hit testing: no dependence on nodeViews (NSHostingView is empty after migration)
         for selectedId in selectedNodeIds {
             guard let canvasFrame = nodeCanvasFrames[selectedId] else { continue }
             let screenFrame = canvasRectToScreen(canvasFrame)
             guard screenFrame.contains(locInCanvas) else { continue }
-            // 排除 header 区域（header 在顶部，flipped 坐标系 minY = 顶边）
+            // Exclude header area (header is at the top, flipped coordinate system minY = top edge)
             let headerScreenHeight = CanvasNodeConstants.headerHeight * zoom
             let contentScreenFrame = CGRect(
                 x: screenFrame.minX,
@@ -540,51 +540,51 @@ final class CanvasViewportView: NSView {
                 height: screenFrame.height - headerScreenHeight
             )
             guard contentScreenFrame.contains(locInCanvas) else { break }
-            // FileTree 节点：路由滚动事件给内部 NSScrollView
+            // FileTree Node: Route scroll events to internal NSScrollView
             if let fileTreeView = FileTreeViewRegistry.shared.view(for: selectedId),
                let scrollView = fileTreeView.innerScrollView {
                 scrollView.scrollWheel(with: event)
                 return nil
             }
-            // Note 节点：路由滚动事件给 NSTextView 的 ScrollView
+            // Note Node: Routing scroll events to NSTextView's ScrollView
             if let noteScrollView = NoteScrollViewRegistry.shared.scrollView(for: selectedId) {
                 noteScrollView.scrollWheel(with: event)
                 return nil
             }
-            // Portal 节点：路由滚动事件给 WKWebView
+            // Portal node: Route scroll events to WKWebView
             if let webView = PortalWebViewStore.shared.webView(for: selectedId) {
                 webView.scrollWheel(with: event)
                 return nil
             }
-            // 其他节点：交由画布处理
+            // Other nodes: handed over to canvas for processing
             break
         }
 
-        // 画布处理：平移
+        // Canvas handling: Panning
         self.scrollWheel(with: event)
         return nil
     }
 
-    /// 在视图树（以 root 为根，point 为 root 的 bounds 坐标）中，
-    /// 查找最合适的滚动目标：
-    ///  1. NSScrollView（最优先，包括 Terminal 内的 scrollView）
-    ///  2. 非标准自定义 NSView（如 SwiftTerm TerminalView）
-    /// 故意跳过 NSHostingView（SwiftUI 容器，不可靠）。
+    /// In the view tree (with root as the root and point as the bounds coordinate of the root),
+    /// Find the most suitable scroll target:
+    ///  1. NSScrollView (highest priority, including scrollView in Terminal)
+    ///  2. Non-standard custom NSView (such as SwiftTerm TerminalView)
+    /// NSHostingView (SwiftUI container, unreliable) is intentionally skipped.
     private func findScrollTarget(in root: NSView, at point: CGPoint) -> NSView? {
         guard root.bounds.contains(point), !root.isHidden, root.alphaValue > 0 else { return nil }
-        // NSScrollView 直接命中（最高优先级，不再深入）
+        // NSScrollView direct hit (highest priority, no further depth)
         if root is NSScrollView { return root }
-        // NSHostingView：排除，不递归其内部（SwiftUI 视图中的 NSScrollView 不可直接控制）
+        // NSHostingView: Exclude, do not recurse inside it (NSScrollView in SwiftUI view is not directly controllable)
         let rootTypeName = String(describing: type(of: root))
         if rootTypeName.contains("HostingView") || rootTypeName.contains("Hosting") { return nil }
-        // 递归子视图（深度优先）
+        // Recursive subviews (depth first)
         for sub in root.subviews.reversed() {
             let subPoint = root.convert(point, to: sub)
             if let found = findScrollTarget(in: sub, at: subPoint) {
                 return found
             }
         }
-        // 非标准 NSView（如 SwiftTerm TerminalView，type != NSView && != NSClipView）
+        // Non-standard NSView (such as SwiftTerm TerminalView, type != NSView && != NSClipView)
         if type(of: root) != NSView.self && !(root is NSClipView) {
             return root
         }
@@ -599,7 +599,7 @@ final class CanvasViewportView: NSView {
         }
     }
 
-    /// 从视图（或其子视图）反查所属节点 ID（O(1) 直查 + O(n) 祖先降级）
+    /// Check the owning node ID from the view (or its subview) (O(1) direct check + O(n) ancestor downgrade)
     private func nodeIdForHitView(_ hitView: NSView?) -> UUID? {
         nodeId(for: hitView)
     }
@@ -613,7 +613,7 @@ final class CanvasViewportView: NSView {
         notificationObservers.forEach { NotificationCenter.default.removeObserver($0) }
     }
 
-    // MARK: - 坐标转换
+    // MARK: - Coordinate conversion
 
     func canvasToScreen(_ point: CGPoint) -> CGPoint {
         CGPoint(
@@ -649,19 +649,19 @@ final class CanvasViewportView: NSView {
         )
     }
 
-    // MARK: - 布局
+    // MARK: - Layout
 
     override func layout() {
         super.layout()
 
-        // 更新 CanvasNodesView 的 frame 以填满画布视口
+        // Update CanvasNodesView's frame to fill the canvas viewport
         nodesHostingView?.frame = bounds
 
-        // 更新 SwiftUI 节点树的 canvasOrigin/zoom，触发节点重新定位
+        // Update canvasOrigin/zoom of SwiftUI node tree to trigger node repositioning
         if let hostingView = nodesHostingView {
             let current = hostingView.rootView
 
-            // 拖动中跳过视口裁剪（不重新筛选可见集），但需把实时 frame 同步进缓存
+            // Skip viewport cropping during dragging (without refiltering the visible set), but the real-time frame needs to be synchronized into the cache
             let isDragging: Bool
             switch interaction {
             case .draggingNode, .batchDragging, .resizingNode:
@@ -671,10 +671,10 @@ final class CanvasViewportView: NSView {
             }
 
             if isDragging {
-                // 拖动中以 sortedNodesByZIndex 为权威来源重建 _cachedViewportNodes：
-                // 1. 排序顺序跟随最新 zIndex（bringNodesToFront 已更新 sortedNodesByZIndex）
-                // 2. frame 取实时值（updateNodeFrameInPlace 已同步到 sortedNodesByZIndex）
-                // 3. 缓存脏时（如 sync() 刚加入新节点）必须重新裁剪，否则新节点永远不进白名单
+                // Rebuilding _cachedViewportNodes with sortedNodesByZIndex as the authoritative source during dragging:
+                // 1. Sort order follows latest zIndex (bringNodesToFront updated sortedNodesByZIndex)
+                // 2. The frame takes the real-time value (updateNodeFrameInPlace has been synchronized to sortedNodesByZIndex)
+                // 3. When the cache is dirty (such as when sync() has just added a new node), it must be pruned again, otherwise the new node will never be included in the whitelist.
                 if _viewportCacheDirty {
                     _cachedViewportNodes = viewportCulledNodes()
                     _cachedViewportOrigin = canvasOrigin
@@ -685,8 +685,8 @@ final class CanvasViewportView: NSView {
                     _cachedViewportNodes = sortedNodesByZIndex.filter { cachedIds.contains($0.id) }
                 }
             } else {
-                // 仅在视口参数大幅变化或缓存显式失效时重新裁剪（避免每帧 O(n) 遍历）
-                // 容差策略：origin 微小变化（< 50 画布单位 ≈ 亚节点级平移）不触发重算
+                // Only re-crop when viewport parameters change significantly or cache is explicitly invalidated (avoiding O(n) passes per frame)
+                // Tolerance policy: small changes in origin (< 50 canvas units ≈ sub-node level translation) do not trigger recalculation
                 let originDelta = hypot(_cachedViewportOrigin.x - canvasOrigin.x,
                                         _cachedViewportOrigin.y - canvasOrigin.y)
                 let needsRecalc = _viewportCacheDirty
@@ -701,15 +701,15 @@ final class CanvasViewportView: NSView {
                 }
             }
 
-            // 仅当 origin/zoom/可见节点变化时才重建 rootView（避免完全无变化时的冗余赋值）
+            // Rebuild rootView only when origin/zoom/visible nodes change (avoiding redundant assignments when there are no changes at all)
             let nodesChanged = current.nodes != _cachedViewportNodes
             let viewportChanged = current.canvasOrigin != canvasOrigin || current.zoom != zoom
             if nodesChanged || viewportChanged {
-                // pan/zoom 时节流：60fps 上限，避免每帧重建 SwiftUI 树触发所有终端 updateNSView
-                // 节点集合变化时强制立即更新（用户操作需要即时响应）
+                // Pan/zoom time throttling: 60fps upper limit to avoid rebuilding the SwiftUI tree every frame triggering updateNSView on all terminals
+                // Force immediate update when node set changes (user operations require immediate response)
                 let now = CACurrentMediaTime()
                 let shouldUpdate = nodesChanged
-                    || isDragging  // 节点拖拽时保持实时更新
+                    || isDragging  // Maintain real-time updates when dragging nodes
                     || (now - _lastRootViewUpdateTime) >= Self.rootViewUpdateMinInterval
                 guard shouldUpdate else { return }
                 _lastRootViewUpdateTime = now
@@ -732,14 +732,14 @@ final class CanvasViewportView: NSView {
         }
     }
 
-    // MARK: - 视口裁剪
+    // MARK: - Viewport cropping
 
-    /// 视口裁剪边距（画布坐标单位），超出视口此距离以外的节点不渲染
-    /// 使用较大边距确保节点进入视口前已经准备好，避免闪烁
+    /// Viewport clipping margin (canvas coordinate unit), nodes beyond this distance from the viewport are not rendered
+    /// Use larger margins to ensure nodes are ready before entering the viewport to avoid flickering
     private static let viewportCullMargin: CGFloat = 200
 
-    /// 计算当前视口可见的节点列表（按 zIndex 升序）
-    /// 逻辑：将视口屏幕 bounds 转为画布坐标，加上边距后与节点 frame 做 intersects 判断
+    /// Compute the list of nodes visible in the current viewport (in ascending order by zIndex)
+    /// Logic: Convert the viewport screen bounds to canvas coordinates, add margins and make intersects judgment with the node frame
     func viewportCulledNodes() -> [CanvasNode] {
         let viewportCanvas = screenRectToCanvas(bounds).insetBy(
             dx: -Self.viewportCullMargin,
@@ -750,10 +750,10 @@ final class CanvasViewportView: NSView {
         }
     }
 
-    /// 保存每个节点的画布坐标（供 layout 时重算屏幕坐标）
+    /// Save the canvas coordinates of each node (for recalculation of screen coordinates during layout)
     var nodeCanvasFrames: [UUID: CGRect] = [:]
 
-    // MARK: - 节点管理
+    // MARK: - Node Management
 
     func addNodeView(_ view: NSView, id: UUID, canvasFrame: CGRect) {
         nodeViews[id] = view
@@ -772,7 +772,7 @@ final class CanvasViewportView: NSView {
     }
 
     func updateNodeFrame(id: UUID, canvasFrame: CGRect) {
-        // 拖动/resize 期间不允许外部覆盖被交互节点的 frame
+        // External overwriting of the frame of the interacted node is not allowed during drag/resize
         switch interaction {
         case .draggingNode(let did, _, _) where did == id: return
         case .batchDragging(let frames, _, _) where frames.keys.contains(id): return
@@ -786,20 +786,20 @@ final class CanvasViewportView: NSView {
             return CanvasNode(id: node.id, frame: canvasFrame, content: node.content,
                               zIndex: node.zIndex, isLocked: node.isLocked)
         }
-        // 节点 frame 变化可能影响视口可见性，强制使裁剪缓存失效
+        // Node frame changes may affect viewport visibility, forcing the crop cache to be invalidated
         _viewportCacheDirty = true
         needsLayout = true
     }
 
 
-    // MARK: - 选中通知合并投递
+    // MARK: - Select notification merge delivery
 
-    /// 防止同一运行循环内多次投递 .canvasSelectionChanged（合并为一次 SwiftUI 重建）
+    /// Prevent multiple deliveries of .canvasSelectionChanged in the same run loop (merged into one SwiftUI rebuild)
     private var _pendingSelectionNotification = false
 
-    /// 将 .canvasSelectionChanged 通知延迟到当前运行循环末尾投递。
-    /// 同一 RunLoop Turn 内多次调用只产生一次通知，从而把
-    /// updateSelectionVisuals() 和 bringNodesToFront() 各自的投递合并为单次 SwiftUI 树重建。
+    /// Delay delivery of .canvasSelectionChanged notifications until the end of the current run loop.
+    /// Multiple calls within the same RunLoop Turn only generate one notification, thus
+    /// The respective posts of updateSelectionVisuals() and bringNodesToFront() are merged into a single SwiftUI tree rebuild.
     private func scheduleSelectionChangedNotification() {
         guard !_pendingSelectionNotification else { return }
         _pendingSelectionNotification = true
@@ -814,7 +814,7 @@ final class CanvasViewportView: NSView {
         }
     }
 
-    // MARK: - 选中视觉更新
+    // MARK: - Check visual updates
 
     private func updateSelectionVisuals() {
         scheduleSelectionChangedNotification()
@@ -828,86 +828,86 @@ final class CanvasViewportView: NSView {
         callback(selectedNodeIds, frame)
     }
 
-    // MARK: - 统一交互状态机
+    // MARK: - Unified interactive state machine
 
-    /// 当前画布交互状态（替换所有散落的拖动/选择/resize 状态变量）
+    /// Current canvas interaction state (replaces all scattered drag/select/resize state variables)
     var interaction: CanvasInteraction = .idle
 
-    /// 拖动期间用于 drag guideline 绘制
+    /// Used for drag guideline drawing during dragging
     var dragGuidelines: [GuideLine] = [] {
         didSet {
             snapGuideView?.guidelines = dragGuidelines
         }
     }
 
-    // 以下保留（与状态机无关，供外部回调）
+    // The following is reserved (not related to the state machine, for external callbacks)
     var onNodeDragEnded: ((UUID, CGRect) -> Void)?
     var onBatchNodeDragEnded: (([UUID: CGRect]) -> Void)?
-    /// resize 结束时回调（替换 onFrameChanged 的旧机制）
+    /// Callback when resize ends (replaces the old mechanism of onFrameChanged)
     var onNodeResizeEnded: ((UUID, CGRect) -> Void)?
 
-    // MARK: - 平移模式状态（由 CanvasInputHandler 扩展使用）
+    // MARK: - Pan mode state (used by CanvasInputHandler extension)
 
     var isPanMode = false
     var isSpaceHeld = false
 
-    // MARK: - 节点绘制模式状态
+    // MARK: - Node drawing mode status
 
     var isInDrawingMode: Bool = false
     var drawingNodeType: String = "terminal" {
         didSet { snapGuideView?.drawingNodeType = drawingNodeType }
     }
     var onNodeDrawn: ((String, CGRect) -> Void)?
-    /// freehand 绘制完成回调（nodeType, 归一化点序列, 边界矩形画布坐标）
+    /// freehand drawing completion callback (nodeType, normalized point sequence, bounding rectangle canvas coordinates)
     var onFreehandDrawn: ((String, [CGPoint], CGRect) -> Void)?
 
-    /// 当前绘图工具是否为 stroke（直线/箭头）模式
+    /// Whether the current drawing tool is in stroke (line/arrow) mode
     var isStrokeDrawing: Bool { drawingNodeType.hasPrefix("stroke_") }
-    /// 当前绘图工具是否为 freehand（自由笔）模式
+    /// Whether the current drawing tool is in freehand mode
     var isFreehandDrawing: Bool { drawingNodeType.hasPrefix("freehand_") }
 
-    // MARK: - 框选/绘制/snap 辅助状态（由 CanvasInteractionHandler 维护）
+    // MARK: - Frame selection/drawing/snap auxiliary state (maintained by CanvasInteractionHandler)
 
-    /// 框选当前鼠标位置（仅在 interaction == .marquee 时有效）
+    /// Marquee select the current mouse position (only valid when interaction == .marquee)
     var marqueeCurrentPoint: CGPoint?
-    /// 节点绘制模式当前鼠标位置
+    /// Current mouse position in node drawing mode
     var drawingCurrentPoint: CGPoint?
-    /// 绘制模式网格吸附：上一次吸附后的画布矩形（用于检测网格跨越并触发 haptic）
+    /// Draw mode grid snapping: Canvas rectangle after last snapping (used to detect grid spanning and trigger haptic)
     var drawingLastSnappedRect: CGRect?
-    /// 磁吸/网格 snap 辅助状态
+    /// Magnet/grid snap assist status
     var lastSnapActive: Bool = false
     var lastSnappedGridOrigin: CGPoint? = nil
 
-    // MARK: - 文件拖放状态（由 CanvasDragHandler 扩展使用）
+    // MARK: - File drag and drop state (used by the CanvasDragHandler extension)
 
     var onFilesDropped: (([String], CGPoint) -> Void)?
     var onFilesDroppedOnNode: (([String], UUID) -> Void)?
     var dropTargetNodeId: UUID?
 
-    // MARK: - 动画定时器（由 CanvasInputHandler 扩展使用）
+    // MARK: - Animation timer (used by CanvasInputHandler extension)
 
     var animationTimer: Timer?
 
-    // MARK: - 变更通知
+    // MARK: - Change notification
 
     func notifyViewportChanged() {
         onViewportChanged?(canvasOrigin, zoom)
     }
 
-    // MARK: - 前景覆盖物绘制
+    // MARK: - Foreground overlay drawing
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
-        // 背景由 CanvasBackground 子视图负责绘制
-        // 磁吸辅助线、框选矩形、绘制预览矩形由 MagneticSnapGuideView（最顶层）负责绘制
-        // 临时连线已迁移到 ConnectionOverlayView 绘制（避免被子视图遮挡）
+        // The background is drawn by the CanvasBackground subview
+        // The magnetic auxiliary lines, selection rectangle, and drawing preview rectangle are drawn by the MagneticSnapGuideView (topmost)
+        // Temporary connections have been moved to ConnectionOverlayView for drawing (to avoid being blocked by subviews)
     }
 
-    // MARK: - Tracking Area 维护
+    // MARK: - Tracking Area Maintenance
 
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
-        // 始终注册全画布 tracking area，保证 mouseMoved 持续触发以更新光标
+        // Always register the full canvas tracking area to ensure that mouseMoved continues to trigger to update the cursor
         for ta in trackingAreas { removeTrackingArea(ta) }
         addTrackingArea(makeTrackingArea())
     }

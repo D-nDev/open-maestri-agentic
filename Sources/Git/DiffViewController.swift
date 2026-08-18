@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Git Diff 双列对比视图
+/// Git Diff dual column comparison view
 struct DiffView: View {
     let diff: String
 

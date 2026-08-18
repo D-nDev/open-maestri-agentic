@@ -3,8 +3,8 @@ import OSLog
 import SwiftTerm
 import AppKit
 
-/// 解析终端字体。"system" 标识符（对标 Maestri 默认值）映射到 monospacedSystemFont，
-/// 其他值按 PostScript 字体名查找，找不到时 fallback 到 monospacedSystemFont。
+/// Parsing terminal fonts. The "system" identifier (against the Maestri default) maps to monospacedSystemFont,
+/// Other values are searched by PostScript font name and fallback to monospacedSystemFont when not found.
 func resolveTerminalFont(family: String, size: CGFloat) -> NSFont {
     if family == "system" || family.isEmpty {
         return NSFont.monospacedSystemFont(ofSize: size, weight: .regular)
@@ -13,14 +13,14 @@ func resolveTerminalFont(family: String, size: CGFloat) -> NSFont {
         ?? NSFont.monospacedSystemFont(ofSize: size, weight: .regular)
 }
 
-/// SwiftTerm PTY 适配层 — 只负责 PTY 进程管理
-/// - 通过子类化 LocalProcessTerminalView（OmLocalProcessTerminalView）的 dataReceived 检测输出
-/// - shellReadyCallback：shell 就绪（100ms 静默）后触发一次
+/// SwiftTerm PTY adaptation layer - only responsible for PTY process management
+/// - Detect output by subclassing dataReceived of LocalProcessTerminalView (OmLocalProcessTerminalView)
+/// - shellReadyCallback: triggered once after shell is ready (100ms silent)
 @MainActor
 final class SwiftTermProvider: NSObject {
     private let logger = Logger.make(category: "SwiftTermProvider")
 
-    // MARK: - 基础属性
+    // MARK: - Basic attributes
 
     let terminalId: UUID
     let command: String
@@ -29,17 +29,17 @@ final class SwiftTermProvider: NSObject {
     private(set) var terminalView: LocalProcessTerminalView?
     private(set) var isRunning: Bool = false
 
-    // MARK: - 回调（外部设置，不由 SwiftTerm 自动触发）
+    // MARK: - callback (external setting, not automatically triggered by SwiftTerm)
 
     var onDataReceived: ((String) -> Void)?
     var onTitleChange: ((String) -> Void)?
     var onBell: (() -> Void)?
     var onProcessExit: ((Int32?) -> Void)?
 
-    /// shell 就绪后触发一次（300ms 静默检测）
+    /// Trigger once when shell is ready (300ms silent detection)
     var shellReadyCallback: (() -> Void)?
 
-    // MARK: - 配置
+    // MARK: - Configuration
 
     var serverPort: UInt16 {
         get { _serverPort > 0 ? _serverPort : InterAgentServer.shared.port }
@@ -51,11 +51,11 @@ final class SwiftTermProvider: NSObject {
     var preferredFont: NSFont?
     var metalRendererEnabled: Bool = false
 
-    /// cd + 自定义命令，由 start() 注入，shell 就绪后统一发送
+    /// cd + custom command, injected by start(), sent uniformly after the shell is ready
     var pendingStartupCommands: [String] = []
 
-    // startProcess 参数暂存：start() 创建视图后不立即启动进程，
-    // 等 MaestroTerminalView.layout() 首次确定正确 bounds 后再由 firePendingStart() 触发。
+    // startProcess parameter temporary storage: start() does not start the process immediately after creating the view.
+    // Wait until MaestroTerminalView.layout() determines the correct bounds for the first time before triggering firePendingStart().
     private struct PendingStart {
         let executable: String
         let args: [String]
@@ -65,7 +65,7 @@ final class SwiftTermProvider: NSObject {
     }
     private var pendingStart: PendingStart?
 
-    // MARK: - Shell 就绪检测（内部）
+    // MARK: - Shell Readiness Detection (Internal)
 
     private var lastOutputTime: ContinuousClock.Instant = .now
     private var shellReadyScheduled = false
@@ -84,11 +84,11 @@ final class SwiftTermProvider: NSObject {
         self.workingDirectory = workingDirectory
     }
 
-    // MARK: - 启动
+    // MARK: - Start
 
     @discardableResult
     func start(in frame: NSRect) -> LocalProcessTerminalView {
-        // 重置 shell 就绪状态，确保每次 start() 都能正确触发就绪检测流程。
+        // Reset the shell readiness state to ensure that each start() can correctly trigger the readiness detection process.
         shellReadyCalled = false
         shellReadyScheduled = false
 
@@ -98,7 +98,7 @@ final class SwiftTermProvider: NSObject {
         let view = OmLocalProcessTerminalView(frame: effectiveFrame)
         view.processDelegate = self
 
-        // 通过子类回调获取 PTY 输出（不覆盖 terminalDelegate，保持 send 链路完整）
+        // Get PTY output through subclass callback (do not override terminalDelegate, keep send link intact)
         view.onDataReceived = { [weak self] text in
             Task { @MainActor in self?.handleDataReceived(text) }
         }
@@ -108,11 +108,11 @@ final class SwiftTermProvider: NSObject {
         applyFontWithPrefs(to: view, prefs: prefs)
 
         terminalView = view
-        // isRunning 延迟到 firePendingStart() 实际启动进程后再设置
+        // isRunning is delayed until firePendingStart() actually starts the process before setting it
 
         enableMetalIfNeeded(view: view, metalEnabled: prefs.metalRendererEnabled)
 
-        // 构建环境变量
+        // Build environment variables
         var env = ProcessInfo.processInfo.environment
         env["MAESTRI_TERMINAL_ID"] = terminalId.uuidString
         env["OMAESTRI_TERMINAL_ID"] = terminalId.uuidString
@@ -143,25 +143,25 @@ final class SwiftTermProvider: NSObject {
             args = ["/bin/bash", "--login"]
             execName = "bash"
         } else {
-            // 非 shell 命令（如 claude, codex 等）：始终在 login shell 中运行。
-            // 这样命令退出后 shell 仍然存活，用户回到 prompt 可继续交互。
-            // 对标 Maestri 行为：终端节点是持久 shell session，agent 命令在其中运行。
+            // Non-shell commands (such as claude, codex, etc.): always run in the login shell.
+            // In this way, the shell still survives after the command exits, and the user can continue to interact when returning to the prompt.
+            // Benchmarking Maestri behavior: Endpoints are persistent shell sessions in which agent commands run.
             args = ["/bin/zsh", "--login"]
             execName = "zsh"
             pendingStartupCommands.append(command)
         }
 
-        // 通过 startProcess(currentDirectory:) 原生设置工作目录，
-        // 避免 shell 中出现可见的 cd 命令（PTY 子进程直接在目标目录启动）
+        // Set the working directory natively through startProcess(currentDirectory:),
+        // Avoid visible cd command in shell (PTY child process starts directly in target directory)
         let startDir: String? = (!workingDirectory.isEmpty && FileManager.default.fileExists(atPath: workingDirectory))
             ? workingDirectory : nil
 
-        // 增大 scrollback buffer（默认 500 行太小，长会话 resize 时会截断历史）
+        // Increase scrollback buffer (default 500 lines is too small, long session resize will truncate history)
         view.getTerminal().changeScrollback(10000)
 
-        // 暂存启动参数，等 MaestroTerminalView.layout() 首次完成后再调用 startProcess。
-        // 这样 zsh 启动时拿到的是正确的内容区尺寸（不是 fallback 的 600x400），
-        // terminal.cols 从一开始就基于真实 frame 计算，避免光标水平偏移。
+        // Temporarily store startup parameters until MaestroTerminalView.layout() completes for the first time before calling startProcess.
+        // In this way, when zsh starts, it gets the correct content area size (not fallback’s 600x400).
+        // terminal.cols is calculated based on the real frame from the beginning to avoid horizontal cursor offset.
         pendingStart = PendingStart(
             executable: args[0],
             args: Array(args.dropFirst()),
@@ -174,7 +174,7 @@ final class SwiftTermProvider: NSObject {
         return view
     }
 
-    /// 由 MaestroTerminalView.layout() 在首次确定正确 bounds 后调用，触发真正的 PTY 启动。
+    /// Called by MaestroTerminalView.layout() after correct bounds are first determined, triggering real PTY startup.
     func firePendingStart() {
         guard let ps = pendingStart else { return }
         pendingStart = nil
@@ -190,16 +190,16 @@ final class SwiftTermProvider: NSObject {
         logger.debug("PTY started (after layout): \(self.command) in \(self.workingDirectory), terminalId=\(self.terminalId.uuidString.prefix(8))")
     }
 
-    // MARK: - Shell 就绪检测
+    // MARK: - Shell Readiness Detection
 
-    /// 收到 PTY 输出后的统一处理入口（由 OmLocalProcessTerminalView.dataReceived 回调触发）
+    /// Unified processing entry after receiving PTY output (triggered by OmLocalProcessTerminalView.dataReceived callback)
     private func handleDataReceived(_ text: String) {
-        // 转发到外部回调（session.recordOutput 等）
+        // Forward to external callback (session.recordOutput, etc.)
         if !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             onDataReceived?(text)
             recordOutputForScrollback(text)
         }
-        // Shell 就绪检测（100ms 静默即认为就绪，对标 Maestri 快速启动）
+        // Shell readiness detection (100ms of silence is considered ready, benchmarked against Maestri quick startup)
         lastOutputTime = .now
         guard !shellReadyCalled, !shellReadyScheduled else { return }
         guard !pendingStartupCommands.isEmpty || shellReadyCallback != nil else {
@@ -208,7 +208,7 @@ final class SwiftTermProvider: NSObject {
         }
         shellReadyScheduled = true
         Task { @MainActor [weak self] in
-            // 快速检测：100ms 间隔轮询，最多等待 3s
+            // Quick detection: 100ms interval polling, wait up to 3s
             for _ in 0..<30 {
                 try? await Task.sleep(for: .milliseconds(100))
                 guard let self, !self.shellReadyCalled else { return }
@@ -233,15 +233,15 @@ final class SwiftTermProvider: NSObject {
         shellReadyCallback = nil
     }
 
-    /// 外部强制标记 shell 已就绪（供 TerminalManager 超时路径调用）
-    /// 防止 processTerminated 在超时后再次触发 drainNext
+    /// External force flag shell ready (for TerminalManager timeout path call)
+    /// Prevent processTerminated from triggering drainNext again after timeout
     func forceMarkShellReady() {
         shellReadyCalled = true
         shellReadyCallback = nil
         pendingStartupCommands.removeAll()
     }
 
-    // MARK: - PTY 写入
+    // MARK: - PTY write
 
     func write(_ text: String) {
         guard let view = terminalView, isRunning else { return }
@@ -252,10 +252,10 @@ final class SwiftTermProvider: NSObject {
         write(text + "\n")
     }
 
-    // MARK: - 停止
+    // MARK: - Stop
 
     func stop() {
-        // 即使 PTY 未完成启动（isRunning=false，pendingStart 挂起），也要清理 terminalView
+        // Clean terminalView even if PTY does not complete startup (isRunning=false, pendingStart pending)
         pendingStart = nil
         scrollbackDebounceTask?.cancel()
         scrollbackDebounceTask = nil
@@ -265,7 +265,7 @@ final class SwiftTermProvider: NSObject {
             return
         }
         isRunning = false
-        // 退出前做最后一次 scrollback 快照（必须在 terminalView 置 nil 之前）
+        // Take the last scrollback snapshot before exiting (must be before terminalView is set to nil)
         if let view = terminalView, let wsId = workspaceId {
             let terminal = view.getTerminal()
             let data = terminal.getBufferAsData()
@@ -287,7 +287,7 @@ final class SwiftTermProvider: NSObject {
         terminalView = nil
     }
 
-    // MARK: - 滚动锁定
+    // MARK: - scroll lock
 
     private(set) var isAutoScrollLocked: Bool = false
 
@@ -296,7 +296,7 @@ final class SwiftTermProvider: NSObject {
         logger.debug("Terminal \(self.terminalId.uuidString.prefix(8)) autoScrollLocked=\(locked)")
     }
 
-    // MARK: - 进程重启
+    // MARK: - Process restart
 
     func restartProcess(command: String, workingDirectory: String) {
         write("exit\n")
@@ -310,13 +310,13 @@ final class SwiftTermProvider: NSObject {
         }
     }
 
-    // MARK: - Metal 渲染器
+    // MARK: - Metal Renderer
 
     private func enableMetalIfNeeded(view: LocalProcessTerminalView, metalEnabled: Bool) {
         guard metalEnabled else { return }
-        // SwiftTerm 的 Metal 渲染器依赖 Bundle.module（SwiftTerm_SwiftTerm.bundle）加载编译好的
-        // metallib。当 bundle 不存在时，Bundle.module 的 one-time init 会触发 assertionFailure 崩溃。
-        // 因此在启用 Metal 前先验证 bundle 是否可用，缺失时安全降级到 CPU 渲染。
+        // SwiftTerm's Metal renderer relies on Bundle.module (SwiftTerm_SwiftTerm.bundle) to load and compile the
+        // metallib. Bundle.module's one-time init will trigger an assertionFailure crash when the bundle does not exist.
+        // Therefore verify that the bundle is available before enabling Metal, and safely downgrade to CPU rendering if missing.
         guard SwiftTermProvider.isMetalBundleAvailable() else {
             logger.warning("SwiftTerm Metal bundle not found — Metal renderer disabled for terminal \(self.terminalId.uuidString.prefix(8))")
             return
@@ -331,18 +331,18 @@ final class SwiftTermProvider: NSObject {
         }
     }
 
-    /// 检查 SwiftTerm 的 Metal shader bundle 是否存在。
-    /// swift build 将 SwiftTerm_SwiftTerm.bundle 放在可执行文件同目录；
-    /// 打包为 .app 时需要将该 bundle 复制到 Contents/Resources/ 内，
-    /// 否则 Bundle.module（由 swift build 自动生成）找不到 bundle 会触发 fatalError 崩溃。
+    /// Check if SwiftTerm's Metal shader bundle exists.
+    /// swift build puts SwiftTerm_SwiftTerm.bundle in the same directory as the executable file;
+    /// When packaging as .app, you need to copy the bundle to Contents/Resources/.
+    /// Otherwise Bundle.module (automatically generated by swift build) cannot find the bundle and trigger a fatalError crash.
     private static func isMetalBundleAvailable() -> Bool {
         let bundleName = "SwiftTerm_SwiftTerm.bundle"
-        // 1. app bundle 的 Resources 目录（正常打包路径）
+        // 1. Resources directory of app bundle (normal packaging path)
         if let resourceURL = Bundle.main.resourceURL,
            FileManager.default.fileExists(atPath: resourceURL.appendingPathComponent(bundleName).path) {
             return true
         }
-        // 2. 可执行文件同目录（swift build 直接运行时）
+        // 2. The executable file is in the same directory (when swift build is run directly)
         let execDir = Bundle.main.executableURL?.deletingLastPathComponent()
         if let execDir,
            FileManager.default.fileExists(atPath: execDir.appendingPathComponent(bundleName).path) {
@@ -353,7 +353,7 @@ final class SwiftTermProvider: NSObject {
 
     func applyMetalRenderer(enabled: Bool) {
         guard let view = terminalView else { return }
-        // 启用时同样做 bundle 检查，避免通过设置 UI 触发崩溃
+        // Also do bundle checking when enabled to avoid crashes triggered by setting UI
         if enabled, !SwiftTermProvider.isMetalBundleAvailable() {
             logger.warning("SwiftTerm Metal bundle not found — ignoring Metal enable request for terminal \(self.terminalId.uuidString.prefix(8))")
             return
@@ -366,7 +366,7 @@ final class SwiftTermProvider: NSObject {
         }
     }
 
-    // MARK: - 主题应用
+    // MARK: - Theme application
 
     private func applyThemeWithPrefs(to view: LocalProcessTerminalView, prefs: Preferences) {
         let themeId = TerminalThemeRegistry.resolveThemeId(from: prefs.terminalTheme)
@@ -389,7 +389,7 @@ final class SwiftTermProvider: NSObject {
         TerminalThemeRegistry.shared.apply(themeId: themeId, to: view)
     }
 
-    // MARK: - 字体应用
+    // MARK: - Font application
 
     private func applyFontWithPrefs(to view: LocalProcessTerminalView, prefs: Preferences) {
         view.font = resolveTerminalFont(family: prefs.terminalFontFamily, size: prefs.terminalFontSize)
@@ -409,17 +409,17 @@ final class SwiftTermProvider: NSObject {
         logger.debug("Font updated to \(family) \(size)pt for terminal \(self.terminalId.uuidString.prefix(8))")
     }
 
-    // MARK: - Scrollback 恢复（启动时 feed 历史到终端视图）
+    // MARK: - Scrollback recovery (feed history to terminal view on startup)
 
-    /// 在 PTY startProcess 前将保存的 scrollback 数据 feed 到终端视图。
-    /// resize 时 reflow 可能导致显示错位，但磁盘快照通过 snapshotScrollbackBeforeResize
-    /// 保护，不会丢失历史。
+    /// Feed saved scrollback data to terminal view before PTY startProcess.
+    /// reflow when resize may cause display misalignment, but disk snapshot passes snapshotScrollbackBeforeResize
+    /// Protection without losing history.
     private func feedScrollbackBeforeStart(view: LocalProcessTerminalView, workspaceId: UUID) {
         let store = ScrollbackStore()
         guard let entries = try? store.load(terminalId: terminalId, workspaceId: workspaceId),
               !entries.isEmpty else { return }
 
-        // 检测旧格式数据（含光标移动等 CSI 序列）：如果发现则跳过恢复
+        // Detect old format data (including CSI sequences such as cursor movement): skip recovery if found
         let sampleEntries = entries.suffix(min(20, entries.count))
         let hasCursorMovement = sampleEntries.contains { entry in
             entry.text.range(of: "\u{1b}\\[[0-9;]*[ABCDHJKf]", options: .regularExpression) != nil
@@ -429,7 +429,7 @@ final class SwiftTermProvider: NSObject {
             return
         }
 
-        // 取最后 2000 行
+        // Get the last 2000 rows
         let maxRestoreLines = 2000
         let toRestore = entries.count > maxRestoreLines
             ? Array(entries.suffix(maxRestoreLines))
@@ -442,15 +442,15 @@ final class SwiftTermProvider: NSObject {
         logger.debug("Scrollback restored: \(toRestore.count) lines for terminal \(self.terminalId.uuidString.prefix(8))")
     }
 
-    // MARK: - Scrollback 持久化（从 terminal buffer 提取已渲染的屏幕行）
+    // MARK: - Scrollback persistence (extracts rendered screen lines from terminal buffer)
 
-    /// 从 SwiftTerm terminal buffer 提取所有行（scrollback + 可视区），存为 JSONL。
-    /// 每行是 translateToString 的纯文本输出，不含光标移动/清屏等控制序列。
-    /// 恢复时可安全 feed 到任意尺寸的终端而不会错位。
+    /// Extract all lines (scrollback + visual area) from SwiftTerm terminal buffer and save as JSONL.
+    /// Each line is the plain text output of translateToString, without control sequences such as cursor movement/clearing the screen.
+    /// Safely feed to any size terminal without misalignment when restoring.
     func recordOutputForScrollback(_ text: String) {
-        // resize 冻结期内跳过，防止 reflow 破坏的 buffer 被持久化
+        // resize is skipped during the freezing period to prevent buffers damaged by reflow from being persisted
         guard !scrollbackFrozen else { return }
-        // 标记有新数据到达，触发 debounce 快照保存
+        // Mark new data arrival, trigger debounce snapshot saving
         scrollbackDirty = true
         if scrollbackDebounceTask == nil {
             scrollbackDebounceTask = Task { [weak self] in
@@ -462,20 +462,20 @@ final class SwiftTermProvider: NSObject {
         }
     }
 
-    /// 是否有新数据需要快照
+    /// Is there new data that requires a snapshot?
     private var scrollbackDirty = false
 
-    /// resize 后短暂冻结 scrollback 写入，防止 reflow 后的破坏 buffer 覆盖磁盘快照
+    /// Briefly freeze scrollback writing after resize to prevent the buffer from overwriting the disk snapshot after reflow.
     private var scrollbackFrozen = false
 
-    /// 从 terminal buffer 提取所有行并持久化
+    /// Extract all lines from terminal buffer and persist
     func flushScrollback() async {
         guard scrollbackDirty, let wsId = workspaceId, let view = terminalView else { return }
         scrollbackDirty = false
 
-        // 通过 SwiftTerm public API 获取整个 buffer 内容（含 scrollback + 可视区域）
-        // getBufferAsData 内部遍历 buffer.lines，对每行调用 translateToString(trimRight: true)
-        // 结果是纯文本（无光标移动序列），每行以 \n 分隔
+        // Get the entire buffer content (including scrollback + visual area) through SwiftTerm public API
+        // getBufferAsData internally iterates over buffer.lines and calls translateToString(trimRight: true) for each line
+        // The result is plain text (no cursor movement sequence) with each line separated by \n
         let terminal = view.getTerminal()
         let data = terminal.getBufferAsData()
         guard !data.isEmpty else { return }
@@ -483,14 +483,14 @@ final class SwiftTermProvider: NSObject {
         let fullText = String(decoding: data, as: UTF8.self)
         var lines = fullText.components(separatedBy: "\n")
 
-        // 去掉尾部空行
+        // Remove trailing blank lines
         while let last = lines.last, last.isEmpty {
             lines.removeLast()
         }
 
         guard !lines.isEmpty else { return }
 
-        // 转为 ScrollbackEntry 并持久化
+        // Convert to ScrollbackEntry and persist
         let maxLines = 5000
         let toKeep = lines.count > maxLines ? Array(lines.suffix(maxLines)) : lines
         let entries = toKeep.map { ScrollbackEntry(attributes: [], text: $0) }
@@ -501,9 +501,9 @@ final class SwiftTermProvider: NSObject {
         Task { await flushScrollback() }
     }
 
-    /// resize 前同步调用：立即把当前 buffer 内容写入磁盘，不走 debounce。
-    /// 必须在 terminalView.frame 变化（触发 SwiftTerm reflow）之前调用，
-    /// 否则 reflow 会破坏 buffer 内容，导致历史记录丢失。
+    /// Resize pre-synchronous call: write the current buffer content to disk immediately without debounce.
+    /// Must be called before terminalView.frame changes (triggering SwiftTerm reflow),
+    /// Otherwise, reflow will destroy the buffer content, causing the history record to be lost.
     func snapshotScrollbackBeforeResize() {
         guard let wsId = workspaceId, let view = terminalView else { return }
         let terminal = view.getTerminal()
@@ -519,13 +519,13 @@ final class SwiftTermProvider: NSObject {
         let toKeep = lines.count > maxLines ? Array(lines.suffix(maxLines)) : lines
         let entries = toKeep.map { ScrollbackEntry(attributes: [], text: $0) }
 
-        // 取消正在进行的 debounce task，避免 resize 后的破坏 buffer 覆盖这次快照
+        // Cancel the ongoing debounce task to avoid damaging the buffer after resize and overwriting this snapshot.
         scrollbackDebounceTask?.cancel()
         scrollbackDebounceTask = nil
         scrollbackDirty = false
 
-        // 冻结 scrollback 写入 2 秒：resize 完成后 PTY 可能立即有输出（SIGWINCH 响应），
-        // 此时 buffer 已被 reflow 破坏，不能让这些输出触发新的 flush
+        // Freeze scrollback writing for 2 seconds: PTY may have output (SIGWINCH response) immediately after resize completes,
+        // At this time, the buffer has been destroyed by reflow, and these outputs cannot be allowed to trigger a new flush.
         scrollbackFrozen = true
         Task { @MainActor [weak self] in
             try? await Task.sleep(for: .seconds(2))
@@ -571,7 +571,7 @@ extension SwiftTermProvider: LocalProcessTerminalViewDelegate {
             await self.flushScrollback()
             self.onProcessExit?(exitCode)
             Logger.make(category: "SwiftTermProvider").info("Terminal \(self.terminalId.uuidString.prefix(8)) terminated with code \(exitCode ?? -1)")
-            // PTY 退出时若 shell 从未就绪（如命令不存在），强制触发以推进串行启动队列
+            // Force trigger to advance serial boot queue if shell was never ready (e.g. command does not exist) when PTY exits
             if !self.shellReadyCalled {
                 self.fireShellReady()
             }
@@ -579,13 +579,13 @@ extension SwiftTermProvider: LocalProcessTerminalViewDelegate {
     }
 }
 
-// MARK: - OmLocalProcessTerminalView（子类化以获取 PTY 输出，不破坏 send 链路）
+// MARK: - OmLocalProcessTerminalView (subclassed to get PTY output without breaking the send link)
 
-/// 子类化 LocalProcessTerminalView，覆盖 dataReceived 获取 PTY 输出文本。
-/// 保持 terminalDelegate = self 不变（LocalProcessTerminalView 在 setup 中设置），
-/// 从而 send(source:data:) 仍然由 LocalProcessTerminalView 自身处理 → process.send。
+/// Subclass LocalProcessTerminalView, overriding dataReceived to get PTY output text.
+/// Leave terminalDelegate = self unchanged (LocalProcessTerminalView set in setup),
+/// Thus send(source:data:) is still handled by LocalProcessTerminalView itself → process.send.
 final class OmLocalProcessTerminalView: LocalProcessTerminalView {
-    /// PTY 有新输出时回调（原始文本）
+    /// Callback when PTY has new output (original text)
     var onDataReceived: ((String) -> Void)?
 
     override func dataReceived(slice: ArraySlice<UInt8>) {

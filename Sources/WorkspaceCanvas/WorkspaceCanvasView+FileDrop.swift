@@ -5,7 +5,7 @@ import SwiftUI
 
 extension WorkspaceCanvasView {
 
-    /// 处理从 Finder 拖入的 .md/.markdown/.txt 文件，创建 Note 节点（storageMode = .custom）
+    /// Process .md/.markdown/.txt files dragged from Finder and create Note nodes (storageMode = .custom)
     func handleFilesDropped(paths: [String], at canvasOriginPoint: CGPoint) {
         var offsetY: CGFloat = 0
         for path in paths {
@@ -28,7 +28,7 @@ extension WorkspaceCanvasView {
         Task { try? await workspace.save() }
     }
 
-    /// 文件拖入节点时的处理
+    /// Processing when files are dragged into nodes
     func handleFilesDroppedOnNode(paths: [String], nodeId: UUID) {
         guard let node = workspace.nodes.first(where: { $0.id == nodeId }) else { return }
         switch node.content {
@@ -42,7 +42,7 @@ extension WorkspaceCanvasView {
         }
     }
 
-    /// Shell 路径转义：对包含空格或特殊字符的路径加单引号
+    /// Shell path escaping: Single quotes for paths containing spaces or special characters
     func shellEscape(_ path: String) -> String {
         let special = CharacterSet(charactersIn: " '\"\\$`!#&|;(){}[]<>?*~")
         if path.unicodeScalars.contains(where: { special.contains($0) }) {

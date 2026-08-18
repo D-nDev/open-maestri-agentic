@@ -1,9 +1,9 @@
 import Foundation
 import OSLog
 
-/// 文件树节点（class 保证 NSOutlineView 可用对象身份 === 追踪 item）
+/// File tree node (class guarantees NSOutlineView available object identity === tracking item)
 final class FileTreeItem: Identifiable, Hashable {
-    let id: String   // 绝对路径
+    let id: String   // Absolute path
     var name: String
     var isDirectory: Bool
     var isExpanded: Bool = false
@@ -24,12 +24,12 @@ final class FileTreeItem: Identifiable, Hashable {
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
 
-/// Git 文件状态
+/// Git file status
 enum GitFileStatus {
     case unmodified, modified, added, deleted, renamed, untracked
 }
 
-/// 文件树状态存储（每个 FileTree 节点独立实例）
+/// File tree state storage (independent instance per FileTree node)
 @Observable
 final class FileTreeStateStore {
     private let logger = Logger.make(category: "FileTreeStateStore")
@@ -41,11 +41,11 @@ final class FileTreeStateStore {
     var gitStatus: [String: GitFileStatus] = [:]
 
     private var watcher: DirectoryWatcher?
-    /// 防抖用的 reload work item
+    /// reload work item for anti-shake
     private var pendingReloadWork: DispatchWorkItem?
-    /// 上次 reload 时间戳，避免过于频繁
+    /// Last reload timestamp to avoid too frequent
     private var lastReloadTime: CFAbsoluteTime = 0
-    /// git status 结果缓存（TTL 60s，避免每次 reload 都执行 git status）
+    /// git status result cache (TTL 60s, avoid executing git status every time reload)
     private var _cachedGitStatus: [String: GitFileStatus] = [:]
     private var _lastGitStatusTime: CFAbsoluteTime = 0
     private static let _gitStatusCacheTTL: CFAbsoluteTime = 60.0
@@ -66,7 +66,7 @@ final class FileTreeStateStore {
         watcher = w
     }
 
-    /// 防抖 reload：合并 500ms 内的多次文件系统事件
+    /// Anti-shake reload: merge multiple file system events within 500ms
     private func scheduleReload() {
         pendingReloadWork?.cancel()
         let work = DispatchWorkItem { [weak self] in
@@ -78,10 +78,10 @@ final class FileTreeStateStore {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: work)
     }
 
-    // MARK: - 加载文件树
+    // MARK: - Load file tree
 
     func reload() async {
-        // 限流：距离上次 reload 不到 300ms 则跳过
+        // Current limiting: skip if it is less than 300ms from the last reload
         let now = CFAbsoluteTimeGetCurrent()
         guard now - lastReloadTime > 0.3 else { return }
         lastReloadTime = now
@@ -99,8 +99,8 @@ final class FileTreeStateStore {
             return
         }
 
-        // 并行加载文件树（仅加载 1 层，子目录按需展开）和 git 状态
-        // git status 有 60s TTL 缓存，避免每次展开文件夹都重跑 git status
+        // Parallel loading of file trees (only 1 level loaded, subdirectories expanded on demand) and git status
+        // git status has a 60s TTL cache to avoid re-running git status every time you expand a folder.
         let gitStatusNeedsRefresh = now - _lastGitStatusTime > Self._gitStatusCacheTTL
         let cachedStatus = _cachedGitStatus
         async let filesTask = Task.detached(priority: .userInitiated) {
@@ -111,12 +111,12 @@ final class FileTreeStateStore {
             : cachedStatus
 
         let (loaded, statusMap) = await (filesTask, gitTask)
-        // 仅当重新查询了 git status 时才更新缓存时间戳
+        // Only update cache timestamp when git status is queried again
         if gitStatusNeedsRefresh {
             _lastGitStatusTime = CFAbsoluteTimeGetCurrent()
             _cachedGitStatus = statusMap
         }
-        // 将 git 状态标记到文件节点
+        // Mark git status to file node
         let annotated = Self.applyGitStatus(to: loaded, statusMap: statusMap, root: root)
         await MainActor.run {
             items = annotated
@@ -167,10 +167,10 @@ final class FileTreeStateStore {
                 id: fullPath,
                 name: name,
                 isDirectory: isDir.boolValue,
-                children: nil   // nil 触发 NSOutlineView 占位展开逻辑；展开时异步加载
+                children: nil   // nil triggers NSOutlineView placeholder expansion logic; loads asynchronously during expansion
             )
         }
-        // 排序：文件夹在前、文件在后（与 Maestri / Finder 一致）
+        // Sort: folders first, files last (consistent with Maestri / Finder)
         return items.sorted { a, b in
             if a.isDirectory != b.isDirectory { return a.isDirectory }
             return a.name.localizedStandardCompare(b.name) == .orderedAscending
@@ -178,7 +178,7 @@ final class FileTreeStateStore {
     }
 
 
-    // MARK: - 展开/折叠
+    // MARK: - Expand/Collapse
 
     func toggle(path: String) {
         if expandedPaths.contains(path) {
@@ -189,12 +189,12 @@ final class FileTreeStateStore {
         }
     }
 
-    /// 加载指定路径的子目录，并更新到 items 树中
+    /// Load the subdirectory of the specified path and update it to the items tree
     func loadChildren(for path: String) async {
         let children = await Task.detached(priority: .userInitiated) {
             return Self.loadDirectory(path: path, depth: 0, maxDepth: 1)
         }.value
-        // 应用 git 状态到加载的子节点
+        // Apply git status to loaded child nodes
         let annotated = Self.applyGitStatus(to: children, statusMap: gitStatus, root: rootPath)
         await MainActor.run {
             updateChildren(annotated, for: path, in: items)

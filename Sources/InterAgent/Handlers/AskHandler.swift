@@ -60,9 +60,9 @@ final class AskHandler {
         return result
     }
 
-    // MARK: - Shell 策略：事件驱动提示符检测
+    // MARK: - Shell Strategy: Event-Driven Prompt Detection
 
-    /// 订阅 PTY 输出回调，每次有新输出时检测提示符，匹配即立即返回
+    /// Subscribe to the PTY output callback, detect the prompt every time there is new output, and return immediately if it matches
     @MainActor
     private func waitForPromptEvent(session: TerminalSession, in tm: TerminalManager, baselineLineCount: Int) async -> String {
         try? await Task.sleep(for: .milliseconds(150))
@@ -95,7 +95,7 @@ final class AskHandler {
                 }
             }
 
-            // 超时保底
+            // Timeout guarantee
             Task { @MainActor in
                 let remaining = deadline.timeIntervalSinceNow
                 if remaining > 0 {
@@ -109,12 +109,12 @@ final class AskHandler {
         }
     }
 
-    // MARK: - Agent 策略：等待 terminalBecameIdle 通知
+    // MARK: - Agent policy: Wait for terminalBecameIdle notification
 
-    /// 监听 .terminalBecameIdle 通知，target 终端空闲后立即返回
+    /// Listen for .terminalBecameIdle notification and return immediately after the target terminal becomes idle.
     @MainActor
     private func waitForIdleNotification(session: TerminalSession, in tm: TerminalManager) async -> String {
-        // 短暂延迟等待 agent 开始处理（避免注入后 activityMonitor 尚未感知到新输出）
+        // Short delay waiting for agent to start processing (to avoid activityMonitor not yet sensing new output after injection)
         try? await Task.sleep(for: .milliseconds(500))
 
         return await withCheckedContinuation { continuation in
@@ -139,7 +139,7 @@ final class AskHandler {
                 }
             }
 
-            // 超时保底
+            // Timeout guarantee
             Task { @MainActor in
                 let remaining = deadline.timeIntervalSinceNow
                 if remaining > 0 {
@@ -153,9 +153,9 @@ final class AskHandler {
         }
     }
 
-    // MARK: - 共用工具
+    // MARK: - Shared Tools
 
-    /// 判断目标终端是否已回到提示符（命令执行完毕）
+    /// Determine whether the target terminal has returned to the prompt (command execution completed)
     @MainActor
     private func hasPromptReturned(session: TerminalSession, in tm: TerminalManager, baselineLineCount: Int) -> Bool {
         guard let provider = tm.providers[session.id],
@@ -182,7 +182,7 @@ final class AskHandler {
                trimmed.hasSuffix("% ") || trimmed.hasSuffix("$ ")
     }
 
-    /// 注入前获取 buffer 当前行数（作为 baseline）
+    /// Obtain the current line number of buffer before injection (as baseline)
     @MainActor
     private func bufferLineCount(session: TerminalSession, in tm: TerminalManager) -> Int {
         guard let provider = tm.providers[session.id],
@@ -192,7 +192,7 @@ final class AskHandler {
         return String(decoding: data, as: UTF8.self).components(separatedBy: "\n").count
     }
 
-    /// 从 SwiftTerm buffer 取纯文本快照
+    /// Take plain text snapshot from SwiftTerm buffer
     @MainActor
     private func snapshot(session: TerminalSession, in tm: TerminalManager) -> String {
         guard let provider = tm.providers[session.id],

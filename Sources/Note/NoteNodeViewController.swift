@@ -4,35 +4,35 @@ import SwiftUI
 
 private let noteLogger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "open-maestri", category: "Note")
 
-// MARK: - Note 编辑器状态（@Observable，避免重建 NSHostingView）
+// MARK: - Note editor state (@Observable, avoid rebuilding NSHostingView)
 
 @Observable
 final class NoteEditorState {
     var isFormatted: Bool = false
     var content: String = ""
-    /// 模式切换后需要恢复焦点的标志，由 NSViewRepresentable.updateNSView 消费并清除
+    /// The flag that needs to restore focus after mode switching is consumed and cleared by NSViewRepresentable.updateNSView
     var pendingFocusRestore: Bool = false
 }
 
-// MARK: - Note 节点 NSViewController
+// MARK: - Note node NSViewController
 
-/// Note 节点 NSViewController（包裹 NoteEditingView）
+/// Note node NSViewController (wrapped NoteEditingView)
 final class NoteNodeViewController: NSViewController {
     let noteId: UUID
     let filePath: String
     let editorState = NoteEditorState()
 
-    /// 标题变更回调（首行内容变化时触发，用于更新节点 header）
+    /// Title change callback (triggered when the content of the first line changes, used to update node header)
     var onTitleChanged: ((String) -> Void)?
 
     private var notificationObserver: NSObjectProtocol?
     private var fileChangeObserver: NSObjectProtocol?
 
-    // MARK: - 防抖写入状态
+    // MARK: - Anti-shake writing status
 
-    /// 当前待写入的内容（nil 表示无待刷新内容）
+    /// The current content to be written (nil means there is no content to be refreshed)
     private var pendingSaveContent: String?
-    /// 防抖任务句柄，取消后重建以重置 300ms 计时
+    /// Anti-shake task handle, cancel and rebuild to reset 300ms timing
     private var debounceTask: Task<Void, Never>?
 
     init(noteId: UUID, filePath: String) {
@@ -70,7 +70,7 @@ final class NoteNodeViewController: NSViewController {
         if let obs = fileChangeObserver {
             NotificationCenter.default.removeObserver(obs)
         }
-        // 视图销毁时将内存缓存立即写入磁盘（后台执行，不阻塞主线程）
+        // Immediately write the memory cache to disk when the view is destroyed (executed in the background, without blocking the main thread)
         debounceTask?.cancel()
         if let content = pendingSaveContent {
             let fp = filePath
@@ -80,7 +80,7 @@ final class NoteNodeViewController: NSViewController {
         }
     }
 
-    // MARK: - 监听格式化切换通知（来自工具栏）
+    // MARK: - Listen for format switching notifications (from the toolbar)
 
     private func observeFormattedToggle() {
         notificationObserver = NotificationCenter.default.addObserver(
@@ -97,7 +97,7 @@ final class NoteNodeViewController: NSViewController {
         }
     }
 
-    // MARK: - 监听外部文件写入（CLI 写入时同步 editorState）
+    // MARK: - Monitor external file writing (CLI synchronizes editorState when writing)
 
     private func observeFileChange() {
         fileChangeObserver = NotificationCenter.default.addObserver(
@@ -128,25 +128,25 @@ final class NoteNodeViewController: NSViewController {
         }
     }
 
-    // MARK: - 防抖磁盘写入
+    // MARK: - Anti-shake disk writing
 
-    /// 防抖保存：缓存最新内容，300ms 无新输入后在后台线程写盘。
-    /// 主线程调用（NSTextViewDelegate 回调保证在主线程）。
+    /// Anti-shake save: cache the latest content and write to disk in the background thread after no new input for 300ms.
+    /// Main thread call (NSTextViewDelegate callback is guaranteed to be on the main thread).
     private func scheduleSave(content: String) {
         pendingSaveContent = content
-        // 重置计时器
+        // Reset timer
         debounceTask?.cancel()
         let fp = filePath
         debounceTask = Task.detached { [weak self] in
             do {
                 try await Task.sleep(for: .milliseconds(300))
             } catch {
-                // 被取消：等待下次 scheduleSave 或 flushPendingSave
+                // Canceled: Waiting for the next scheduleSave or flushPendingSave
                 return
             }
-            // ── 此处已脱离主线程，在协作线程池上执行同步 I/O ──
+            // ── The main thread has been separated from the main thread and synchronous I/O is performed on the cooperative thread pool ──
             try? NoteFileManager.shared.write(filePath: fp, content: content)
-            // 清理状态（回主线程）
+            // Cleanup status (return to main thread)
             await MainActor.run { [weak self] in
                 self?.pendingSaveContent = nil
                 self?.debounceTask = nil
@@ -154,8 +154,8 @@ final class NoteNodeViewController: NSViewController {
         }
     }
 
-    /// 立即将待写内容刷新到磁盘（视图隐藏时调用）。
-    /// 取消防抖任务，后台异步写入，不阻塞调用线程。
+    /// Immediately flush content to be written to disk (called when the view is hidden).
+    /// Cancel the anti-shake task and write asynchronously in the background without blocking the calling thread.
     func flushPendingSave() {
         debounceTask?.cancel()
         debounceTask = nil

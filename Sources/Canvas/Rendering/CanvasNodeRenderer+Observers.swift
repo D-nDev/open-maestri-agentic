@@ -14,7 +14,7 @@ extension CanvasNodeRenderer {
                let tv = provider.terminalView {
                 tv.window?.makeFirstResponder(tv)
             }
-            // Portal 节点不在此处聚焦——由 CanvasInteractionHandler 根据点击位置精确判断
+            // Portal node is not focused here - accurately determined by CanvasInteractionHandler based on click location
         }
         notificationObservers.append(obs)
     }
@@ -27,8 +27,8 @@ extension CanvasNodeRenderer {
                   let canvas = self.canvas,
                   let ids = notif.userInfo?["selectedIds"] as? Set<UUID> else { return }
             guard let current = self.nodesHostingView?.rootView else { return }
-            // 注意：不能仅凭 selectedNodeIds 不变就跳过——zIndex 变化时节点排序已更新，
-            // 必须用最新的 viewportCulledNodes() 重建 rootView 才能让渲染层反映新层级顺序
+            // Note: You cannot skip just because selectedNodeIds remain unchanged - the node sorting has been updated when zIndex changes.
+            // The rootView must be rebuilt with the latest viewportCulledNodes() in order for the render layers to reflect the new hierarchy order
             let lockedIds = Set(canvas.currentNodes.filter { $0.isLocked }.map { $0.id })
             self.nodesHostingView?.rootView = CanvasNodesSwiftUIView(
                 nodes: canvas.viewportCulledNodes(),
@@ -76,7 +76,7 @@ extension CanvasNodeRenderer {
     }
 
     func setupNodeStateObservers() {
-        // 节点 isLocked 变更：同步到 canvas.currentNodes
+        // Node isLocked change: synchronized to canvas.currentNodes
         let lockObs = NotificationCenter.default.addObserver(
             forName: .canvasNodeLockChanged, object: nil, queue: .main
         ) { [weak self] notif in
@@ -86,7 +86,7 @@ extension CanvasNodeRenderer {
         }
         notificationObservers.append(lockObs)
 
-        // 节点 content 变更：同步到 canvas.currentNodes
+        // Node content change: synchronized to canvas.currentNodes
         let contentObs = NotificationCenter.default.addObserver(
             forName: .canvasNodeContentChanged, object: nil, queue: .main
         ) { [weak self] notif in
@@ -94,16 +94,16 @@ extension CanvasNodeRenderer {
                   let id = notif.userInfo?["nodeId"] as? UUID,
                   let content = notif.userInfo?["content"] as? NodeContent else { return }
             canvas?.updateNodeContentInPlace(id: id, content: content)
-            // 若携带新 frame（文本节点内容/样式变化时自动测量），同步更新画布 frame
+            // If a new frame is carried (automatically measured when the text node content/style changes), the canvas frame is updated synchronously
             if let newFrame = notif.userInfo?["frame"] as? CGRect {
                 canvas?.updateNodeFrameInPlace(id: id, frame: newFrame)
                 canvas?.nodeCanvasFrames[id] = newFrame
             }
-            // displayName 同步
+            // displayName synchronization
             if case .terminal(let tc) = content {
                 TerminalManager.shared.terminals[id]?.displayName = tc.name
             }
-            // 刷新 SwiftUI 节点层
+            // Refresh SwiftUI node layer
             guard let canvas, let current = nodesHostingView?.rootView else { return }
             let lockedIds = Set(canvas.currentNodes.filter { $0.isLocked }.map { $0.id })
             nodesHostingView?.rootView = CanvasNodesSwiftUIView(
@@ -123,7 +123,7 @@ extension CanvasNodeRenderer {
         }
         notificationObservers.append(contentObs)
 
-        // 连接状态变化（ask 通信开始/结束）：立即重建状态缓存并重渲染连接线
+        // Connection status changes (ask communication starts/ends): Immediately rebuild the status cache and re-render the connection line
         let connStatusObs = NotificationCenter.default.addObserver(
             forName: .connectionStatusChanged, object: nil, queue: .main
         ) { [weak self] _ in

@@ -2,9 +2,9 @@ import AppKit
 
 extension CanvasViewportView {
 
-    // MARK: - 节点绘制模式
+    // MARK: - Node drawing mode
 
-    /// 点击创建时的默认节点尺寸（画布坐标）
+    /// Default node size (canvas coordinates) on click creation
     func defaultNodeSize(for nodeType: String) -> CGSize {
         switch nodeType {
         case "terminal":
@@ -24,10 +24,10 @@ extension CanvasViewportView {
         }
     }
 
-    // MARK: - 连线辅助
+    // MARK: - Connection assistance
 
-    /// 从视图（或其子视图）反查所属节点 ID
-    /// 先尝试 O(1) 直接映射缓存，未命中时走 O(n) 祖先链遍历
+    /// Check the node ID from the view (or its subview)
+    /// Try O(1) direct mapped cache first, O(n) ancestor chain traversal on miss
     func nodeId(for view: NSView?) -> UUID? {
         guard let v = view else { return nil }
         if let id = viewToNodeId[ObjectIdentifier(v)] { return id }
@@ -39,19 +39,19 @@ extension CanvasViewportView {
 
     func handleConnectionClick(nodeId: UUID) {
         if let fromId = connectingFromNodeId {
-            // 第二次点击：完成连线
+            // Second click: Complete connection
             if fromId != nodeId {
                 onConnectionCreated?(fromId, nodeId)
             }
             connectingFromNodeId = nil
             connectionDragPoint = nil
-            // 连线完成后退出连线模式（通知 SwiftUI 层更新 isConnecting）
+            // Exit the connection mode after the connection is completed (notify the SwiftUI layer to update isConnecting)
             isInConnectingMode = false
         } else {
-            // 第一次点击：设置起点，选中节点
+            // First click: Set the starting point and select the node
             connectingFromNodeId = nodeId
             selectedNodeIds = [nodeId]
-            // 开启鼠标跟踪
+            // Turn on mouse tracking
             for ta in trackingAreas { removeTrackingArea(ta) }
             addTrackingArea(makeTrackingArea())
         }
@@ -67,10 +67,10 @@ extension CanvasViewportView {
         )
     }
 
-    // MARK: - 网格吸附
+    // MARK: - Grid adsorption
 
-    /// 将节点 frame 的四条边吸附到背景网格线（与 drawLineGrid 使用的坐标系一致）
-    /// 分别对 left/right/top/bottom 四边取整，选择位移量最小的那条边对齐
+    /// Adsorb the four edges of the node frame to the background grid line (consistent with the coordinate system used by drawLineGrid)
+    /// Round the four sides of left/right/top/bottom respectively, and select the side with the smallest displacement to align
     func snapToGrid(_ origin: CGPoint, size: CGSize) -> CGPoint {
         let grid = Constants.canvasGridSpacing
 
@@ -94,7 +94,7 @@ extension CanvasViewportView {
         return CGPoint(x: origin.x + dx, y: origin.y + dy)
     }
 
-    // MARK: - 绘制矩形预览
+    // MARK: - Draw rectangle preview
 
     func drawDrawingRect() {
         guard isInDrawingMode,
@@ -115,7 +115,7 @@ extension CanvasViewportView {
         path.fill()
     }
 
-    // MARK: - 框选矩形绘制
+    // MARK: - Drawing of frame selection rectangle
 
     func drawSelectionRect() {
         guard let rect = selectionRect, rect.width > 2 || rect.height > 2 else { return }
@@ -127,28 +127,28 @@ extension CanvasViewportView {
         path.fill()
     }
 
-    // MARK: - 临时连线绘制（连线工具拖动时，使用物理下垂曲线）
+    // MARK: - Temporary connection drawing (when dragging the connection tool, use the physical droop curve)
 
     func drawTemporaryConnection() {
         guard let fromId = connectingFromNodeId,
               let fromCanvasFrame = nodeCanvasFrames[fromId] else { return }
         let fromScreenFrame = canvasRectToScreen(fromCanvasFrame)
 
-        // 如果鼠标还没移动（刚进入连线模式），显示四个边缘的连接点指示器
+        // If the mouse has not been moved yet (just entered wired mode), show four edge connection point indicators
         guard let toPoint = connectionDragPoint else {
             drawEdgeConnectors(on: fromScreenFrame)
             return
         }
-        // 计算从节点边缘出发的锚点（向鼠标方向与边框的交点）
+        // Calculate the anchor point starting from the edge of the node (towards the intersection point with the border in the direction of the mouse)
         let fromCenter = CGPoint(x: fromScreenFrame.midX, y: fromScreenFrame.midY)
         let fromPoint = Self.edgeAnchorScreen(of: fromScreenFrame, center: fromCenter, toward: toPoint)
 
-        // 使用静态悬链线计算（带自然下垂效果）
+        // Use static catenary calculations (with natural droop effect)
         let catenaryPoints = RopeSimulation.computeStaticCatenary(from: fromPoint, to: toPoint)
 
         guard catenaryPoints.count >= 2 else { return }
 
-        // 使用折线绘制（21 个控制点足够密集，视觉上近似平滑曲线）
+        // Use polyline drawing (21 control points are dense enough to visually approximate a smooth curve)
         let path = NSBezierPath()
         path.move(to: catenaryPoints[0])
         for i in 1..<catenaryPoints.count {
@@ -159,7 +159,7 @@ extension CanvasViewportView {
         NSColor.systemBlue.withAlphaComponent(0.8).setStroke()
         path.stroke()
 
-        // 起点连接点指示器（在节点边缘出发点画小圆圈）
+        // Start connection point indicator (draw a small circle at the starting point on the edge of the node)
         let connectorRadius: CGFloat = 5.0
         let connectorRect = CGRect(
             x: fromPoint.x - connectorRadius,
@@ -179,33 +179,33 @@ extension CanvasViewportView {
         )
         NSBezierPath(ovalIn: innerRect).fill()
 
-        // 源节点边框高亮（淡蓝色）
+        // Source node border highlight (light blue)
         let borderPath = NSBezierPath(roundedRect: fromScreenFrame, xRadius: 6, yRadius: 6)
         borderPath.lineWidth = 1.5
         NSColor.systemBlue.withAlphaComponent(0.4).setStroke()
         borderPath.stroke()
     }
 
-    // MARK: - 连接点指示器
+    // MARK: - Connection point indicator
 
-    /// 在节点四个边缘中点绘制连接点圆圈（连线模式激活但鼠标未移动时）
+    /// Draw a connection point circle at the midpoint of the four edges of the node (when wire mode is activated but the mouse is not moved)
     private func drawEdgeConnectors(on frame: CGRect) {
         let midPoints = [
-            CGPoint(x: frame.midX, y: frame.minY),  // 上
-            CGPoint(x: frame.midX, y: frame.maxY),  // 下
-            CGPoint(x: frame.minX, y: frame.midY),  // 左
-            CGPoint(x: frame.maxX, y: frame.midY),  // 右
+            CGPoint(x: frame.midX, y: frame.minY),  // on
+            CGPoint(x: frame.midX, y: frame.maxY),  // Next
+            CGPoint(x: frame.minX, y: frame.midY),  // Left
+            CGPoint(x: frame.maxX, y: frame.midY),  // Right
         ]
         let radius: CGFloat = 5.0
         let innerRadius: CGFloat = 2.5
 
-        // 节点边框高亮
+        // Node border highlighting
         let borderPath = NSBezierPath(roundedRect: frame, xRadius: 6, yRadius: 6)
         borderPath.lineWidth = 1.5
         NSColor.systemBlue.withAlphaComponent(0.4).setStroke()
         borderPath.stroke()
 
-        // 四个连接点
+        // Four connection points
         for pt in midPoints {
             let outerRect = CGRect(x: pt.x - radius, y: pt.y - radius, width: radius * 2, height: radius * 2)
             NSColor.systemBlue.setFill()
@@ -216,10 +216,10 @@ extension CanvasViewportView {
         }
     }
 
-    // MARK: - 边缘锚点计算（屏幕坐标）
+    // MARK: - Edge anchor point calculation (screen coordinates)
 
-    /// 计算从节点边框出发的锚点（屏幕坐标版本）
-    /// 从 frame 中心向 target 方向做射线，返回与边框的交点
+    /// Compute anchor point starting from node bounding box (screen coordinate version)
+    /// Make a ray from the center of the frame to the target direction and return the intersection point with the border
     static func edgeAnchorScreen(of frame: CGRect, center: CGPoint, toward target: CGPoint) -> CGPoint {
         let dx = target.x - center.x
         let dy = target.y - center.y
@@ -241,9 +241,9 @@ extension CanvasViewportView {
         return CGPoint(x: center.x + dx * t, y: center.y + dy * t)
     }
 
-    // MARK: - Finder 文件拖入（创建 Note 节点）
+    // MARK: - Finder file drag-in (create Note node)
 
-    /// 注册拖放目标（在 setup() 调用）
+    /// Register drag-and-drop target (in setup() call)
     func registerDragTypes() {
         registerForDraggedTypes([.fileURL])
     }
@@ -255,7 +255,7 @@ extension CanvasViewportView {
 
     override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
         guard containsFileURLs(sender) else { return [] }
-        // 高亮目标节点（如果鼠标在节点上方）
+        // Highlight target node (if mouse is over node)
         let loc = convert(sender.draggingLocation, from: nil)
         updateDropTargetHighlight(at: loc)
         return .copy
@@ -272,13 +272,13 @@ extension CanvasViewportView {
         guard !urls.isEmpty else { return false }
         let paths = urls.map { $0.path }
 
-        // 检查是否落在某个节点上
+        // Check whether it falls on a certain node
         if let targetNodeId = nodeId(at: locScreen) {
             onFilesDroppedOnNode?(paths, targetNodeId)
             return true
         }
 
-        // 落在空白区域：所有文件都创建 Note 节点
+        // Falling in white space: Note nodes are created for all files
         let locCanvas = screenToCanvas(locScreen)
         if !paths.isEmpty {
             onFilesDropped?(paths, locCanvas)
@@ -286,7 +286,7 @@ extension CanvasViewportView {
         return true
     }
 
-    /// 查找指定屏幕坐标下的节点 ID（使用 hitTestCanvas，兼容 NSHostingView 迁移后 nodeViews 为空的情况）
+    /// Find the node ID at the specified screen coordinates (using hitTestCanvas, compatible with the case where nodeViews is empty after NSHostingView migration)
     func nodeId(at screenPoint: CGPoint) -> UUID? {
         let hit = hitTestCanvas(at: screenPoint)
         switch hit {
@@ -297,7 +297,7 @@ extension CanvasViewportView {
         }
     }
 
-    /// 拖拽悬停时高亮目标节点（通过 NotificationCenter 更新 SwiftUI 层 dropTargetNodeId）
+    /// Highlight target node when dragging and hovering (updating SwiftUI layer dropTargetNodeId via NotificationCenter)
     private func updateDropTargetHighlight(at screenPoint: CGPoint) {
         let newTarget = nodeId(at: screenPoint)
         if newTarget != dropTargetNodeId {

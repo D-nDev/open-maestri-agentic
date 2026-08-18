@@ -4,10 +4,10 @@ import UniformTypeIdentifiers
 
 // MARK: - FileTreeIconGridView
 
-/// Icon Grid 视图（NSCollectionView 实现，对标 Maestri Grid 模式）
-/// - 每列固定展示缩略图网格（图片/PDF/视频显示 Quick Look 预览图标）
-/// - 双击文件夹：通过 onNavigateTo 导航进入
-/// - 双击文件：Quick Look 预览
+/// Icon Grid view (NSCollectionView implementation, benchmarking Maestri Grid pattern)
+/// - Fixed display of thumbnail grid per column (Pictures/PDF/Videos display Quick Look preview icon)
+/// - Double-click the folder: Navigate through onNavigateTo
+/// - Double click on file: Quick Look preview
 final class FileTreeIconGridView: NSView {
 
     // MARK: - Public API
@@ -15,9 +15,9 @@ final class FileTreeIconGridView: NSView {
     var rootPath: String { store.rootPath }
 
     var onNavigateTo: ((String) -> Void)?
-    /// 任意点击时通知 Canvas 选中此节点
+    /// Notify Canvas that this node is selected when any click is made
     var onTapped: (() -> Void)?
-    /// 后退/前进导航（由 CanvasNodesView 在 navBar 区域命中对应按钮时调用）
+    /// Back/forward navigation (called by CanvasNodesView when the corresponding button is hit in the navBar area)
     var onGoBack: (() -> Void)?
     var onGoForward: (() -> Void)?
 
@@ -71,7 +71,7 @@ final class FileTreeIconGridView: NSView {
         scrollView.autoresizingMask = [.width, .height]
         addSubview(scrollView)
 
-        // 双击
+        // Double click
         let doubleClick = NSClickGestureRecognizer(target: self, action: #selector(handleDoubleClick))
         doubleClick.numberOfClicksRequired = 2
         collectionView.addGestureRecognizer(doubleClick)
@@ -99,28 +99,28 @@ final class FileTreeIconGridView: NSView {
         super.mouseDown(with: event)
     }
 
-    /// 由 CanvasNodesView 调用，将鼠标事件转发给内部 NSCollectionView，
-    /// 确保选中和手势识别器（双击）都能正确触发
+    /// Called by CanvasNodesView to forward mouse events to the internal NSCollectionView,
+    /// Ensure selection and gesture recognizers (double click) both fire correctly
     func forwardMouseDown(with event: NSEvent) {
         onTapped?()
         collectionView.mouseDown(with: event)
     }
 
-    /// 程序化点击处理（不依赖 NSEvent 转发）
+    /// Programmatic click processing (not relying on NSEvent forwarding)
     /// - Parameters:
-    ///   - localPoint: 相对于 FileTreeIconGridView 左上角的坐标
-    ///   - clickCount: 1=单击, 2=双击
+    ///   - localPoint: coordinates relative to the upper left corner of FileTreeIconGridView
+    ///   - clickCount: 1=click, 2=double click
     func handleClickAtLocalPoint(_ localPoint: NSPoint, clickCount: Int) {
         onTapped?()
 
-        // 考虑 scrollView 的 contentOffset
+        // Consider scrollView’s contentOffset
         let scrollOffset = scrollView.contentView.bounds.origin
         let adjustedPoint = NSPoint(x: localPoint.x + scrollOffset.x, y: localPoint.y + scrollOffset.y)
 
-        // 查找点击位置对应的 item
+        // Find the item corresponding to the click position
         guard let indexPath = collectionView.indexPathForItem(at: adjustedPoint),
               indexPath.item < store.items.count else {
-            // 点击空白区域：取消选中
+            // Click on an empty area: Uncheck
             collectionView.deselectAll(nil)
             return
         }
@@ -128,14 +128,14 @@ final class FileTreeIconGridView: NSView {
         let fi = store.items[indexPath.item]
 
         if clickCount >= 2 {
-            // 双击：目录导航进入 / 文件 Quick Look
+            // Double-click: Directory navigation into /File Quick Look
             if fi.isDirectory {
                 onNavigateTo?(fi.id)
             } else {
                 QuickLookCoordinator.shared.preview(url: URL(fileURLWithPath: fi.id))
             }
         } else {
-            // 单击：选中
+            // Click: Select
             collectionView.selectItems(at: [indexPath], scrollPosition: [])
         }
     }
@@ -143,13 +143,13 @@ final class FileTreeIconGridView: NSView {
     // MARK: - Double Click
 
     @objc private func handleDoubleClick(_ gesture: NSClickGestureRecognizer) {
-        // 优先通过手势坐标直接查找 item（避免事件转发导致 selectionIndexPaths 未更新的问题）
+        // Prioritize searching items directly through gesture coordinates (to avoid the problem of selectionIndexPaths not being updated due to event forwarding)
         let pt = gesture.location(in: collectionView)
         let indexPath: IndexPath?
         if let ip = collectionView.indexPathForItem(at: pt) {
             indexPath = ip
         } else {
-            // fallback：使用已有的 selection 状态
+            // fallback: use existing selection state
             indexPath = collectionView.selectionIndexPaths.first
         }
         guard let ip = indexPath, ip.item < store.items.count else { return }
@@ -202,9 +202,9 @@ extension FileTreeIconGridView: NSCollectionViewDelegate {
     }
 }
 
-// MARK: - FileGridItem（NSCollectionViewItem）
+// MARK: - FileGridItem (NSCollectionViewItem)
 
-/// 单个缩略图格子 Cell
+/// Single thumbnail grid Cell
 private final class FileGridItem: NSCollectionViewItem {
 
     private let iconView = NSImageView()

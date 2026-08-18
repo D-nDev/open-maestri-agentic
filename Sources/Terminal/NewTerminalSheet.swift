@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - 新建 Terminal Sheet
+// MARK: - New Terminal Sheet
 
 struct NewTerminalSheet: View {
     @Environment(AppState.self) private var appState
@@ -10,21 +10,21 @@ struct NewTerminalSheet: View {
     let onConfirm: (AgentPreset, RolePreset?, Bool, String) -> Void  // preset, role, isManager, workingDirectory
     @Environment(\.dismiss) private var dismiss
 
-    // 选中状态
+    // Selected status
     @State private var selectedIdx: Int = 0
     @State private var selectedRoleId: UUID? = nil
 
-    // Tab 切换: 0=详细信息, 1=外观, 2=角色
+    // Tab switching: 0=Details, 1=Appearance, 2=Character
     @State private var selectedTab: Int = 0
 
-    // 表单字段
+    // Form fields
     @State private var terminalName: String = ""
     @State private var command: String = ""
     @State private var monitorActivity: Bool = true
     @State private var isMaestroMode: Bool = false
     @State private var workingDirectory: String = ""
 
-    // 焦点控制
+    // Focus Control
     enum Field: Hashable { case name, command }
     @FocusState private var focusedField: Field?
 
@@ -33,13 +33,13 @@ struct NewTerminalSheet: View {
         let rs = initialRoles
 
         VStack(spacing: 0) {
-            // MARK: 标题
+            // MARK: Title
             Text("terminal.new")
                 .font(.system(size: 13, weight: .semibold))
                 .padding(.top, 16)
                 .padding(.bottom, 12)
 
-            // MARK: 快速开始 - Agent 图标行
+            // MARK: Quick Start - Agent Icon Row
             VStack(alignment: .leading, spacing: 8) {
                 Text("onboarding.quick_start")
                     .font(.system(size: 11))
@@ -53,7 +53,7 @@ struct NewTerminalSheet: View {
                             isSelected: selectedIdx == idx
                         ) {
                             selectedIdx = idx
-                            // 切换 agent 时更新名称和命令
+                            // Update names and commands when switching agents
                             terminalName = preset.name
                             command = preset.command
                         }
@@ -63,7 +63,7 @@ struct NewTerminalSheet: View {
             }
             .padding(.bottom, 14)
 
-            // MARK: 分段 Tab 控件
+            // MARK: Segmented Tab control
             Picker("", selection: $selectedTab) {
                 Text("label.details").tag(0)
                 Text("label.appearance").tag(1)
@@ -73,7 +73,7 @@ struct NewTerminalSheet: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 14)
 
-            // MARK: Tab 内容（条件渲染，确保每次只渲染当前 Tab，避免 TextField 焦点互相干扰）
+            // MARK: Tab content (conditional rendering, ensuring that only the current Tab is rendered each time to avoid TextField focus interference with each other)
             Group {
                 if selectedTab == 0 {
                     VStack(alignment: .leading, spacing: 12) {
@@ -92,7 +92,7 @@ struct NewTerminalSheet: View {
 
             Spacer(minLength: 8)
 
-            // MARK: 底部按钮
+            // MARK: Bottom button
             HStack(spacing: 12) {
                 Button("button.cancel") { dismiss() }
                     .buttonStyle(.plain)
@@ -127,7 +127,7 @@ struct NewTerminalSheet: View {
         }
     }
 
-    // MARK: - 确认创建
+    // MARK: - Confirm creation
 
     private func confirmCreation(presets: [AgentPreset], roles: [RolePreset]) {
         guard selectedIdx < presets.count else { return }
@@ -144,11 +144,11 @@ struct NewTerminalSheet: View {
         dismiss()
     }
 
-    // MARK: - 详细信息 Tab
+    // MARK: - Details Tab
 
     @ViewBuilder
     private var detailsTabContent: some View {
-        // 终端名称
+        // Terminal name
         VStack(alignment: .leading, spacing: 4) {
             Text("terminal.name")
                 .font(.system(size: 11))
@@ -159,7 +159,7 @@ struct NewTerminalSheet: View {
                 .focused($focusedField, equals: .name)
         }
 
-        // 命令
+        // Command
         VStack(alignment: .leading, spacing: 4) {
             Text("terminal.command")
                 .font(.system(size: 11))
@@ -170,7 +170,7 @@ struct NewTerminalSheet: View {
                 .focused($focusedField, equals: .command)
         }
 
-        // 复选框
+        // Checkbox
         VStack(alignment: .leading, spacing: 8) {
             Toggle(isOn: $monitorActivity) {
                 HStack(spacing: 4) {
@@ -196,7 +196,7 @@ struct NewTerminalSheet: View {
         }
         .padding(.top, 4)
 
-        // 工作目录（只读显示 + 选择按钮）
+        // Working directory (read-only display + select button)
         VStack(alignment: .leading, spacing: 4) {
             Text("workspace.working_dir")
                 .font(.system(size: 11))
@@ -241,7 +241,7 @@ struct NewTerminalSheet: View {
         .padding(.top, 4)
     }
 
-    /// 缩短路径显示（将用户目录替换为 ~）
+    /// Shorten path display (replace user directory with ~)
     private func abbreviatePath(_ path: String) -> String {
         let home = FileManager.default.homeDirectoryForCurrentUser.path
         if path.hasPrefix(home) {
@@ -250,7 +250,7 @@ struct NewTerminalSheet: View {
         return path
     }
 
-    // MARK: - 外观 Tab
+    // MARK: - Appearance Tab
 
     @ViewBuilder
     private var appearanceTabContent: some View {
@@ -283,7 +283,7 @@ struct NewTerminalSheet: View {
         }
     }
 
-    // MARK: - 角色 Tab
+    // MARK: - Character Tab
 
     @ViewBuilder
     private var roleTabContent: some View {
@@ -309,7 +309,7 @@ struct NewTerminalSheet: View {
     }
 }
 
-// MARK: - Agent 图标按钮
+// MARK: - Agent icon button
 
 struct AgentIconButton: View {
     let preset: AgentPreset

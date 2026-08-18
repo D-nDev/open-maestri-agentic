@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 创建工作区 Sheet（FR1：工作目录、名称、图标）
+/// Create workspace Sheet (FR1: working directory, name, icon)
 struct CreateWorkspaceSheet: View {
     @Environment(AppState.self) private var appState
     @Environment(\.dismiss) private var dismiss
@@ -16,7 +16,7 @@ struct CreateWorkspaceSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 标题栏
+            // Title bar
             HStack {
                 Text("workspace.new")
                     .font(.headline)
@@ -98,7 +98,7 @@ struct CreateWorkspaceSheet: View {
             workingDirectory: workingDirectory,
             icon: selectedIcon
         )
-        // 在 dismiss 前快照 manifest 和 appState 强引用，避免 sheet 销毁后 @Environment 失效
+        // Snapshot manifest and appState strong references before dismiss to avoid @Environment invalidation after sheet is destroyed
         let currentManifest = appState.manifest
         let capturedAppState = appState
 
@@ -107,21 +107,21 @@ struct CreateWorkspaceSheet: View {
         Task.detached(priority: .userInitiated) {
             let pm = PersistenceManager.shared
 
-            // 1. 创建目录和初始 workspace.json
+            // 1. Create directory and initial workspace.json
             try? pm.ensureWorkspaceDirectoryExists(id: entry.id)
             let payload = WorkspacePayload(id: entry.id, name: entry.name, workingDirectory: entry.workingDirectory)
             let doc = WorkspaceDocument(payload: payload)
             try? pm.saveSync(doc, to: pm.workspaceURL(id: entry.id))
 
-            // 2. 持久化 manifest
+            // 2. Persistence manifest
             var newManifest = currentManifest
             newManifest.workspaces.append(entry)
             try? pm.saveManifest(newManifest)
 
-            // 3. 构造 WorkspaceManager（不需要 load，刚创建的是空工作区）
+            // 3. Construct WorkspaceManager (no load required, the just created is an empty workspace)
             let ws = WorkspaceManager(entry: entry)
 
-            // 4. 回主线程更新 UI 状态（用强引用 capturedAppState，不会因 sheet 销毁而为 nil）
+            // 4. Return to the main thread to update the UI state (use a strong reference to capturedAppState, which will not become nil due to sheet destruction)
             let finalManifest = newManifest
             await MainActor.run {
                 capturedAppState.manifest = finalManifest
@@ -134,7 +134,7 @@ struct CreateWorkspaceSheet: View {
                 )
             }
 
-            // 5. Spotlight 更新
+            // 5. Spotlight update
             SpotlightIndexer.shared.indexWorkspace(
                 id: entry.id,
                 name: entry.name,

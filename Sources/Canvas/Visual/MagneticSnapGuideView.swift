@@ -1,26 +1,26 @@
 import AppKit
 
-/// 磁吸对齐辅助线层（最顶层），替代 CanvasViewportView.drawSnapGuidelines()。
-/// 同时负责绘制框选矩形和节点绘制预览矩形（因为此层在所有节点层之上）。
-/// 使用 canvasOrigin/zoom 将画布坐标转换为屏幕坐标后绘制。
+/// Magnetic alignment guide lines layer (topmost), replacing CanvasViewportView.drawSnapGuidelines().
+/// Responsible for drawing both the selection rectangle and the node drawing preview rectangle (because this layer is above all node layers).
+/// Use canvasOrigin/zoom to convert canvas coordinates to screen coordinates and then draw.
 final class MagneticSnapGuideView: NSView {
     override var isFlipped: Bool { true }
 
     var guidelines: [GuideLine] = [] { didSet { needsDisplay = true } }
-    /// 框选矩形（屏幕坐标，nil = 不绘制）
+    /// Selection rectangle (screen coordinates, nil = do not draw)
     var selectionRect: CGRect? { didSet { needsDisplay = true } }
-    /// 节点绘制预览矩形（屏幕坐标，nil = 不绘制）
+    /// Node draw preview rectangle (screen coordinates, nil = do not draw)
     var drawingRect: CGRect? { didSet { needsDisplay = true } }
-    /// 当前绘制节点类型（由 CanvasViewportView 同步，用于预览样式判断）
+    /// Current drawing node type (synchronized by CanvasViewportView, used for preview style judgment)
     var drawingNodeType: String = "terminal"
-    /// stroke 预览路径（屏幕坐标），包含起点、终点和节点类型
+    /// stroke preview path (screen coordinates), including start point, end point and node type
     var strokePreviewPath: (start: CGPoint, end: CGPoint, type: String)? {
         didSet {
             if strokePreviewPath != nil { startAnimation() } else { stopAnimation() }
             needsDisplay = true
         }
     }
-    /// freehand 预览点列表（屏幕坐标）
+    /// freehand preview point list (screen coordinates)
     var freehandPreviewPoints: [CGPoint]? {
         didSet {
             if freehandPreviewPoints != nil { startAnimation() } else { stopAnimation() }
@@ -30,7 +30,7 @@ final class MagneticSnapGuideView: NSView {
     var canvasOrigin: CGPoint = .zero
     var zoom: CGFloat = 1.0
 
-    // MARK: - 行进虚线动画
+    // MARK: - Marching dash animation
 
     private var animationTimer: Timer?
     private var dashPhase: CGFloat = 0
@@ -51,12 +51,12 @@ final class MagneticSnapGuideView: NSView {
         dashPhase = 0
     }
 
-    // MARK: - 绘制
+    // MARK: - draw
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
 
-        // 框选矩形
+        // Frame selection rectangle
         if let rect = selectionRect, rect.width > 2 || rect.height > 2 {
             let path = NSBezierPath(rect: rect)
             path.lineWidth = 1.0
@@ -66,7 +66,7 @@ final class MagneticSnapGuideView: NSView {
             path.fill()
         }
 
-        // 节点绘制预览矩形
+        // Node drawing preview rectangle
         if let rect = drawingRect {
             let path = NSBezierPath(roundedRect: rect, xRadius: 4, yRadius: 4)
             path.lineWidth = 1.5
@@ -77,12 +77,12 @@ final class MagneticSnapGuideView: NSView {
             path.fill()
         }
 
-        // stroke 预览（箭头/直线）—— 行进虚线
+        // stroke preview (arrow/line) - traveling dashed line
         if let preview = strokePreviewPath {
             drawStrokePreview(start: preview.start, end: preview.end, type: preview.type)
         }
 
-        // freehand 预览（钢笔/涂鸦）—— 行进虚线
+        // freehand preview (pen/doodle) - marching dashed line
         if let pts = freehandPreviewPoints, pts.count >= 2 {
             drawFreehandPreview(points: pts)
         }
@@ -111,7 +111,7 @@ final class MagneticSnapGuideView: NSView {
         }
     }
 
-    // MARK: - 预览绘制辅助
+    // MARK: - Preview drawing assistance
 
     private func drawStrokePreview(start: CGPoint, end: CGPoint, type: String) {
         let path = NSBezierPath()
@@ -128,7 +128,7 @@ final class MagneticSnapGuideView: NSView {
         NSColor.systemBlue.withAlphaComponent(0.8).setStroke()
         path.stroke()
 
-        // 起点和终点圆点
+        // Start and end points
         drawEndpointDot(at: start)
         drawEndpointDot(at: end)
     }

@@ -2,10 +2,10 @@ import XCTest
 import CoreGraphics
 @testable import open_maestri
 
-// Story 1.2 AC: frame [[x,y],[w,h]] 格式兼容性测试（NFR14: 与 Maestri v0.25.4 兼容）
+// Story 1.2 AC: frame [[x,y],[w,h]] format compatibility test (NFR14: compatible with Maestri v0.25.4)
 final class CGRectFrameTests: XCTestCase {
 
-    // MARK: - CGRect+Frame 扩展
+    // MARK: - CGRect+Frame extension
 
     func testFrameArrayEncoding() {
         let rect = CGRect(x: 100, y: 200, width: 300, height: 400)
@@ -30,9 +30,9 @@ final class CGRectFrameTests: XCTestCase {
     }
 
     func testInvalidFrameArrayReturnsNil() {
-        XCTAssertNil(CGRect(frameArray: [[100.0]]))         // 只有 1 个子数组
-        XCTAssertNil(CGRect(frameArray: [[100.0], [200.0]])) // 子数组元素不足
-        XCTAssertNil(CGRect(frameArray: []))                 // 空数组
+        XCTAssertNil(CGRect(frameArray: [[100.0]]))         // Only 1 subarray
+        XCTAssertNil(CGRect(frameArray: [[100.0], [200.0]])) // Insufficient subarray elements
+        XCTAssertNil(CGRect(frameArray: []))                 // Empty array
     }
 
     func testFrameRoundTrip() {
@@ -46,7 +46,7 @@ final class CGRectFrameTests: XCTestCase {
         XCTAssertEqual(restored?.size.height ?? 0, original.size.height, accuracy: 0.001)
     }
 
-    // MARK: - CanvasNode 序列化（NFR14 关键）
+    // MARK: - CanvasNode serialization (NFR14 key)
 
     func testCanvasNodeFrameIsArrayOfArraysInJSON() throws {
         let pm = PersistenceManager.shared
@@ -56,7 +56,7 @@ final class CGRectFrameTests: XCTestCase {
         )
         let data = try pm.encoder.encode(node)
         let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
-        // frame 必须是 [[x,y],[w,h]] 而非 {x:..., y:..., width:..., height:...}
+        // frame must be [[x,y],[w,h]] instead of {x:..., y:..., width:..., height:...}
         let frame = try XCTUnwrap(json["frame"] as? [[Double]],
                                    "frame must be [[Double]] format, got: \(json["frame"] as Any)")
         XCTAssertEqual(frame.count, 2)
@@ -64,10 +64,10 @@ final class CGRectFrameTests: XCTestCase {
         XCTAssertEqual(frame[1].count, 2)
     }
 
-    // MARK: - NodeContent Maestri 格式（{ "terminal": { "_0": {...} } }）
+    // MARK: - NodeContent Maestri format ({ "terminal": { "_0": {...} } })
 
     func testCanvasNodeFrameDecodeFromMaestriFormat() throws {
-        // Maestri v0.25.4 真实格式：content 使用 { "terminal": { "_0": {...} } }
+        // Maestri v0.25.4 real format: content using { "terminal": { "_0": {...} } }
         let maestriJSON = """
         {
           "id": "00000000-0000-0000-0000-000000000001",
@@ -115,7 +115,7 @@ final class CGRectFrameTests: XCTestCase {
         let content = NodeContent.terminal(TerminalContent(name: "test"))
         let data = try PersistenceManager.shared.encoder.encode(content)
         let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
-        // Maestri 格式：顶层 key 为 "terminal"，内部为 "_0"
+        // Maestri format: top-level key is "terminal", internal is "_0"
         XCTAssertNotNil(json["terminal"] as? [String: Any],
                         "NodeContent.terminal must encode as { 'terminal': { '_0': ... } }")
         let inner = try XCTUnwrap(json["terminal"] as? [String: Any])

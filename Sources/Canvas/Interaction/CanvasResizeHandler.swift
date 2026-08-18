@@ -2,7 +2,7 @@ import AppKit
 
 extension CanvasViewportView {
 
-    // MARK: - Resize 辅助
+    // MARK: - Resize auxiliary
 
     func applyResizeOnCanvas(id: UUID,
                              edge: ResizeEdge,
@@ -17,8 +17,8 @@ extension CanvasViewportView {
         var w = startFrame.width
         var h = startFrame.height
 
-        // startFrame 是屏幕坐标（缩放后），dx/dy 亦为屏幕坐标
-        // isFlipped = true：y=0 在顶部，dy>0 向下
+        // startFrame is the screen coordinate (after scaling), dx/dy is also the screen coordinate
+        // isFlipped = true: y=0 at top, dy>0 down
         switch edge {
         case .right:
             w = max(w + dx, minW)
@@ -57,8 +57,8 @@ extension CanvasViewportView {
             h = newH
         }
 
-        // 将活动边吸附到画布网格（与拖拽/绘制保持一致）
-        // 先转为画布坐标取整，再转回屏幕坐标
+        // Snap active edges to canvas grid (consistent with drag/draw)
+        // First convert to canvas coordinates and then convert back to screen coordinates
         let rawCanvasOrigin = screenToCanvas(CGPoint(x: x, y: y))
         let rawCanvasW = w / zoom
         let rawCanvasH = h / zoom
@@ -69,26 +69,26 @@ extension CanvasViewportView {
 
         switch edge {
         case .right, .bottomRight, .topRight:
-            // 右边活动：吸附右边
+            // Right activity: Adsorb the right side
             let snappedRight = ((rawCanvasOrigin.x + rawCanvasW) / grid).rounded() * grid
             snappedCanvasW = max(snappedRight - rawCanvasOrigin.x, CanvasNodeConstants.minNodeWidth)
             snappedCanvasOrigin = rawCanvasOrigin
             snappedCanvasH = rawCanvasH
         case .left, .bottomLeft, .topLeft:
-            // 左边活动：吸附左边（右边固定）
+            // Left activity: adsorb the left side (right side is fixed)
             let fixedRight = rawCanvasOrigin.x + rawCanvasW
             let snappedLeft = (rawCanvasOrigin.x / grid).rounded() * grid
             snappedCanvasW = max(fixedRight - snappedLeft, CanvasNodeConstants.minNodeWidth)
             snappedCanvasOrigin = CGPoint(x: fixedRight - snappedCanvasW, y: rawCanvasOrigin.y)
             snappedCanvasH = rawCanvasH
         case .bottom:
-            // 下边活动：吸附下边
+            // Bottom activity: adsorb the bottom
             let snappedBottom = ((rawCanvasOrigin.y + rawCanvasH) / grid).rounded() * grid
             snappedCanvasH = max(snappedBottom - rawCanvasOrigin.y, CanvasNodeConstants.minNodeHeight)
             snappedCanvasOrigin = rawCanvasOrigin
             snappedCanvasW = rawCanvasW
         case .top:
-            // 上边活动：吸附上边（下边固定）
+            // Top activity: adsorb the top (fix the bottom)
             let fixedBottom = rawCanvasOrigin.y + rawCanvasH
             let snappedTop = (rawCanvasOrigin.y / grid).rounded() * grid
             snappedCanvasH = max(fixedBottom - snappedTop, CanvasNodeConstants.minNodeHeight)
@@ -99,7 +99,7 @@ extension CanvasViewportView {
         let newCanvasFrame = CGRect(x: snappedCanvasOrigin.x, y: snappedCanvasOrigin.y,
                                     width: snappedCanvasW, height: snappedCanvasH)
 
-        // 网格跨越时触发触觉反馈（与拖拽/绘制一致）
+        // Trigger haptic feedback on grid crossing (consistent with dragging/drawing)
         if let prev = nodeCanvasFrames[id], prev != newCanvasFrame {
             NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
         }
@@ -107,11 +107,11 @@ extension CanvasViewportView {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         nodeCanvasFrames[id] = newCanvasFrame
-        // 同步更新 currentNodes，避免 layout() 重建 SwiftUI 视图时使用旧 frame 导致"弹回"
+        // Update currentNodes synchronously to avoid "bounce" caused by using the old frame when layout() rebuilds the SwiftUI view
         updateNodeFrameInPlace(id: id, frame: newCanvasFrame)
         CATransaction.commit()
         needsLayout = true
-        // 通知连线物理引擎：resize 也改变了节点中心
+        // Notify the wired physics engine: resize also changes the node center
         onNodeFramesDuringDrag?([id])
     }
 }

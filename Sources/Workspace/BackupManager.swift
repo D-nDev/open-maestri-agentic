@@ -1,22 +1,22 @@
 import OSLog
 import Foundation
 
-/// 备份与恢复管理器
-/// - 每小时自动生成 .omaestribak 备份（文件路径清单 JSON）
-/// - 支持从备份文件恢复所有工作区数据
-/// - 支持导出完整备份到用户指定路径 / 从外部文件导入恢复
+/// Backup and Recovery Manager
+/// - Automatic hourly generation of .omaestribak backups (list of file paths JSON)
+/// - Supports restoring all workspace data from backup files
+/// - Support exporting full backup to user-specified path/import recovery from external files
 final class BackupManager {
     static let shared = BackupManager()
     private let logger = Logger.make(category: "BackupManager")
     private var timer: Timer?
     private let pm = PersistenceManager.shared
 
-    /// 上次自动备份完成时间（运行时状态）
+    /// Last automatic backup completion time (runtime status)
     private(set) var lastBackupTime: Date?
 
     private init() {}
 
-    // MARK: - 定时备份
+    // MARK: - Scheduled backup
 
     func startHourlyBackups() {
         timer?.invalidate()
@@ -36,7 +36,7 @@ final class BackupManager {
         timer = nil
     }
 
-    // MARK: - 备份创建
+    // MARK: - Backup created
 
     func createBackup() async {
         let fm = FileManager.default
@@ -64,25 +64,25 @@ final class BackupManager {
         }
     }
 
-    // MARK: - 导出完整备份（用户手动触发，保存到指定路径）
+    // MARK: - Export full backup (manually triggered by user, save to specified path)
 
-    /// 将所有应用数据导出为单个备份文件
-    /// - Parameter destinationURL: 用户通过 NSSavePanel 选择的目标路径
+    /// Export all application data to a single backup file
+    /// - Parameter destinationURL: The destination path selected by the user through NSSavePanel
     func exportBackup(to destinationURL: URL) throws {
         let data = try buildBackupData()
         try data.write(to: destinationURL, options: .atomic)
         logger.info("Backup exported to: \(destinationURL.path)")
     }
 
-    /// 从外部备份文件导入恢复（用户通过 NSOpenPanel 选择）
-    /// - Parameter sourceURL: 外部 .omaestribak 文件路径
-    /// - Returns: 成功恢复的文件数量
+    /// Import recovery from external backup file (user selection via NSOpenPanel)
+    /// - Parameter sourceURL: External .omaestribak file path
+    /// - Returns: Number of files successfully recovered
     @discardableResult
     func importBackup(from sourceURL: URL) throws -> Int {
         return try restoreFromBackup(url: sourceURL)
     }
 
-    // MARK: - 备份列表
+    // MARK: - Backup list
 
     func listBackups() -> [URL] {
         let backupDir = pm.appDataURL.appendingPathComponent("backups")
@@ -99,28 +99,28 @@ final class BackupManager {
         }) ?? []
     }
 
-    /// 获取上次备份的时间（从文件系统读取，用于首次启动时显示）
+    /// Get the time of the last backup (read from the file system, for display on first boot)
     func lastBackupDate() -> Date? {
         if let cached = lastBackupTime { return cached }
         guard let latest = listBackups().first else { return nil }
         return (try? latest.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate)
     }
 
-    // MARK: - 恢复
+    // MARK: - Recovery
 
-    /// 从备份文件恢复数据（将备份的文件内容复制回原路径）
-    /// - Parameter backupURL: .omaestribak 文件 URL
-    /// - Returns: 成功恢复的文件数量
+    /// Restore data from backup file (copy the backup file contents back to the original path)
+    /// - Parameter backupURL: .omaestribak file URL
+    /// - Returns: Number of files successfully recovered
     @discardableResult
     func restoreFromBackup(url backupURL: URL) throws -> Int {
         let fm = FileManager.default
         let data = try Data(contentsOf: backupURL)
 
-        // 新格式：{"files": {"path": "base64content", ...}}
-        // 旧格式（路径清单）：["path1", "path2", ...]
+        // New format: {"files": {"path": "base64content", ...}}
+        // Old format (path list): ["path1", "path2", ...]
         if let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
            let files = dict["files"] as? [String: String] {
-            // 新格式恢复
+            // New format recovery
             var restoredCount = 0
             for (path, base64) in files {
                 guard let fileData = Data(base64Encoded: base64) else { continue }
@@ -138,7 +138,7 @@ final class BackupManager {
             NotificationCenter.default.post(name: .backupRestored, object: nil)
             return restoredCount
         } else {
-            // 旧格式：仅路径清单，无法真正恢复
+            // Old format: path list only, no real recovery
             let filePaths = (try? JSONDecoder().decode([String].self, from: data)) ?? []
             let available = filePaths.filter { fm.fileExists(atPath: $0) }.count
             logger.warning("Backup \(backupURL.lastPathComponent) uses old format (path-only), cannot restore content")
@@ -146,14 +146,14 @@ final class BackupManager {
         }
     }
 
-    // MARK: - 存储用量计算
+    // MARK: - Storage usage calculation
 
-    /// 计算整个应用数据目录的总大小
+    /// Calculate the total size of the entire application data directory
     func totalStorageSize() -> Int64 {
         return directorySize(at: pm.appDataURL)
     }
 
-    /// 计算各工作区的存储大小
+    /// Calculate the storage size of each workspace
     /// - Returns: [(workspaceName, workspaceId, sizeInBytes)]
     func workspaceStorageSizes() -> [(name: String, id: UUID, size: Int64)] {
         let fm = FileManager.default
@@ -165,7 +165,7 @@ final class BackupManager {
             guard let uuid = UUID(uuidString: entry) else { continue }
             let wsPath = wsDir.appendingPathComponent(entry)
             let size = directorySize(at: wsPath)
-            // 尝试读取工作区名称
+            // Attempt to read workspace name
             let wsJsonPath = wsPath.appendingPathComponent("workspace.json")
             var name = entry
             if let data = try? Data(contentsOf: wsJsonPath),
@@ -179,7 +179,7 @@ final class BackupManager {
         return results.sorted { $0.size > $1.size }
     }
 
-    /// 递归计算目录大小
+    /// Recursively calculate directory size
     private func directorySize(at url: URL) -> Int64 {
         let fm = FileManager.default
         guard let enumerator = fm.enumerator(
@@ -198,28 +198,28 @@ final class BackupManager {
         return totalSize
     }
 
-    // MARK: - 重置所有数据
+    // MARK: - Reset all data
 
-    /// 删除所有应用数据（危险操作，调用前需确认）
+    /// Delete all application data (dangerous operation, need to confirm before calling)
     func deleteAllData() throws {
         let fm = FileManager.default
         let appDataPath = pm.appDataURL.path
         guard fm.fileExists(atPath: appDataPath) else { return }
 
-        // 逐个删除子目录和文件，而非递归删除根目录
+        // Delete subdirectories and files one by one instead of recursively deleting the root directory
         let contents = try fm.contentsOfDirectory(atPath: appDataPath)
         for item in contents {
             let itemPath = pm.appDataURL.appendingPathComponent(item).path
             try fm.removeItem(atPath: itemPath)
         }
-        // 重新创建基础目录结构
+        // Recreate the base directory structure
         try pm.ensureDirectoriesExist()
         logger.warning("All application data has been deleted and directories recreated")
     }
 
-    // MARK: - 私有辅助
+    // MARK: - Private Auxiliary
 
-    /// 构建备份数据（收集所有文件并打包为 JSON）
+    /// Build backup data (collect all files and package as JSON)
     private func buildBackupData() throws -> Data {
         let fm = FileManager.default
         var filesToBackup: [URL] = []
@@ -235,7 +235,7 @@ final class BackupManager {
                 if fm.fileExists(atPath: wsFile.path) {
                     filesToBackup.append(wsFile)
                 }
-                // 备份 notes
+                // Backup notes
                 let notesDir = wsDir.appendingPathComponent("\(wsId)/notes")
                 if let notes = try? fm.contentsOfDirectory(atPath: notesDir.path) {
                     for note in notes where note.hasSuffix(".md") {
@@ -244,7 +244,7 @@ final class BackupManager {
                 }
             }
         }
-        // 备份 roles
+        // Backup roles
         let rolesDir = pm.appDataURL.appendingPathComponent("roles")
         if let roleIds = try? fm.contentsOfDirectory(atPath: rolesDir.path) {
             for roleId in roleIds {
@@ -257,11 +257,11 @@ final class BackupManager {
             }
         }
 
-        // 存储文件路径 + base64 编码内容
+        // Storage file path + base64 encoded content
         var fileContents: [String: String] = [:]
         for fileURL in filesToBackup {
             if let fileData = try? Data(contentsOf: fileURL) {
-                // 使用相对路径存储（相对于 appDataURL），便于恢复到不同位置
+                // Use relative path storage (relative to appDataURL) to facilitate restoring to a different location
                 fileContents[fileURL.path] = fileData.base64EncodedString()
             }
         }
@@ -275,7 +275,7 @@ final class BackupManager {
         return try JSONSerialization.data(withJSONObject: payload)
     }
 
-    // MARK: - 清理旧备份
+    // MARK: - Clean old backups
 
     private func pruneOldBackups(in dir: URL, keepCount: Int) async {
         let fm = FileManager.default

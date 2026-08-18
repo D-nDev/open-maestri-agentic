@@ -11,7 +11,7 @@ final class ConnectionManagerTests: XCTestCase {
         tm = TerminalManager.shared
     }
 
-    // MARK: - 连接建立
+    // MARK: - Connection established
 
     func testConnectTerminalsCreatesConnection() async {
         let idA = UUID()
@@ -27,7 +27,7 @@ final class ConnectionManagerTests: XCTestCase {
         XCTAssertNotNil(cm.connections[conn.id])
         XCTAssertEqual(cm.connections[conn.id]?.type, .terminalToTerminal)
 
-        // 清理
+        // Cleanup
         cm.disconnect(id: conn.id)
         tm.removeTerminal(id: idA)
         tm.removeTerminal(id: idB)
@@ -88,7 +88,7 @@ final class ConnectionManagerTests: XCTestCase {
         tm.removeTerminal(id: idC)
     }
 
-    // MARK: - 状态管理
+    // MARK: - Status Management
 
     func testConnectionStatusDefaultIsIdle() async {
         let idA = UUID()
@@ -124,7 +124,7 @@ final class ConnectionManagerTests: XCTestCase {
         tm.removeTerminal(id: idB)
     }
 
-    // MARK: - 查询
+    // MARK: - Query
 
     func testConnectionsForNodeReturnsCorrectConnections() async {
         let idA = UUID()

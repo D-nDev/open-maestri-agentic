@@ -5,8 +5,8 @@ import OSLog
 
 private let dataSettingsLogger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "open-maestri", category: "DataSettings")
 
-/// 数据管理设置页（对标 Maestri Settings → 数据）
-/// 包含：存储位置、存储用量、自动保存、备份与恢复、全局存储、重置
+/// Data management settings page (compared to Maestri Settings → Data)
+/// Includes: storage location, storage usage, auto-save, backup and recovery, global storage, reset
 struct DataSettingsView: View {
     @Environment(AppState.self) private var appState
     @State private var totalSize: Int64 = 0
@@ -44,7 +44,7 @@ struct DataSettingsView: View {
         }
     }
 
-    // MARK: - 存储位置
+    // MARK: - Storage location
 
     private var storageLocationSection: some View {
         Section("data.section.storage_location") {
@@ -62,7 +62,7 @@ struct DataSettingsView: View {
         }
     }
 
-    // MARK: - 存储用量
+    // MARK: - Storage usage
 
     private var storageUsageSection: some View {
         Section("data.section.storage_usage") {
@@ -79,7 +79,7 @@ struct DataSettingsView: View {
         }
     }
 
-    // MARK: - 自动保存
+    // MARK: - Auto save
 
     private var autosaveSection: some View {
         @Bindable var state = appState
@@ -117,7 +117,7 @@ struct DataSettingsView: View {
         }
     }
 
-    // MARK: - 备份与恢复
+    // MARK: - Backup and Restore
 
     private var backupSection: some View {
         Section("data.section.backup") {
@@ -158,7 +158,7 @@ struct DataSettingsView: View {
         }
     }
 
-    // MARK: - 全局存储
+    // MARK: - Global Storage
 
     private var globalStorageSection: some View {
         Section("data.section.global_storage") {
@@ -187,7 +187,7 @@ struct DataSettingsView: View {
         }
     }
 
-    // MARK: - 重置
+    // MARK: - Reset
 
     private var resetSection: some View {
         Section("data.section.reset") {
@@ -300,7 +300,7 @@ struct DataSettingsView: View {
     private func deleteAllData() {
         do {
             try BackupManager.shared.deleteAllData()
-            // 重启应用
+            // Restart application
             let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
             let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
             let task = Process()

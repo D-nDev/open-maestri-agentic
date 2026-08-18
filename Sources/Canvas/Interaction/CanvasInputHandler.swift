@@ -3,31 +3,31 @@ import OSLog
 
 extension CanvasViewportView {
 
-    // MARK: - 键盘事件
+    // MARK: - Keyboard events
 
     override func keyDown(with event: NSEvent) {
         let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
         let key = event.charactersIgnoringModifiers ?? ""
 
-        // ⌘W - 删除选中节点
+        // ⌘W - Delete selected node
         if flags == .command && key == "w" {
             onDeleteSelectedNodes?()
             return
         }
 
-        // \ - 聚焦/居中选中节点到视口
+        // \ - Focus/center selected node to viewport
         if key == "\\" && flags.isEmpty {
             focusSelectedNodeInViewport()
             return
         }
 
-        // ⌘P - 过滤/搜索
+        // ⌘P - Filter/Search
         if flags == .command && key == "p" {
             NotificationCenter.default.post(name: .showCanvasFilter, object: nil)
             return
         }
 
-        // L - 启动连线工具（官方快捷键，非 ⌘L）
+        // L - Start the connection tool (official shortcut key, not ⌘L)
         if key == "l" && flags.isEmpty {
             if let firstSelected = selectedNodeIds.first {
                 connectingFromNodeId = firstSelected
@@ -36,31 +36,31 @@ extension CanvasViewportView {
             return
         }
 
-        // H - 切换平移模式（Pan）
+        // H - Switch pan mode (Pan)
         if key == "h" && flags.isEmpty {
             togglePanMode()
             return
         }
 
-        // ⌃Tab - 切换到下一个终端节点
+        // ⌃Tab - Switch to the next terminal node
         if event.keyCode == CanvasKeyCode.tab && flags == .control {
             cycleTerminalFocus(forward: true)
             return
         }
 
-        // ⌃⇧Tab - 切换到上一个终端节点
+        // ⌃⇧Tab - switch to the previous terminal node
         if event.keyCode == CanvasKeyCode.tab && flags == [.control, .shift] {
             cycleTerminalFocus(forward: false)
             return
         }
 
-        // ⌘⇧B - 切换当前选中终端节点的滚动锁定
+        // ⌘⇧B - Toggles the scroll lock of the currently selected terminal node
         if flags == [.command, .shift] && key == "b" {
             toggleAutoScrollLock()
             return
         }
 
-        // Space - 进入平移模式
+        // Space - Enter panning mode
         if event.keyCode == CanvasKeyCode.space && !isSpaceHeld {
             isSpaceHeld = true
             NSCursor.openHand.set()
@@ -71,7 +71,7 @@ extension CanvasViewportView {
     }
 
     override func keyUp(with event: NSEvent) {
-        // Space 释放 - 退出平移模式
+        // Space Release - Exit Panning Mode
         if event.keyCode == CanvasKeyCode.space {
             isSpaceHeld = false
             if case .panCanvas = interaction { interaction = .idle }
@@ -86,14 +86,14 @@ extension CanvasViewportView {
         onNodeJumpNumbersRequested?(cmdHeld)
         assignJumpNumbers(visible: cmdHeld)
 
-        // Space 键检测（用于 Space+拖拽平移）
-        // NSEvent.ModifierFlags 不包含 Space，通过 keyDown/keyUp 跟踪
+        // Space key detection (for Space+drag pan)
+        // NSEvent.ModifierFlags does not contain Space, tracked via keyDown/keyUp
         super.flagsChanged(with: event)
     }
 
-    /// ⌘ 按住时为所有 Terminal 节点分配跳转数字（1~9），松开时清除
+    /// ⌘ Assign jump numbers (1~9) to all Terminal nodes when pressed and clear when released
     private func assignJumpNumbers(visible: Bool) {
-        // NSHostingView 迁移后 nodeViews 为空；跳转数字通过通知传递给 SwiftUI 层
+        // nodeViews is empty after NSHostingView migration; jump number is passed to SwiftUI layer through notification
         let terminalIds = currentNodes
             .filter { if case .terminal = $0.content { return true }; return false }
             .sorted { lhs, rhs in
@@ -114,12 +114,12 @@ extension CanvasViewportView {
         )
     }
 
-    // MARK: - ⌘+数字 终端跳转
+    // MARK: - ⌘+number terminal jump
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
         let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
 
-        // ⌘= / ⌘+ — 放大（以视口中心为锚点）
+        // ⌘= / ⌘+ — Zoom in (center of viewport as anchor)
         if flags == .command,
            let key = event.charactersIgnoringModifiers,
            key == "=" || key == "+" {
@@ -127,7 +127,7 @@ extension CanvasViewportView {
             return true
         }
 
-        // ⌘- — 缩小
+        // ⌘- — Zoom out
         if flags == .command,
            let key = event.charactersIgnoringModifiers,
            key == "-" {
@@ -135,7 +135,7 @@ extension CanvasViewportView {
             return true
         }
 
-        // ⌘0 — 重置缩放到 100%
+        // ⌘0 — Reset zoom to 100%
         if flags == .command,
            let key = event.charactersIgnoringModifiers,
            key == "0" {
@@ -143,7 +143,7 @@ extension CanvasViewportView {
             return true
         }
 
-        // ⌘1…9 — 终端跳转
+        // ⌘1…9 — Terminal jump
         if flags == .command, let key = event.charactersIgnoringModifiers,
            let num = Int(key), num >= 1 && num <= 9 {
             jumpToTerminal(number: num)
@@ -152,19 +152,19 @@ extension CanvasViewportView {
         return super.performKeyEquivalent(with: event)
     }
 
-    // MARK: - 键盘缩放辅助
+    // MARK: - Keyboard zoom assist
 
-    /// 以视口中心为锚点，按增量调整缩放
+    /// Using the center of the viewport as the anchor point, adjust the zoom in increments
     func zoomCanvas(delta: CGFloat) {
         applyZoom((zoom + delta).clamped(to: Constants.canvasMinZoom...Constants.canvasMaxZoom))
     }
 
-    /// 以视口中心为锚点，设置绝对缩放值（如重置 100%）
+    /// Using the center of the viewport as the anchor point, set the absolute zoom value (such as reset to 100%)
     func zoomCanvas(toAbsolute target: CGFloat) {
         applyZoom(target.clamped(to: Constants.canvasMinZoom...Constants.canvasMaxZoom))
     }
 
-    /// 以视口中心为锚点应用缩放值（内部实现）
+    /// Apply scale value with viewport center as anchor point (internal implementation)
     private func applyZoom(_ newZoom: CGFloat) {
         guard newZoom != zoom else { return }
         let viewCenter = CGPoint(x: bounds.midX, y: bounds.midY)
@@ -181,7 +181,7 @@ extension CanvasViewportView {
     }
 
     private func jumpToTerminal(number: Int) {
-        // NSHostingView 迁移后改用 currentNodes + nodeCanvasFrames
+        // NSHostingView uses currentNodes + nodeCanvasFrames after migration
         let sorted = currentNodes
             .filter { if case .terminal = $0.content { return true }; return false }
             .sorted { lhs, rhs in
@@ -190,24 +190,24 @@ extension CanvasViewportView {
             }
         guard number - 1 < sorted.count else { return }
         let targetNode = sorted[number - 1]
-        // 聚焦到对应 TerminalView
+        // Focus on the corresponding TerminalView
         if let provider = TerminalManager.shared.providers[targetNode.id],
            let tv = provider.terminalView {
             window?.makeFirstResponder(tv)
         }
         selectedNodeIds = [targetNode.id]
-        // 平滑滚动视口使目标居中
+        // Smoothly scroll viewport to center target
         scrollToCanvasFrame(targetNode.frame)
     }
 
-    // MARK: - ⌃Tab 终端循环切换
+    // MARK: - ⌃Tab terminal cycle switching
 
-    /// 按画布横坐标排序，循环切换到下一个/上一个终端节点
+    /// Sort by the abscissa coordinate of the canvas and cycle to the next/previous terminal node
     func cycleTerminalFocus(forward: Bool) {
         let sorted = sortedTerminalNodes()
         guard !sorted.isEmpty else { return }
 
-        // 找当前聚焦的终端索引
+        // Find the currently focused terminal index
         let currentIndex: Int
         if let firstId = selectedNodeIds.first,
            let idx = sorted.firstIndex(where: { $0.id == firstId }) {
@@ -232,7 +232,7 @@ extension CanvasViewportView {
         scrollToCanvasFrame(target.frame)
     }
 
-    /// 按画布 x 坐标排序的终端节点列表
+    /// List of terminal nodes sorted by canvas x coordinate
     private func sortedTerminalNodes() -> [CanvasNode] {
         currentNodes
             .filter { if case .terminal = $0.content { return true }; return false }
@@ -242,16 +242,16 @@ extension CanvasViewportView {
             }
     }
 
-    /// 反查节点视图对应的 UUID（供内部循环使用，兼容旧代码）
+    /// Check back the UUID corresponding to the node view (for internal loop use, compatible with old code)
     func nodeId(forView view: NSView) -> UUID? {
         nodeId(for: view)
     }
 
-    // MARK: - ⌘⇧B 滚动锁定
+    // MARK: - ⌘⇧B scroll lock
 
-    /// 切换当前选中终端节点的自动滚动锁定状态
+    /// Toggle the automatic scroll lock state of the currently selected terminal node
     private func toggleAutoScrollLock() {
-        // NSHostingView 迁移后通过 TerminalManager.providers 操作，不依赖 TerminalNodeView
+        // NSHostingView operates through TerminalManager.providers after migration and does not rely on TerminalNodeView
         let targetIds: [UUID] = selectedNodeIds.isEmpty
             ? currentNodes.filter { if case .terminal = $0.content { return true }; return false }.map { $0.id }
             : Array(selectedNodeIds)
@@ -263,7 +263,7 @@ extension CanvasViewportView {
         }
     }
 
-    // MARK: - 聚焦到视口
+    // MARK: - Focus on viewport
 
     func focusSelectedNodeInViewport() {
         guard let firstId = selectedNodeIds.first,
@@ -272,7 +272,7 @@ extension CanvasViewportView {
         onFocusSelectedNode?()
     }
 
-    /// 立即（无动画）跳转到指定画布 frame（内部同步使用）
+    /// Immediately (without animation) jump to the specified canvas frame (used internally for synchronization)
     func scrollToCanvasFrame(_ canvasFrame: CGRect) {
         let newOriginX = canvasFrame.midX - (bounds.width / 2) / zoom
         let newOriginY = canvasFrame.midY - (bounds.height / 2) / zoom
@@ -281,7 +281,7 @@ extension CanvasViewportView {
         onViewportPanned?()
     }
 
-    /// 平滑动画跳转到指定画布 frame（duration=0.35s easeInOut）
+    /// Smooth animation jumps to the specified canvas frame (duration=0.35s easeInOut)
     func scrollToCanvasFrameAnimated(_ canvasFrame: CGRect, duration: TimeInterval = 0.35) {
         let targetOriginX = canvasFrame.midX - (bounds.width / 2) / zoom
         let targetOriginY = canvasFrame.midY - (bounds.height / 2) / zoom
@@ -290,14 +290,14 @@ extension CanvasViewportView {
         animateOrigin(from: canvasOrigin, to: targetOrigin, startTime: startTime, duration: duration)
     }
 
-    /// 平滑动画跳转到指定视图（兼容旧调用：传 NSView）
+    /// Smooth animation jumps to the specified view (compatible with old calls: pass NSView)
     func scrollToViewAnimated(_ view: NSView, duration: TimeInterval = 0.35) {
-        // 通过 viewToNodeId 反查 canvasFrame，避免依赖 nodeViews
+        // Check canvasFrame through viewToNodeId to avoid relying on nodeViews
         if let id = viewToNodeId[ObjectIdentifier(view)],
            let frame = nodeCanvasFrames[id] {
             scrollToCanvasFrameAnimated(frame, duration: duration)
         } else {
-            // 降级：使用 view.frame（屏幕坐标）反算画布坐标
+            // Downgrade: Backcalculate canvas coordinates using view.frame (screen coordinates)
             let screenCenter = CGPoint(x: view.frame.midX, y: view.frame.midY)
             let canvasCenter = screenToCanvas(screenCenter)
             let targetOriginX = canvasCenter.x - (bounds.width / 2) / zoom
@@ -308,7 +308,7 @@ extension CanvasViewportView {
         }
     }
 
-    /// 逐帧插值 canvasOrigin（easeInOut 缓动），使用 Timer 60fps 驱动
+    /// Frame-by-frame interpolation canvasOrigin (easeInOut easing), using Timer 60fps driver
     func animateOrigin(from: CGPoint, to: CGPoint, startTime: CFTimeInterval, duration: TimeInterval) {
         animationTimer?.invalidate()
         animationTimer = nil
@@ -333,23 +333,23 @@ extension CanvasViewportView {
         animationTimer = timer
     }
 
-    /// easeInOut 缓动函数
+    /// easeInOut easing function
     static func easeInOut(_ t: Double) -> Double {
         t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
     }
 
-    // MARK: - 平移模式
+    // MARK: - Panning mode
 
     func togglePanMode() {
         isPanMode = !isPanMode
         NSCursor.closedHand.set()
     }
 
-    // MARK: - 手势（触控板平移和缩放）
+    // MARK: - Gestures (trackpad pan and zoom)
 
     override func scrollWheel(with event: NSEvent) {
         if event.modifierFlags.contains(.command) {
-            // ⌘+滚轮 缩放（以鼠标位置为锚点）
+            // ⌘+wheel zoom (with mouse position as anchor point)
             let delta = event.scrollingDeltaY * 0.01
             let newZoom = (zoom + delta).clamped(to: Constants.canvasMinZoom...Constants.canvasMaxZoom)
             let mouseScreen = convert(event.locationInWindow, from: nil)
@@ -360,25 +360,25 @@ extension CanvasViewportView {
                 y: mouseCanvas.y - mouseScreen.y / zoom
             )
         } else {
-            // 触摸板两指平移：自然滚动（手指方向 = 内容移动方向）
+            // Touchpad two-finger pan: natural scrolling (finger direction = content movement direction)
             canvasOrigin = CGPoint(
                 x: canvasOrigin.x - event.scrollingDeltaX / zoom,
                 y: canvasOrigin.y - event.scrollingDeltaY / zoom
             )
         }
         needsLayout = true
-        // 仅在有临时连线时才触发 draw（draw() 只负责绘制临时连线，无临时连线时 needsDisplay 浪费）
+        // draw is only triggered when there are temporary connections (draw() is only responsible for drawing temporary connections, needsDisplay is wasted when there are no temporary connections)
         if connectingFromNodeId != nil {
             needsDisplay = true
         }
         notifyViewportChanged()
-        // 立即重渲染连线（不等 SwiftUI updateNSView 回路）
+        // Immediately re-render the connection (without waiting for SwiftUI updateNSView loop)
         onViewportPanned?()
     }
 
     override func magnify(with event: NSEvent) {
-        // 捏合开始：冻结所有终端 layout，防止 scaleEffect 的 CALayer transform 变化
-        // 触发 Metal drawable 重建导致闪烁（frozen 期间 terminalView.frame 保持旧尺寸）
+        // Pinch start: Freeze all terminal layouts to prevent scaleEffect's CALayer transform from changing
+        // Triggering Metal drawable rebuild causes flickering (terminalView.frame maintains old size during frozen)
         if event.phase == .began {
             setTerminalZoomFreeze(true)
         }
@@ -393,21 +393,21 @@ extension CanvasViewportView {
             y: mouseCanvas.y - mouseScreen.y / zoom
         )
         needsLayout = true
-        // 仅在有临时连线时才触发 draw
+        // draw is only triggered when there are temporary connections
         if connectingFromNodeId != nil {
             needsDisplay = true
         }
         notifyViewportChanged()
-        // 立即重渲染连线（不等 SwiftUI updateNSView 回路）
+        // Immediately re-render the connection (without waiting for SwiftUI updateNSView loop)
         onViewportPanned?()
 
-        // 捏合结束：解冻终端，触发一次防抖 resize 落地最终尺寸
+        // End of pinching: Unfreeze the terminal, trigger anti-shake once, resize the final size after landing
         if event.phase.contains(.ended) || event.phase.contains(.cancelled) {
             setTerminalZoomFreeze(false)
         }
     }
 
-    /// 遍历当前所有终端节点，冻结或解冻其 MaestroTerminalView 的 layout。
+    /// Traverse all current terminal nodes and freeze or unfreeze the layout of their MaestroTerminalView.
     private func setTerminalZoomFreeze(_ freeze: Bool) {
         for node in currentNodes {
             guard case .terminal = node.content,

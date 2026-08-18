@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - 角色选择器（EditTerminalSheet / NewTerminalSheet 共用）
+// MARK: - Role Selector (common to EditTerminalSheet / NewTerminalSheet)
 
 struct RolePickerView: View {
     let roles: [RolePreset]
@@ -26,7 +26,7 @@ struct RolePickerView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // 描述文字
+            // Description text
             Text("role.picker.description")
                 .font(.system(size: 12))
                 .foregroundStyle(.secondary)
@@ -34,7 +34,7 @@ struct RolePickerView: View {
                 .padding(.bottom, 12)
 
             VStack(spacing: 0) {
-                // 搜索框（深一点的灰色背景）
+                // Search box (darker gray background)
                 HStack(spacing: 6) {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 12))
@@ -53,7 +53,7 @@ struct RolePickerView: View {
                 .padding(.top, 14)
                 .padding(.bottom, 10)
 
-                // 角色网格
+                // Character Mesh
                 ScrollView {
                     LazyVGrid(
                         columns: [GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6)],
@@ -87,7 +87,7 @@ struct RolePickerView: View {
             .padding(.horizontal, 24)
             .padding(.bottom, 12)
 
-            // 选中角色 prompt 预览（灰色背景，与角色网格区域颜色一致）
+            // Select the character prompt preview (gray background, consistent with the color of the character grid area)
             if let role = selectedRole {
                 VStack(spacing: 0) {
                     HStack(alignment: .top, spacing: 0) {
@@ -128,7 +128,7 @@ struct RolePickerView: View {
                     .padding(.bottom, 4)
             }
 
-            // 底部操作行
+            // Bottom Action Row
             HStack {
                 Spacer()
 
@@ -146,7 +146,7 @@ struct RolePickerView: View {
             .padding(.horizontal, 24)
             .padding(.bottom, 10)
 
-            // Info 说明
+            // Info description
             HStack(alignment: .top, spacing: 6) {
                 Image(systemName: "info.circle")
                     .font(.system(size: 10))
@@ -180,7 +180,7 @@ struct RolePickerView: View {
     }
 }
 
-// MARK: - 角色网格卡片
+// MARK: - Character Grid Card
 
 private struct RoleGridCard: View {
     let role: RolePreset
@@ -221,7 +221,7 @@ private struct RoleGridCard: View {
     }
 }
 
-// MARK: - 新建卡片
+// MARK: - Create new card
 
 private struct NewRoleCard: View {
     let onTap: () -> Void

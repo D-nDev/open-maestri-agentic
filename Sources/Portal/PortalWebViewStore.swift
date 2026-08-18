@@ -2,8 +2,8 @@ import Foundation
 import WebKit
 import OSLog
 
-/// Portal WKWebView 实例管理器
-/// 每个 Portal 节点持有独立 WKWebViewConfiguration（独立 Cookie/Storage）
+/// Portal WKWebView Instance Manager
+/// Each Portal node holds an independent WKWebViewConfiguration (independent Cookie/Storage)
 @MainActor
 final class PortalWebViewStore {
     static let shared = PortalWebViewStore()
@@ -12,11 +12,11 @@ final class PortalWebViewStore {
     private var navigationDelegates: [UUID: PortalNavigationDelegate] = [:]
     private var uiDelegates: [UUID: PortalUIDelegate] = [:]
     private var loadingContinuations: [UUID: CheckedContinuation<Void, Error>] = [:]
-    /// Portal URL 输入框引用（用于 AppKit 层聚焦）
+    /// Portal URL input box reference (for AppKit layer focus)
     private var urlTextFields: [UUID: NSTextField] = [:]
     private init() {}
 
-    // MARK: - URL TextField 管理
+    // MARK: - URL TextField Management
 
     func registerURLTextField(_ textField: NSTextField, for portalId: UUID) {
         urlTextFields[portalId] = textField
@@ -26,7 +26,7 @@ final class PortalWebViewStore {
         urlTextFields.removeValue(forKey: portalId)
     }
 
-    /// 通过 NSTextField 引用注销（dismantleNSView 场景下 nodeId 不易获取）
+    /// Logout through NSTextField reference (nodeId is not easy to obtain in dismantleNSView scenario)
     func unregisterURLTextField(matching textField: NSTextField) {
         if let key = urlTextFields.first(where: { $0.value === textField })?.key {
             urlTextFields.removeValue(forKey: key)
@@ -37,16 +37,16 @@ final class PortalWebViewStore {
         urlTextFields[portalId]
     }
 
-    // MARK: - WebView 生命周期
+    // MARK: - WebView life cycle
 
-    /// sharedDataStores: portal-portal 连接组 → 共享 WKWebsiteDataStore
+    /// sharedDataStores: portal-portal connection group → shared WKWebsiteDataStore
     private var sharedDataStores: [UUID: WKWebsiteDataStore] = [:]  // groupId → store
     private var portalGroups: [UUID: UUID] = [:]                     // portalId → groupId
 
     func createWebView(for portalId: UUID, initialURL: String? = nil, sharedGroupId: UUID? = nil) -> WKWebView {
-        // 去重保护：如果已存在同 portalId 的 WebView，直接返回（避免重复创建导致旧 WebView 丢失引用）
+        // Deduplication protection: If a WebView with the same portalId already exists, return directly (to avoid repeated creation causing the old WebView to lose references)
         if let existing = webViews[portalId] {
-            // 如果调用方提供了 initialURL 且 WebView 当前无内容且未在加载中，才补充加载
+            // If the caller provides the initialURL and the WebView currently has no content and is not loading, it will only be loaded additionally.
             if let urlStr = initialURL, let url = URL(string: urlStr),
                existing.url == nil && !existing.isLoading {
                 existing.load(URLRequest(url: url))
@@ -54,8 +54,8 @@ final class PortalWebViewStore {
             return existing
         }
         let config = WKWebViewConfiguration()
-        // 独立 Portal 使用非持久化存储（storageScope: isolated）
-        // Portal-Portal 连接时共享同一 WKWebsiteDataStore
+        // Independent Portal uses non-persistent storage (storageScope: isolated)
+        // Portal-Portal connections share the same WKWebsiteDataStore
         if let groupId = sharedGroupId {
             if let existing = sharedDataStores[groupId] {
                 config.websiteDataStore = existing
@@ -66,17 +66,17 @@ final class PortalWebViewStore {
             }
             portalGroups[portalId] = groupId
         } else {
-            // 使用持久化存储，保留 Cookie/Session，避免网站因会话丢失而无限刷新
+            // Use persistent storage to retain Cookie/Session to avoid infinite refresh of the website due to session loss.
             config.websiteDataStore = WKWebsiteDataStore.default()
         }
         let webView = WKWebView(frame: .zero, configuration: config)
-        // 设置 navigationDelegate 处理证书挑战（允许自签名 HTTPS）
+        // Set navigationDelegate to handle certificate challenges (allow self-signed HTTPS)
         let delegate = PortalNavigationDelegate(portalId: portalId)
         webView.navigationDelegate = delegate
-        // 设置 uiDelegate 处理 target="_blank" / window.open() 新窗口请求
+        // Set uiDelegate to handle target="_blank" / window.open() new window request
         let uiDelegate = PortalUIDelegate(portalId: portalId)
         webView.uiDelegate = uiDelegate
-        // 保留 delegate 引用避免被 ARC 释放
+        // Keep delegate reference to avoid being released by ARC
         navigationDelegates[portalId] = delegate
         uiDelegates[portalId] = uiDelegate
         webViews[portalId] = webView
@@ -100,7 +100,7 @@ final class PortalWebViewStore {
         uiDelegates.removeValue(forKey: portalId)
         loadingContinuations.removeValue(forKey: portalId)?.resume()
         lastNotifiedURLs.removeValue(forKey: portalId)
-        // 清理共享组（如果是最后一个成员）
+        // Clean up shared group if last member
         if let groupId = portalGroups.removeValue(forKey: portalId) {
             let remaining = portalGroups.values.filter { $0 == groupId }
             if remaining.isEmpty { sharedDataStores.removeValue(forKey: groupId) }
@@ -111,26 +111,26 @@ final class PortalWebViewStore {
         webViews[portalId]
     }
 
-    // MARK: - Portal↔Portal session 共享（FR31）
+    // MARK: - Portal↔Portal session sharing (FR31)
 
-    /// 建立 Portal-Portal 连接时共享 session
-    /// 注意：WKWebView 创建后无法更改 dataStore，因此需要重建 WebView
+    /// Sharing session when establishing Portal-Portal connection
+    /// Note: The dataStore cannot be changed after the WKWebView is created, so the WebView needs to be rebuilt
     func shareSession(portalIdA: UUID, portalIdB: UUID) {
         let groupId = portalGroups[portalIdA] ?? UUID()
         let urlA = webViews[portalIdA]?.url?.absoluteString
         let urlB = webViews[portalIdB]?.url?.absoluteString
 
-        // 停止旧 WebView
+        // Stop old WebView
         webViews[portalIdA]?.stopLoading()
         webViews[portalIdB]?.stopLoading()
         webViews.removeValue(forKey: portalIdA)
         webViews.removeValue(forKey: portalIdB)
 
-        // 创建共享 session 的新 WebView
+        // Create a new WebView that shares the session
         let newA = createWebView(for: portalIdA, initialURL: urlA, sharedGroupId: groupId)
         let newB = createWebView(for: portalIdB, initialURL: urlB, sharedGroupId: groupId)
 
-        // 通知 CanvasNodeRenderer 更新 Portal 视图中嵌入的 WebView
+        // Notify CanvasNodeRenderer to update WebView embedded in Portal view
         NotificationCenter.default.post(
             name: .portalWebViewReplaced,
             object: nil,
@@ -139,15 +139,15 @@ final class PortalWebViewStore {
         logger.info("Session shared: portal \(portalIdA.uuidString.prefix(8)) ↔ \(portalIdB.uuidString.prefix(8)) (group: \(groupId.uuidString.prefix(8)))")
     }
 
-    // MARK: - Navigation 回调（由 PortalNavigationDelegate 调用）
+    // MARK: - Navigation callback (called by PortalNavigationDelegate)
 
-    /// 上一次通知出去的 URL（防止同一 URL 重复 post 通知触发 @Observable 级联）
+    /// The URL of the last notification (to prevent repeated post notifications from triggering @Observable cascading for the same URL)
     private var lastNotifiedURLs: [UUID: String] = [:]
 
     func navigationDidFinish(for portalId: UUID) {
         loadingContinuations.removeValue(forKey: portalId)?.resume()
-        // 将最终落地 URL 写回模型，保证关闭重开后能恢复
-        // 去抖：仅当 URL 与上次通知的不同时才 post，避免重复触发 @Observable 级联更新
+        // Write the final landing URL back to the model to ensure recovery after closing and reopening
+        // Debounce: Post only when the URL is different from the last notification to avoid repeatedly triggering @Observable cascading updates
         if let url = webViews[portalId]?.url?.absoluteString, !url.isEmpty,
            lastNotifiedURLs[portalId] != url {
             lastNotifiedURLs[portalId] = url
@@ -163,7 +163,7 @@ final class PortalWebViewStore {
         loadingContinuations.removeValue(forKey: portalId)?.resume(throwing: error)
     }
 
-    // MARK: - Portal 自动化命令（omaestri portal）
+    // MARK: - Portal automation command (omaestri portal)
 
     func goBack(portalId: UUID) async throws {
         guard let wv = webViews[portalId] else {
@@ -191,13 +191,13 @@ final class PortalWebViewStore {
               let url = URL(string: urlString) else {
             throw MaestriError.portalCommandFailed("Invalid URL or portal not found: \(urlString)")
         }
-        // 取消之前未完成的 navigation（如有）
+        // Cancel previously unfinished navigation (if any)
         loadingContinuations.removeValue(forKey: portalId)?.resume()
 
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             loadingContinuations[portalId] = continuation
             wv.load(URLRequest(url: url))
-            // 15 秒超时保护：超时后不报错，直接继续
+            // 15 seconds timeout protection: no error will be reported after timeout and continue directly
             Task { [weak self] in
                 try? await Task.sleep(nanoseconds: 15_000_000_000)
                 self?.loadingContinuations.removeValue(forKey: portalId)?.resume()
@@ -241,10 +241,10 @@ final class PortalWebViewStore {
         }
     }
 
-    // MARK: - 全局存储管理
+    // MARK: - Global storage management
 
-    /// 清除全局 Portal 存储（Cookie、缓存、本地数据）
-    /// 对应 Maestri "清除全局存储..." 功能
+    /// Clear global portal storage (cookies, cache, local data)
+    /// Corresponds to Maestri "Clear global storage..." function
     func clearGlobalStorage() async {
         let dataStore = WKWebsiteDataStore.default()
         let dataTypes = WKWebsiteDataStore.allWebsiteDataTypes()

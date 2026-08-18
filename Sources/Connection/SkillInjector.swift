@@ -2,20 +2,20 @@
 import Foundation
 import OSLog
 
-/// 将 open-maestri skill 文件写入用户全局 ~/.claude/skills/ 目录
-/// 在建立 Connection 时调用，确保 Claude Code 能自动加载 omaestri 相关 skill
+/// Write the open-maestri skill file to the user global ~/.claude/skills/ directory
+/// Called when establishing a Connection to ensure that Claude Code can automatically load omaestri related skills
 final class SkillInjector {
     static let shared = SkillInjector()
     private let logger = Logger.make(category: "SkillInjector")
     private init() {}
 
-    // MARK: - 写入 skill 文件
+    // MARK: - Write skill file
 
     func inject(to terminalId: UUID, host: String) {
-        // no-op: skill 写入已在 applicationDidFinishLaunching 完成
+        // no-op: skill writing completed in applicationDidFinishLaunching
     }
 
-    /// 按需写入：将内置 skill 写入用户配置的所有活跃 skillPaths，已存在则跳过
+    /// Write on demand: Write the built-in skill to all active skillPaths configured by the user, skip if it already exists
     func installSkillsIfNeeded() {
         let prefs = PersistenceManager.shared.loadPreferencesSync()
         let activePaths = prefs.skillPaths.filter { $0.isActive }.map { $0.path }
@@ -50,7 +50,7 @@ final class SkillInjector {
         }
     }
 
-    // MARK: - Skill 内容
+    // MARK: - Skill content
 
     private struct SkillFile {
         let name: String

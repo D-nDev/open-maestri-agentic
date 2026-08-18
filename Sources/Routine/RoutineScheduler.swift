@@ -1,11 +1,11 @@
 import Foundation
 import OSLog
 
-/// 定时 Routine 配置
+/// Scheduled Routine configuration
 struct Routine: Codable, Identifiable {
     var id: UUID
     var name: String
-    var prompts: [String]           // 用 && 分隔的多条提示
+    var prompts: [String]           // Multiple prompts separated by &&
     var intervalSeconds: TimeInterval
     var targetTerminalId: UUID
     var isActive: Bool
@@ -14,7 +14,7 @@ struct Routine: Codable, Identifiable {
     init(id: UUID = UUID(), name: String, prompt: String, intervalSeconds: TimeInterval, targetTerminalId: UUID) {
         self.id = id
         self.name = name
-        // 解析 && 分隔符
+        // Parsing && delimiters
         self.prompts = prompt.components(separatedBy: "&&").map { $0.trimmingCharacters(in: .whitespaces) }
         self.intervalSeconds = intervalSeconds
         self.targetTerminalId = targetTerminalId
@@ -28,7 +28,7 @@ struct RoutinesContainer: Codable {
     init() { self.routines = [] }
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        // 兼容两种字段名：新格式用 routines，旧格式（Maestri原生）用 payload
+        // Compatible with two types of field names: routines for the new format, payload for the old format (Maestri native)
         if let r = try? container.decode([Routine].self, forKey: .routines) {
             self.routines = r
         } else if let p = try? container.decode([Routine].self, forKey: .payload) {
@@ -40,13 +40,13 @@ struct RoutinesContainer: Codable {
     private enum CodingKeys: String, CodingKey { case routines, payload }
     func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(routines, forKey: .payload)  // 写入时用 payload 与 Maestri 格式一致
+        try c.encode(routines, forKey: .payload)  // Use payload consistent with Maestri format when writing
     }
 }
 
-/// Routine 定时调度器（FR56-58）
-/// - 支持链式提示（&& 分隔，前一条完成后发下一条）
-/// - 活跃 Routine 显示绿色脉冲指示器
+/// Routine timing scheduler (FR56-58)
+/// - Support chain prompts (separated by &&, the next one will be sent after the previous one is completed)
+/// - Active Routine displays green pulsing indicator
 @MainActor
 final class RoutineScheduler {
     static let shared = RoutineScheduler()
@@ -57,12 +57,12 @@ final class RoutineScheduler {
 
     private init() {}
 
-    // MARK: - 持久化
+    // MARK: - Persistence
 
     func loadRoutines() throws {
         let container = (try? pm.load(RoutinesContainer.self, from: pm.routinesURL)) ?? RoutinesContainer()
         routines = container.routines
-        // 恢复活跃 Routine
+        // Restore active routine
         for routine in routines where routine.isActive {
             startTimer(for: routine)
         }
@@ -74,7 +74,7 @@ final class RoutineScheduler {
         try pm.saveSync(container, to: pm.routinesURL)
     }
 
-    // MARK: - Routine 管理
+    // MARK: - Routine management
 
     func addRoutine(_ routine: Routine) throws {
         routines.append(routine)
@@ -102,7 +102,7 @@ final class RoutineScheduler {
         }
     }
 
-    // MARK: - 定时器
+    // MARK: - Timer
 
     private func startTimer(for routine: Routine) {
         let timer = Timer.scheduledTimer(withTimeInterval: routine.intervalSeconds, repeats: true) { [weak self] _ in
@@ -119,13 +119,13 @@ final class RoutineScheduler {
         timers.removeValue(forKey: id)
     }
 
-    /// 停止所有 Routine 定时器（应用退出时调用，避免 Timer 回调阻塞主线程）
+    /// Stop all Routine timers (called when the application exits to avoid Timer callbacks from blocking the main thread)
     func stopAllTimers() {
         for (_, timer) in timers { timer.invalidate() }
         timers.removeAll()
     }
 
-    // MARK: - 执行（链式：等待 Agent 空闲后发下一条）
+    // MARK: - Execute (chain: wait for the Agent to be idle before sending the next one)
 
     private func executeRoutine(_ routine: Routine) async {
         logger.debug("Executing routine '\(routine.name)' — \(routine.prompts.count) prompt(s)")
@@ -135,19 +135,19 @@ final class RoutineScheduler {
             tm.writeLine(to: routine.targetTerminalId, text: prompt)
             logger.debug("Routine '\(routine.name)' sent prompt \(i+1)/\(routine.prompts.count)")
 
-            // 等待 Agent 变为空闲（最多 5 分钟）
+            // Wait for Agent to become idle (5 minutes maximum)
             if i < routine.prompts.count - 1 {
                 await waitForIdle(session: session, timeout: 300)
             }
         }
     }
 
-    /// 等待 TerminalSession 恢复空闲状态
+    /// Waiting for TerminalSession to return to idle state
     private func waitForIdle(session: TerminalSession, timeout: TimeInterval) async {
         let deadline = Date().addingTimeInterval(timeout)
-        // 先等 Agent 开始响应（最多 3s）
+        // Wait for the Agent to start responding (up to 3s)
         try? await Task.sleep(for: .seconds(3))
-        // 然后等 Agent 完成（输出静止）
+        // Then wait for Agent to complete (output is static)
         while Date() < deadline {
             if session.isIdle { return }
             try? await Task.sleep(for: .milliseconds(500))

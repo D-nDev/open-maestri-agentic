@@ -1,19 +1,19 @@
 import Foundation
 import CoreGraphics
 
-// MARK: - Rope（单条绳索的物理状态）
+// MARK: - Rope (physical state of a single rope)
 
-/// 单条物理绳索：存储 21 个质点的位置和上一帧位置（Verlet 积分所需）
+/// Single physics rope: stores 21 particle positions and previous frame position (required for Verlet integration)
 final class Rope {
     let id: UUID
-    /// 当前帧各质点位置（画布坐标）
+    /// The position of each particle in the current frame (canvas coordinates)
     var points: [CGPoint]
-    /// 上一帧各质点位置（Verlet 积分用于计算速度）
+    /// Position of each particle in the previous frame (Verlet integral is used to calculate velocity)
     var prevPoints: [CGPoint]
-    /// 绳索两端锚点（连接到节点中心）
+    /// Anchor points at both ends of the rope (connected to the center of the node)
     var anchorA: CGPoint
     var anchorB: CGPoint
-    /// 绳段静止长度（每两个相邻质点之间的理想距离）
+    /// Rest length of rope segment (ideal distance between every two adjacent mass points)
     var segmentLength: CGFloat
 
     init(id: UUID, anchorA: CGPoint, anchorB: CGPoint, pointCount: Int = Constants.ropeControlPointCount) {
@@ -21,7 +21,7 @@ final class Rope {
         self.anchorA = anchorA
         self.anchorB = anchorB
 
-        // 初始化为直线均分
+        // Initialize to straight line equalization
         var pts: [CGPoint] = []
         for i in 0..<pointCount {
             let t = CGFloat(i) / CGFloat(pointCount - 1)
@@ -33,14 +33,14 @@ final class Rope {
         self.points = pts
         self.prevPoints = pts
 
-        // 绳段长度 = 绳总长度 / (点数-1)，绳总长度 = 直线距离 * bendRatio
+        // Rope segment length = total rope length / (points - 1), total rope length = straight line distance * bendRatio
         let dist = hypot(anchorB.x - anchorA.x, anchorB.y - anchorA.y)
         let bendRatio = (Constants.ropeBendRatioMin + Constants.ropeBendRatioMax) / 2.0
-        let ropeLength = max(dist * bendRatio, 20.0)  // 最小绳长，避免零长度
+        let ropeLength = max(dist * bendRatio, 20.0)  // Minimum rope length, avoid zero length
         self.segmentLength = ropeLength / CGFloat(pointCount - 1)
     }
 
-    /// 重置绳索到新端点位置（直线初始化）
+    /// Reset rope to new end position (straight line initialization)
     func reset(anchorA: CGPoint, anchorB: CGPoint) {
         self.anchorA = anchorA
         self.anchorB = anchorB
@@ -57,7 +57,7 @@ final class Rope {
         updateSegmentLength()
     }
 
-    /// 更新端点后重算绳段长度（保持自然下垂比例）
+    /// Recalculate the length of the rope segment after updating the endpoint (maintaining the natural sagging ratio)
     func updateSegmentLength() {
         let dist = hypot(anchorB.x - anchorA.x, anchorB.y - anchorA.y)
         let bendRatio = (Constants.ropeBendRatioMin + Constants.ropeBendRatioMax) / 2.0
@@ -66,66 +66,66 @@ final class Rope {
     }
 }
 
-// MARK: - RopeSimulation（物理模拟引擎）
+// MARK: - RopeSimulation (physics simulation engine)
 
-/// 悬链线物理模拟器（对标 Maestri RopeSimulation）
-/// - Verlet 积分 + 弹簧距离约束 + 重力
-/// - Timer 驱动 60fps 物理 tick（Timer 挂在 RunLoop.main，回调始终在主线程）
-/// - 自动睡眠：运动量 < 阈值时停止模拟，节省 CPU
-/// - 唤醒：端点位置变化时重新启动模拟
+/// Catenary physical simulator (compared to Maestri RopeSimulation)
+/// - Verlet integral + spring distance constraint + gravity
+/// - Timer drives 60fps physical tick (Timer hangs in RunLoop.main, callback is always in the main thread)
+/// - Auto sleep: Stop simulation when motion amount < threshold, save CPU
+/// - Wakeup: Restart simulation when endpoint position changes
 ///
-/// 线程模型：所有访问均在主线程，@MainActor 使编译器可以静态验证此约束。
+/// Threading model: All accesses are on the main thread, @MainActor enables the compiler to statically verify this constraint.
 @MainActor
 final class RopeSimulation {
     static let controlPointCount = Constants.ropeControlPointCount
 
-    // MARK: - 物理参数
+    // MARK: - Physical parameters
 
-    /// 重力加速度（画布坐标单位/帧²），Y+ 向下
+    /// Gravity acceleration (canvas coordinate units/frame²), Y+ down
     private static let gravity: CGFloat = 0.8
-    /// 阻尼系数（0~1，越大越快衰减，0.98 = 2% 每帧速度损失）
+    /// Damping coefficient (0~1, the larger the faster the decay, 0.98 = 2% speed loss per frame)
     private static let damping: CGFloat = 0.98
-    /// 距离约束迭代次数（越多越刚性，3~5 次较优）
+    /// Number of distance constraint iterations (the more, the more rigid it is, 3 to 5 times is better)
     private static let constraintIterations = 5
-    /// 睡眠阈值：当所有质点单帧总运动量 < 此值时进入睡眠
+    /// Sleep threshold: Enter sleep when the total movement of all particles in a single frame < this value
     private static let sleepThreshold: CGFloat = 0.1
-    /// 唤醒阈值：端点偏移 > 此值时唤醒
+    /// Wake-up threshold: wake when endpoint offset > this value
     private static let wakeThreshold: CGFloat = 0.5
-    /// 物理 tick 间隔（秒），约 60fps
+    /// Physical tick interval (seconds), about 60fps
     private static let tickInterval: TimeInterval = 1.0 / 60.0
 
-    // MARK: - 状态
+    // MARK: - Status
 
-    /// 所有参与物理模拟的绳索
+    /// All ropes participating in the physics simulation
     private(set) var ropes: [UUID: Rope] = [:]
-    /// 物理定时器（nonisolated 以便 deinit 访问）
+    /// Physical timer (nonisolated for deinit access)
     nonisolated(unsafe) private var timer: Timer?
-    /// 是否处于睡眠状态（所有绳索均静止）
+    /// Whether in sleep state (all ropes are still)
     private(set) var isSleeping: Bool = true
-    /// 当前帧总运动量
+    /// Total motion amount of current frame
     private var totalMovement: CGFloat = 0
-    /// 睡眠回调（物理停止后调用，用于持久化 ropePoints）
+    /// Sleep callback (called after physical stop, used to persist ropePoints)
     var onSleep: (([UUID: [CGPoint]]) -> Void)?
-    /// 每帧更新回调（用于实时更新渲染层）
+    /// Each frame update callback (used to update the rendering layer in real time)
     var onTick: (([UUID: [CGPoint]]) -> Void)?
 
-    /// 缓存的 allPoints 字典（避免每帧分配新字典，仅在绳索数量变化时重建 keys）
+    /// Cached allPoints dictionary (avoid allocating new dictionary every frame, only rebuild keys when number of ropes changes)
     private var _cachedAllPoints: [UUID: [CGPoint]] = [:]
     private var _cachedAllPointsDirty: Bool = true
 
-    /// 复用的约束前位置缓冲区（避免每条绳索每帧分配新数组）
+    /// Multiplexed pre-constraint position buffer (avoids allocating new arrays per frame per rope)
     private var _preConstraintBuffer: [CGPoint] = []
 
-    // MARK: - 生命周期
+    // MARK: - Life cycle
 
     deinit {
         timer?.invalidate()
         timer = nil
     }
 
-    // MARK: - 公开接口
+    // MARK: - Public interface
 
-    /// 添加绳索（创建连接时调用）
+    /// Add rope (called when creating connection)
     func addRope(id: UUID, anchorA: CGPoint, anchorB: CGPoint) {
         let rope = Rope(id: id, anchorA: anchorA, anchorB: anchorB)
         ropes[id] = rope
@@ -133,7 +133,7 @@ final class RopeSimulation {
         wake()
     }
 
-    /// 从已有控制点恢复绳索（加载 workspace 时）
+    /// Restore rope from existing control point (when loading workspace)
     func addRope(id: UUID, anchorA: CGPoint, anchorB: CGPoint, existingPoints: [CGPoint]) {
         let rope = Rope(id: id, anchorA: anchorA, anchorB: anchorB)
         if existingPoints.count == rope.points.count {
@@ -141,10 +141,10 @@ final class RopeSimulation {
             rope.prevPoints = existingPoints
         }
         ropes[id] = rope
-        // 恢复时不立即唤醒（假设已处于稳态）
+        // Do not wake up immediately on recovery (assumes steady state already)
     }
 
-    /// 移除绳索（断开连接时调用）
+    /// Remove rope (called when disconnecting)
     func removeRope(id: UUID) {
         ropes.removeValue(forKey: id)
         _cachedAllPointsDirty = true
@@ -153,8 +153,8 @@ final class RopeSimulation {
         }
     }
 
-    /// 更新绳索端点（节点拖动时实时调用）
-    /// 端点变化超过阈值时唤醒物理模拟
+    /// Update rope endpoint (called in real time when the node is dragged)
+    /// Wake up physics simulation when endpoint changes exceed threshold
     func updateAnchors(id: UUID, anchorA: CGPoint, anchorB: CGPoint) {
         guard let rope = ropes[id] else { return }
         let movedA = hypot(rope.anchorA.x - anchorA.x, rope.anchorA.y - anchorA.y)
@@ -162,20 +162,20 @@ final class RopeSimulation {
 
         rope.anchorA = anchorA
         rope.anchorB = anchorB
-        // 立即同步首尾质点位置到新锚点（确保渲染时端点紧贴节点边缘）
+        // Immediately synchronize the position of the first and last particles to the new anchor point (make sure the endpoints are close to the edge of the node when rendering)
         rope.points[0] = anchorA
         rope.prevPoints[0] = anchorA
         rope.points[rope.points.count - 1] = anchorB
         rope.prevPoints[rope.points.count - 1] = anchorB
         rope.updateSegmentLength()
 
-        // 端点移动时唤醒物理模拟
+        // Wake up physics simulation when endpoint moves
         if movedA > Self.wakeThreshold || movedB > Self.wakeThreshold {
             wake()
         }
     }
 
-    /// 批量更新多条绳索的端点（高效路径：节点拖动影响多条连接时）
+    /// Batch update the endpoints of multiple ropes (efficient path: when node dragging affects multiple connections)
     func updateAnchors(updates: [(id: UUID, anchorA: CGPoint, anchorB: CGPoint)]) {
         var needWake = false
         for update in updates {
@@ -184,7 +184,7 @@ final class RopeSimulation {
             let movedB = hypot(rope.anchorB.x - update.anchorB.x, rope.anchorB.y - update.anchorB.y)
             rope.anchorA = update.anchorA
             rope.anchorB = update.anchorB
-            // 立即同步首尾质点位置到新锚点
+            // Immediately synchronize the head and tail particle positions to the new anchor point
             rope.points[0] = update.anchorA
             rope.prevPoints[0] = update.anchorA
             rope.points[rope.points.count - 1] = update.anchorB
@@ -197,12 +197,12 @@ final class RopeSimulation {
         if needWake { wake() }
     }
 
-    /// 获取指定绳索的当前控制点（用于渲染）
+    /// Get the current control point of the specified rope (for rendering)
     func points(for id: UUID) -> [CGPoint]? {
         ropes[id]?.points
     }
 
-    /// 获取所有绳索的当前控制点（复用内部缓存字典，避免每帧分配新字典）
+    /// Get the current control points of all ropes (reuse internal cache dictionaries to avoid allocating new dictionaries every frame)
     func allPoints() -> [UUID: [CGPoint]] {
         if _cachedAllPointsDirty {
             _cachedAllPoints.removeAll(keepingCapacity: true)
@@ -211,7 +211,7 @@ final class RopeSimulation {
             }
             _cachedAllPointsDirty = false
         } else {
-            // 绳索数量未变，仅更新各绳索的点位置引用
+            // The number of ropes has not changed, only the point position reference of each rope is updated.
             for (id, rope) in ropes {
                 _cachedAllPoints[id] = rope.points
             }
@@ -219,26 +219,26 @@ final class RopeSimulation {
         return _cachedAllPoints
     }
 
-    /// 强制唤醒（外部可在需要时调用，如连接刚创建）
+    /// Forced wake-up (can be called externally when needed, such as the connection has just been created)
     func wake() {
         guard isSleeping else { return }
         isSleeping = false
         startTimer()
     }
 
-    /// 强制停止所有模拟
+    /// Force stop all simulations
     func stopAll() {
         sleep()
         ropes.removeAll()
     }
 
-    // MARK: - 静态计算（用于不需要动画的场景，如截图/初始化）
+    // MARK: - Static calculation (for scenes that do not require animation, such as screenshots/initialization)
 
-    /// 静态计算悬链线控制点（无物理动画，即时返回）
-    /// 用于：截图渲染、临时连线（拖拽创建中）
+    /// Static calculation of catenary control points (no physical animation, instant return)
+    /// Used for: screenshot rendering, temporary connection (drag and drop creation)
     ///
-    /// - Important: 下垂方向固定为 Y+（假设 isFlipped = true，即 Y 轴向下）。
-    ///   如果在非 flipped 坐标系中使用，需要对 droop 取反。
+    /// - Important: The sag direction is fixed to Y+ (assuming isFlipped = true, i.e. Y-axis downward).
+    ///   Droop needs to be negated if used in non-flipped coordinate systems.
     static func computeStaticCatenary(from start: CGPoint, to end: CGPoint) -> [CGPoint] {
         let count = controlPointCount
         let dx = end.x - start.x
@@ -246,7 +246,7 @@ final class RopeSimulation {
         let dist = hypot(dx, dy)
 
         let bendRatio = (Constants.ropeBendRatioMin + Constants.ropeBendRatioMax) / 2.0
-        let sag = dist * (bendRatio - 1.0) * 1.5  // 自然下垂幅度
+        let sag = dist * (bendRatio - 1.0) * 1.5  // Natural sagging range
 
         guard dist > 1 else {
             return Array(repeating: start, count: count)
@@ -256,20 +256,20 @@ final class RopeSimulation {
             let t = CGFloat(i) / CGFloat(count - 1)
             let x = start.x + dx * t
             let y = start.y + dy * t
-            // 抛物线下垂：4*sag*t*(1-t) 在 t=0.5 时最大值为 sag
+            // Parabolic sag: 4*sag*t*(1-t) has a maximum value of sag at t=0.5
             let droop = 4.0 * sag * t * (1.0 - t)
             return CGPoint(x: x, y: y + droop)
         }
     }
 
-    // MARK: - 序列化
+    // MARK: - Serialization
 
-    /// 将控制点数组序列化为 [[Double]] 格式（用于 workspace.json）
+    /// Serialize control point array to [[Double]] format (for workspace.json)
     func serialize(_ points: [CGPoint]) -> [[Double]] {
         points.map { [Double($0.x), Double($0.y)] }
     }
 
-    /// 从 [[Double]] 反序列化
+    /// Deserializing from [[Double]]
     func deserialize(_ raw: [[Double]]) -> [CGPoint] {
         raw.compactMap { arr in
             guard arr.count >= 2 else { return nil }
@@ -277,7 +277,7 @@ final class RopeSimulation {
         }
     }
 
-    // MARK: - 物理模拟核心
+    // MARK: - Physics simulation core
 
     private func startTimer() {
         guard timer == nil else { return }
@@ -295,11 +295,11 @@ final class RopeSimulation {
     private func sleep() {
         isSleeping = true
         stopTimer()
-        // 通知外部持久化当前状态
+        // Notify external persistence of current status
         onSleep?(allPoints())
     }
 
-    /// 物理模拟一帧
+    /// One frame of physical simulation
     private func tick() {
         totalMovement = 0
 
@@ -307,22 +307,22 @@ final class RopeSimulation {
             simulateRope(rope)
         }
 
-        // 通知渲染层更新
+        // Notify rendering layer of updates
         onTick?(allPoints())
 
-        // 检查是否可以进入睡眠
+        // Check if sleep can be entered
         if totalMovement < Self.sleepThreshold {
             sleep()
         }
     }
 
-    /// 单条绳索的物理模拟步骤
+    /// Physical simulation steps of a single rope
     private func simulateRope(_ rope: Rope) {
         let count = rope.points.count
         guard count >= 2 else { return }
 
-        // --- Step 1: 记录约束前位置（用于 Step 4 准确计算运动量） ---
-        // 复用 _preConstraintBuffer 避免每条绳索每帧分配新数组
+        // --- Step 1: Record the position before restraint (used in Step 4 to accurately calculate the amount of motion) ---
+        // Reuse _preConstraintBuffer to avoid allocating new arrays per rope per frame
         if _preConstraintBuffer.count != count {
             _preConstraintBuffer = rope.points
         } else {
@@ -332,16 +332,16 @@ final class RopeSimulation {
         }
         let preConstraintPositions = _preConstraintBuffer
 
-        // --- Step 2: Verlet 积分（位移 = 当前位置 - 上帧位置 + 加速度） ---
+        // --- Step 2: Verlet integration (displacement = current position - previous frame position + acceleration) ---
         for i in 1..<(count - 1) {
             let current = rope.points[i]
             let prev = rope.prevPoints[i]
 
-            // 速度 = 当前 - 上帧（Verlet 隐式速度）
+            // Speed = Current - Previous Frame (Verlet Implicit Speed)
             let vx = (current.x - prev.x) * Self.damping
             let vy = (current.y - prev.y) * Self.damping
 
-            // 新位置 = 当前 + 速度 + 重力加速度
+            // New position = current + velocity + gravity
             let newX = current.x + vx
             let newY = current.y + vy + Self.gravity
 
@@ -349,22 +349,22 @@ final class RopeSimulation {
             rope.points[i] = CGPoint(x: newX, y: newY)
         }
 
-        // --- Step 3: 固定端点（锚定到节点中心）---
+        // --- Step 3: Fixed endpoint (anchored to node center) ---
         rope.points[0] = rope.anchorA
         rope.prevPoints[0] = rope.anchorA
         rope.points[count - 1] = rope.anchorB
         rope.prevPoints[count - 1] = rope.anchorB
 
-        // --- Step 4: 距离约束（弹簧，保持相邻质点间距 = segmentLength）---
+        // --- Step 4: Distance constraint (spring, maintain distance between adjacent particles = segmentLength) ---
         for _ in 0..<Self.constraintIterations {
             applyDistanceConstraints(rope)
-            // 每次迭代后重新固定端点
+            // Repin endpoints after each iteration
             rope.points[0] = rope.anchorA
             rope.points[count - 1] = rope.anchorB
         }
 
-        // --- Step 5: 累计运动量（约束后最终位置 vs 本帧起始位置）---
-        // 这样准确反映了这一帧中每个质点实际移动的距离
+        // --- Step 5: Accumulated motion amount (final position after constraints vs starting position of this frame) ---
+        // This accurately reflects the actual distance moved by each particle in this frame.
         for i in 1..<(count - 1) {
             let dx = rope.points[i].x - preConstraintPositions[i].x
             let dy = rope.points[i].y - preConstraintPositions[i].y
@@ -372,8 +372,8 @@ final class RopeSimulation {
         }
     }
 
-    /// 距离约束：Jakobsen method
-    /// 遍历相邻质点对，将它们推/拉到理想距离
+    /// Distance constraint: Jakobsen method
+    /// Traverse adjacent pairs of particles and push/pull them to the desired distance
     private func applyDistanceConstraints(_ rope: Rope) {
         let count = rope.points.count
         let restLength = rope.segmentLength
@@ -392,7 +392,7 @@ final class RopeSimulation {
             let offsetX = dx * diff * 0.5
             let offsetY = dy * diff * 0.5
 
-            // 端点不移动（通过 i==0 和 i==count-2 判断）
+            // Endpoint does not move (judged by i==0 and i==count-2)
             if i != 0 {
                 rope.points[i] = CGPoint(x: p1.x - offsetX, y: p1.y - offsetY)
             }
@@ -402,10 +402,10 @@ final class RopeSimulation {
         }
     }
 
-    // MARK: - 旧接口兼容（供 CanvasNodeRenderer 在无动画场景使用）
+    // MARK: - Old interface compatible (for use by CanvasNodeRenderer in scenes without animation)
 
-    /// 计算悬链线控制点（静态，无物理动画）
-    /// 保留此方法以兼容不需要动画的调用方
+    /// Compute catenary control points (static, no physics animation)
+    /// This method is reserved for compatibility with callers that do not require animation
     func compute(from start: CGPoint, to end: CGPoint) -> [CGPoint] {
         Self.computeStaticCatenary(from: start, to: end)
     }

@@ -1,7 +1,7 @@
 // Sources/CLI/main.swift
 import Foundation
 
-// 1. 读取环境变量
+// 1. Read environment variables
 guard let socketPath = ProcessInfo.processInfo.environment["MAESTRI_SOCKET"] else {
     fputs("only available inside open-maestri terminals (MAESTRI_SOCKET not set).\n", stderr)
     exit(1)
@@ -11,14 +11,14 @@ guard let terminalId = ProcessInfo.processInfo.environment["MAESTRI_TERMINAL_ID"
     exit(1)
 }
 
-// 2. 解析命令
+// 2. Parse command
 let args = Array(CommandLine.arguments.dropFirst())
 guard let command = args.first else {
     printHelp()
     exit(1)
 }
 
-// 3. 命令分发
+// 3. Command distribution
 switch command {
 case "list":
     ListCommand.run(args, socketPath, terminalId)

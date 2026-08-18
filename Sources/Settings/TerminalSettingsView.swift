@@ -15,7 +15,7 @@ struct TerminalSettingsView: View {
     var body: some View {
         @Bindable var state = appState
         Form {
-            // MARK: - 快速启动预设
+            // MARK: - Quick start preset
             Section {
                 Text("settings.terminal.presets.help")
                     .font(.caption)
@@ -39,7 +39,7 @@ struct TerminalSettingsView: View {
                 Text("settings.terminal.presets")
             }
 
-            // MARK: - 主题
+            // MARK: - Topic
             Section("settings.terminal.theme") {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("settings.terminal.theme")
@@ -49,7 +49,7 @@ struct TerminalSettingsView: View {
                 }
             }
 
-            // MARK: - 字体
+            // MARK: - Font
             Section("settings.terminal.font") {
                 Picker("settings.terminal.font", selection: $state.preferences.terminalFontFamily) {
                     ForEach(fontFamilies, id: \.self) { Text($0).tag($0) }
@@ -57,7 +57,7 @@ struct TerminalSettingsView: View {
                 Picker("settings.terminal.font_size", selection: $state.preferences.terminalFontSize) {
                     ForEach(fontSizes, id: \.self) { Text("\(Int($0))pt").tag($0) }
                 }
-                // 字体预览
+                // Font preview
                 Text("abc 012 →|←")
                     .font(.custom(appState.preferences.terminalFontFamily, size: appState.preferences.terminalFontSize))
                     .padding(.vertical, 4)
@@ -66,7 +66,7 @@ struct TerminalSettingsView: View {
                     .background(RoundedRectangle(cornerRadius: 6).fill(Color(nsColor: .textBackgroundColor)))
             }
 
-            // MARK: - 性能
+            // MARK: - Performance
             Section("settings.terminal.performance") {
                 Toggle("settings.terminal.metal", isOn: $state.preferences.metalRendererEnabled)
                     .help("settings.terminal.metal.help".localized)
@@ -74,7 +74,7 @@ struct TerminalSettingsView: View {
                     .help("settings.terminal.memory_limit.help".localized)
             }
 
-            // MARK: - 键盘
+            // MARK: - Keyboard
             Section("settings.terminal.keyboard") {
                 Toggle("settings.terminal.option_as_meta", isOn: $state.preferences.optionAsMeta)
             }
@@ -136,7 +136,7 @@ struct TerminalSettingsView: View {
         try? PersistenceManager.shared.savePreferences(appState.preferences)
     }
 
-    /// 即时应用主题到所有已打开的终端
+    /// Instantly apply themes to all open terminals
     private func applyThemeToAll(_ preference: String) {
         let themeId = TerminalThemeRegistry.resolveThemeId(from: preference)
         Task { @MainActor in
@@ -146,7 +146,7 @@ struct TerminalSettingsView: View {
         }
     }
 
-    /// 即时应用字体到所有已打开的终端（无需重启）
+    /// Instantly apply fonts to all open terminals (no reboot required)
     private func applyFontToAll(family: String, size: CGFloat) {
         Task { @MainActor in
             for provider in allProviders() {
@@ -160,7 +160,7 @@ struct TerminalSettingsView: View {
     }
 }
 
-// MARK: - 终端预设行（新版，匹配 UI 参考图）
+// MARK: - Terminal default line (new version, matching UI reference picture)
 
 struct TerminalPresetRow: View {
     let preset: AgentPreset
@@ -170,7 +170,7 @@ struct TerminalPresetRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            // 启用/禁用勾选圆形
+            // Enable/disable tick circle
             Button(action: onToggle) {
                 Image(systemName: preset.isActive ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 16))
@@ -178,13 +178,13 @@ struct TerminalPresetRow: View {
             }
             .buttonStyle(.plain)
 
-            // Agent 图标
+            // Agent icon
             Image(systemName: preset.icon)
                 .font(.system(size: 14))
                 .frame(width: 20)
                 .foregroundStyle(Color(hex: preset.color) ?? .accentColor)
 
-            // 名称 + 命令
+            // name + command
             VStack(alignment: .leading, spacing: 1) {
                 Text(preset.name).font(.body)
                 Text(preset.command.isEmpty ? "shell" : preset.command)
@@ -193,7 +193,7 @@ struct TerminalPresetRow: View {
 
             Spacer()
 
-            // 编辑按钮
+            // Edit button
             Button(action: onEdit) {
                 Image(systemName: "pencil")
                     .font(.system(size: 12))
@@ -201,7 +201,7 @@ struct TerminalPresetRow: View {
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
 
-            // 删除按钮（仅自定义预设可删）
+            // Delete button (only custom presets can be deleted)
             Button(action: onDelete) {
                 Image(systemName: "minus.circle")
                     .font(.system(size: 12))
@@ -214,7 +214,7 @@ struct TerminalPresetRow: View {
     }
 }
 
-// MARK: - 编辑预设 Sheet
+// MARK: - Edit Preset Sheet
 
 struct EditAgentPresetSheet: View {
     @Environment(\.dismiss) private var dismiss

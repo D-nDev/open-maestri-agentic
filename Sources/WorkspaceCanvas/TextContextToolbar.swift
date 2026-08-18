@@ -57,7 +57,7 @@ struct TextContextToolbar: View {
         .onChange(of: fontSize) { newSize in localFontSize = newSize }
     }
 
-    // MARK: - 字号控件
+    // MARK: - Font size control
 
     private var fontSizeControls: some View {
         HStack(spacing: 0) {
@@ -91,7 +91,7 @@ struct TextContextToolbar: View {
         }
     }
 
-    // MARK: - 字重按钮
+    // MARK: - Font weight button
 
     @ViewBuilder
     private func weightButton(_ label: String, weight: String) -> some View {
@@ -111,7 +111,7 @@ struct TextContextToolbar: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: - 字体族按钮
+    // MARK: - Font family button
 
     @ViewBuilder
     private func familyButton(_ label: String, family: String) -> some View {
@@ -133,7 +133,7 @@ struct TextContextToolbar: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: - 系统字体按钮 (Aa)
+    // MARK: - System Font Button (Aa)
 
     private var systemFontButton: some View {
         Button { NSFontManager.shared.orderFrontFontPanel(nil) } label: {
@@ -148,7 +148,7 @@ struct TextContextToolbar: View {
         .opacity(0.6)
     }
 
-    // MARK: - 颜色按钮
+    // MARK: - Color button
 
     private var colorButton: some View {
         Button { showColorPicker = true } label: {
@@ -169,13 +169,13 @@ struct TextContextToolbar: View {
         }
     }
 
-    // MARK: - 删除按钮
+    // MARK: - Delete button
 
     private var deleteButton: some View {
         NoteToolbarButton(icon: "trash", tooltip: "Delete", isDestructive: true, action: onDelete)
     }
 
-    // MARK: - 分隔线
+    // MARK: - divider
 
     private var toolbarSeparator: some View {
         Rectangle()

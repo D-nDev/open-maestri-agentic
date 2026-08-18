@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Note 节点编辑视图（Raw/Formatted 双视图切换，由外部 NoteEditorState 驱动）
+/// Note node editing view (Raw/Formatted dual view switching, driven by external NoteEditorState)
 struct NoteEditingView: View {
     @Bindable var state: NoteEditorState
     let filePath: String

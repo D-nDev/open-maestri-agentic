@@ -7,7 +7,7 @@ enum DebugCommand {
         print("Terminal ID:      \(terminalId)")
         print("Socket:           \(socketPath)\n")
 
-        // 检查 socket 文件是否存在且类型正确
+        // Check if the socket file exists and is of the correct type
         var st = stat()
         let statResult = stat(socketPath, &st)
         let exists = FileManager.default.fileExists(atPath: socketPath)

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Routine 管理器视图（File → Routines… 打开）
+/// Routine Manager View (File → Routines… Open)
 struct RoutineManagerView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.dismiss) private var dismiss
@@ -9,7 +9,7 @@ struct RoutineManagerView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 标题栏
+            // Title bar
             HStack {
                 Text(verbatim: "Routines")
                     .font(.headline)
@@ -29,7 +29,7 @@ struct RoutineManagerView: View {
 
             Divider()
 
-            // 底部工具栏
+            // Bottom toolbar
             HStack {
                 Button {
                     showCreate = true
@@ -104,7 +104,7 @@ struct RoutineManagerView: View {
     }
 }
 
-// MARK: - 单行
+// MARK: - single line
 
 struct RoutineRow: View {
     let routine: Routine
@@ -113,7 +113,7 @@ struct RoutineRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // 活跃脉冲指示器
+            // Active Pulse Indicator
             ActiveIndicator(isActive: routine.isActive)
                 .frame(width: 10, height: 10)
 
@@ -127,7 +127,7 @@ struct RoutineRow: View {
 
             Spacer()
 
-            // Pause/Resume 按钮
+            // Pause/Resume button
             Button {
                 onToggle()
             } label: {
@@ -156,7 +156,7 @@ struct RoutineRow: View {
     }
 }
 
-// MARK: - 活跃脉冲动画（绿色圆点）
+// MARK: - active pulse animation (green dot)
 
 struct ActiveIndicator: View {
     let isActive: Bool

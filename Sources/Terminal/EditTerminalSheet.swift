@@ -2,13 +2,13 @@ import OSLog
 import SwiftUI
 import AppKit
 
-/// 用于 Sheet 呈现的 Identifiable 包装
+/// Identifiable wrapper for Sheet rendering
 struct EditTerminalItem: Identifiable {
     let id: UUID
     let content: TerminalContent
 }
 
-// MARK: - 编辑终端 Sheet（三 Tab：详细信息、外观、角色）
+// MARK: - Edit terminal Sheet (three tabs: details, appearance, role)
 
 struct EditTerminalSheet: View {
     let nodeId: UUID
@@ -26,7 +26,7 @@ struct EditTerminalSheet: View {
 
     @State private var selectedTab: Tab = .details
 
-    // 详细信息 Tab
+    // Detailed information Tab
     @State private var name: String
     @State private var command: String
     @State private var monitorActivity: Bool
@@ -34,14 +34,14 @@ struct EditTerminalSheet: View {
     @State private var shortcutMode: ShortcutMode
     @State private var workingDirectory: String
 
-    // 外观 Tab
+    // Appearance Tab
     @State private var icon: String
     @State private var iconColor: String
     @State private var themeId: String
     @State private var fontFamily: String
     @State private var fontSize: CGFloat
 
-    // 角色 Tab
+    // Role Tab
     @State private var selectedRoleId: UUID?
 
     enum Field: Hashable { case name, command }
@@ -68,18 +68,18 @@ struct EditTerminalSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 标题
+            // Title
             Text("terminal.edit.title")
                 .font(.system(size: 16, weight: .bold))
                 .padding(.top, 20)
                 .padding(.bottom, 14)
 
-            // Tab 选择器 — 胶囊样式
+            // Tab Selector — Capsule Style
             EditTerminalTabBar(selectedTab: $selectedTab)
                 .padding(.horizontal, 24)
                 .padding(.bottom, 20)
 
-            // Tab 内容
+            // Tab content
             Group {
                 switch selectedTab {
                 case .details:
@@ -95,7 +95,7 @@ struct EditTerminalSheet: View {
             Divider()
                 .padding(.horizontal, 20)
 
-            // 底部按钮 — 居中
+            // Bottom Button - Centered
             HStack(spacing: 12) {
                 Button("button.cancel") { dismiss(); onDismiss() }
                     .keyboardShortcut(.escape)
@@ -111,12 +111,12 @@ struct EditTerminalSheet: View {
         .task { activateFirstTextField() }
     }
 
-    // MARK: - 详细信息 Tab
+    // MARK: - Details Tab
 
     @ViewBuilder
     private var detailsTabView: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // 名称（浅灰背景输入框）
+            // Name (light gray background input box)
             TextField("terminal.name_placeholder", text: $name)
                 .focused($focusedField, equals: .name)
                 .font(.system(size: 13))
@@ -132,7 +132,7 @@ struct EditTerminalSheet: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 16)
 
-            // 命令
+            // Command
             HStack(spacing: 10) {
                 Text("terminal.command")
                     .font(.system(size: 12))
@@ -154,7 +154,7 @@ struct EditTerminalSheet: View {
             .padding(.horizontal, 24)
             .padding(.bottom, 14)
 
-            // 监控活动
+            // Monitoring activities
             Toggle(isOn: $monitorActivity) {
                 HStack(spacing: 5) {
                     Text("terminal.monitor")
@@ -181,7 +181,7 @@ struct EditTerminalSheet: View {
             .padding(.horizontal, 24)
             .padding(.bottom, 14)
 
-            // 快捷键
+            // Shortcut keys
             HStack(spacing: 10) {
                 Text("terminal.shortcut")
                     .font(.system(size: 12))
@@ -198,7 +198,7 @@ struct EditTerminalSheet: View {
             .padding(.horizontal, 24)
             .padding(.bottom, 14)
 
-            // 工作目录
+            // Working directory
             VStack(alignment: .leading, spacing: 6) {
                 Text("terminal.working_directory")
                     .font(.system(size: 12))
@@ -223,13 +223,13 @@ struct EditTerminalSheet: View {
         .padding(.top, 4)
     }
 
-    // MARK: - 外观 Tab
+    // MARK: - Appearance Tab
 
     @ViewBuilder
     private var appearanceTabView: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // 图标
+                // icon
                 VStack(alignment: .leading, spacing: 8) {
                     Text("terminal.edit.icon")
                         .font(.system(size: 13, weight: .medium))
@@ -237,7 +237,7 @@ struct EditTerminalSheet: View {
                     IconPickerView(selectedIcon: $icon)
                 }
 
-                // 颜色
+                // Color
                 VStack(alignment: .leading, spacing: 8) {
                     Text("terminal.edit.color")
                         .font(.system(size: 13, weight: .medium))
@@ -245,7 +245,7 @@ struct EditTerminalSheet: View {
                     ColorPickerGridView(selectedColor: $iconColor)
                 }
 
-                // 主题
+                // Topic
                 VStack(alignment: .leading, spacing: 8) {
                     Text("terminal.edit.theme")
                         .font(.system(size: 13, weight: .medium))
@@ -253,7 +253,7 @@ struct EditTerminalSheet: View {
                     ThemePickerView(selectedThemeId: $themeId)
                 }
 
-                // 字体
+                // Font
                 VStack(alignment: .leading, spacing: 8) {
                     Text("terminal.edit.font")
                         .font(.system(size: 13, weight: .medium))
@@ -265,7 +265,7 @@ struct EditTerminalSheet: View {
         }
     }
 
-    // MARK: - 角色 Tab
+    // MARK: - Character Tab
 
     @ViewBuilder
     private var roleTabView: some View {
@@ -349,7 +349,7 @@ struct EditTerminalSheet: View {
     }
 }
 
-// MARK: - 自定义 Tab 栏（胶囊样式，匹配 Maestri UI）
+// MARK: - Custom Tab bar (capsule style, matches Maestri UI)
 
 struct EditTerminalTabBar: View {
     @Binding var selectedTab: EditTerminalSheet.Tab
@@ -499,12 +499,12 @@ struct ThemePickerView: View {
         ("maestri-light", "terminal.theme.light".localized, .white, .blue),
     ]
 
-    /// 判断当前选中的是否为自定义主题（非 system/maestri-dark/maestri-light）
+    /// Determine whether the currently selected theme is a custom theme (not system/maestri-dark/maestri-light)
     private var isCustomThemeSelected: Bool {
         !["system", "maestri-dark", "maestri-light"].contains(selectedThemeId)
     }
 
-    /// 获取自定义主题的显示信息
+    /// Obtain the display information of a custom theme
     private var customThemeDisplay: (bg: Color, fg: Color, name: String)? {
         guard isCustomThemeSelected else { return nil }
         let registry = TerminalThemeRegistry.shared
@@ -554,13 +554,13 @@ struct ThemePickerView: View {
                 .buttonStyle(.plain)
             }
 
-            // 自定义主题按钮
+            // Custom theme button
             Button {
                 showCustomThemePicker = true
             } label: {
                 VStack(spacing: 4) {
                     if let display = customThemeDisplay {
-                        // 已选中自定义主题：显示该主题预览
+                        // Custom theme selected: Show preview of this theme
                         RoundedRectangle(cornerRadius: 8)
                             .fill(display.bg)
                             .frame(width: 86, height: 54)
@@ -585,7 +585,7 @@ struct ThemePickerView: View {
                                     .stroke(isCustomThemeSelected ? Color.accentColor : Color(white: 0.8), lineWidth: isCustomThemeSelected ? 2 : 0.5)
                             )
                     } else {
-                        // 未选中自定义主题：显示虚线占位
+                        // Custom theme not selected: Show dotted line placeholder
                         RoundedRectangle(cornerRadius: 8)
                             .fill(Color(nsColor: .controlBackgroundColor))
                             .frame(width: 86, height: 54)
@@ -641,13 +641,13 @@ struct CustomThemePickerSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 标题
+            // Title
             Text("terminal.theme.custom_title")
                 .font(.system(size: 18, weight: .bold))
                 .padding(.top, 28)
                 .padding(.bottom, 24)
 
-            // 主题网格（可滚动）
+            // Topic grid (scrollable)
             ScrollView {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 16), count: 5), spacing: 20) {
                     ForEach(allThemes) { theme in
@@ -665,7 +665,7 @@ struct CustomThemePickerSheet: View {
             }
             .frame(maxHeight: .infinity)
 
-            // 预览区域
+            // Preview area
             previewSection
                 .padding(.horizontal, 32)
                 .padding(.top, 20)
@@ -674,7 +674,7 @@ struct CustomThemePickerSheet: View {
             Divider()
                 .padding(.horizontal, 24)
 
-            // 底部按钮
+            // Bottom button
             HStack {
                 Button("button.cancel") {
                     dismiss()
@@ -698,7 +698,7 @@ struct CustomThemePickerSheet: View {
         }
         .frame(width: 680, height: 680)
         .onAppear {
-            // 如果当前已选中自定义主题，默认选中它
+            // If a custom theme is currently selected, it is selected by default
             if allThemes.contains(where: { $0.id == selectedThemeId }) {
                 previewThemeId = selectedThemeId
             } else {
@@ -707,14 +707,14 @@ struct CustomThemePickerSheet: View {
         }
     }
 
-    // MARK: - 预览区域（含占位）
+    // MARK: - Preview area (including placeholder)
 
     @ViewBuilder
     private var previewSection: some View {
         if let theme = previewTheme {
             themePreviewView(theme: theme)
         } else {
-            // 未选中时显示占位
+            // Show placeholder when not selected
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(nsColor: .quaternaryLabelColor).opacity(0.15))
                 .frame(height: 150)
@@ -726,7 +726,7 @@ struct CustomThemePickerSheet: View {
         }
     }
 
-    // MARK: - 主题网格项
+    // MARK: - Topic grid items
 
     @ViewBuilder
     private func themeGridItem(theme: TerminalTheme) -> some View {
@@ -741,7 +741,7 @@ struct CustomThemePickerSheet: View {
                 .frame(height: 70)
                 .overlay(
                     VStack(alignment: .leading, spacing: 3) {
-                        // ANSI 色条
+                        // ANSI color bar
                         HStack(spacing: 2) {
                             ForEach(ansiColors(for: theme), id: \.self) { color in
                                 Rectangle()
@@ -780,7 +780,7 @@ struct CustomThemePickerSheet: View {
         }
     }
 
-    // MARK: - 预览视图
+    // MARK: - Preview view
 
     @ViewBuilder
     private func themePreviewView(theme: TerminalTheme) -> some View {
@@ -797,7 +797,7 @@ struct CustomThemePickerSheet: View {
             .frame(height: 150)
             .overlay(
                 VStack(alignment: .leading, spacing: 5) {
-                    // 模拟终端输出
+                    // Simulate terminal output
                     HStack(spacing: 0) {
                         Text("ev@maestri")
                             .foregroundStyle(greenColor)
@@ -888,7 +888,7 @@ struct FontPickerView: View {
                 .controlSize(.small)
             }
 
-            // 预览 — 灰色背景框，左对齐
+            // Preview - gray background box, left aligned
             HStack {
                 Text("abc 012 →|←")
                     .font(.custom(fontFamily, size: fontSize))
@@ -911,11 +911,11 @@ struct FontPickerView: View {
     }
 }
 
-// MARK: - Sheet TextField 激活（共用于所有带 TextField 的 Sheet）
+// MARK: - Sheet TextField activation (common to all Sheets with TextField)
 
-/// 激活 sheet 内第一个 TextField，同时 deactivate 主窗口所有
-/// NSTextInputClient（SwiftTerm TerminalView）的 input context，
-/// 防止 TSM 把键盘事件路由给后台终端。
+/// Activate the first TextField in the sheet and deactivate all the main window
+/// input context of NSTextInputClient (SwiftTerm TerminalView),
+/// Prevent TSM from routing keyboard events to background terminals.
 func activateFirstTextField() {
     Task { @MainActor in
         try? await Task.sleep(for: .milliseconds(100))
@@ -923,18 +923,18 @@ func activateFirstTextField() {
         guard let sheetWin = NSApp.windows.first(where: { $0.isSheet }) else { return }
         guard let parentWin = sheetWin.sheetParent else { return }
 
-        // ── 核心修复 ──────────────────────────────────────────────────────────
-        // SwiftTerm 的 TerminalView 实现了 NSTextInputClient。
-        // 即使它不是 first responder，TSM（Text Services Manager）可能仍然
-        // 持有它的 NSTextInputContext 为 active 状态，导致键盘事件被路由给它
-        // 而不是 sheet 内的 TextField，且 local event monitor 完全收不到事件。
+        // ──Core Repair──────────────────────────────────────────────────────
+        // SwiftTerm's TerminalView implements NSTextInputClient.
+        // Even if it is not the first responder, TSM (Text Services Manager) may still
+        // Holding its NSTextInputContext in the active state causes keyboard events to be routed to it
+        // Instead of the TextField in the sheet, the local event monitor cannot receive events at all.
         //
-        // 修复：找到主窗口里所有 NSTextInputClient view，
-        // 强制调用 NSTextInputContext.deactivate()，让 TSM 释放这些 context。
+        // Fix: Find all NSTextInputClient views in the main window,
+        // Force a call to NSTextInputContext.deactivate() to let TSM release these contexts.
         // ─────────────────────────────────────────────────────────────────────
         deactivateAllTextInputClients(in: parentWin)
 
-        // 激活 sheet 内第一个 NSTextField 的 field editor
+        // Activate the field editor of the first NSTextField in the sheet
         if let tf = firstEditableTextField(in: sheetWin.contentView) {
             sheetWin.makeFirstResponder(tf)
             tf.selectText(nil)
@@ -942,8 +942,8 @@ func activateFirstTextField() {
     }
 }
 
-/// 遍历 window 内所有 NSView，对实现了 NSTextInputClient 的 view
-/// 调用其 inputContext 的 deactivate()，释放 TSM 持有的 active context。
+/// Traverse all NSViews in the window, and view the view that implements NSTextInputClient
+/// Call deactivate() of its inputContext to release the active context held by TSM.
 private func deactivateAllTextInputClients(in window: NSWindow) {
     func walk(_ view: NSView) {
         if view is NSTextInputClient {

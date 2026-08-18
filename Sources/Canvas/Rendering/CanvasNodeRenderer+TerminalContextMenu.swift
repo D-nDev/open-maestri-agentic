@@ -4,21 +4,21 @@ import AppKit
 
 extension CanvasNodeRenderer {
 
-    /// 清除缓冲区：向终端发送 clear 命令（模拟 ⌘K 行为）
+    /// Clear buffer: send clear command to terminal (emulates ⌘K behavior)
     func handleClearBuffer(terminalId: UUID) {
         guard let ws = currentWorkspace,
               let node = ws.nodes.first(where: { $0.id == terminalId }),
               case .terminal(let tc) = node.content else { return }
-        // 通过 provider 直接清除终端屏幕
+        // Directly clear the terminal screen through provider
         if let provider = TerminalManager.shared.providers[tc.id],
            let tv = provider.terminalView {
-            // 发送 ANSI 清屏 + 重置光标（等同于 clear 命令效果）
+            // Send ANSI to clear screen + reset cursor (equivalent to clear command effect)
             tv.getTerminal().resetToInitialState()
             tv.getTerminal().updateFullScreen()
         }
     }
 
-    /// 重新加载终端：重启 PTY 进程
+    /// Reload terminal: restart PTY process
     func handleReloadTerminal(terminalId: UUID) {
         guard let ws = currentWorkspace,
               let node = ws.nodes.first(where: { $0.id == terminalId }),
@@ -34,7 +34,7 @@ extension CanvasNodeRenderer {
         }
     }
 
-    /// 拷贝终端可见内容到剪贴板
+    /// Copy the visible content of the terminal to the clipboard
     func handleCopyTerminal(terminalId: UUID) {
         guard let ws = currentWorkspace,
               let node = ws.nodes.first(where: { $0.id == terminalId }),
@@ -56,7 +56,7 @@ extension CanvasNodeRenderer {
         }
     }
 
-    /// 切换监控活动
+    /// Switch monitoring activity
     func handleToggleMonitor(terminalId: UUID) {
         guard let ws = currentWorkspace,
               let idx = ws.nodes.firstIndex(where: { $0.id == terminalId }),

@@ -2,29 +2,29 @@ import AppKit
 import Foundation
 import OSLog
 
-/// 终端生命周期管理器
-/// - 为每个 Terminal 节点创建/销毁 PTY 会话
-/// - **并行启动**：所有终端 PTY 同时 fork，对标 Maestri 快速无卡顿启动
-/// - 所有 PTY 写入操作必须通过此类（架构约束）
+/// Terminal Lifecycle Manager
+/// - Create/destroy PTY sessions for each Terminal node
+/// - **Parallel startup**: All terminal PTY forks at the same time, benchmarking Maestri for fast and smooth startup
+/// - All PTY write operations must go through this class (architectural constraint)
 @MainActor
 final class TerminalManager {
     static let shared = TerminalManager()
     private let logger = Logger.make(category: "TerminalManager")
 
-    /// 活跃终端 UUID → 终端状态（跨工作区共存，符合 Maestri 多工作区后台运行设计）
+    /// Active terminal UUID → terminal status (coexistence across workspaces, consistent with Maestri multi-workspace background running design)
     private(set) var terminals: [UUID: TerminalSession] = [:]
-    /// 终端 UUID → 所属工作区 ID（用于按工作区查询）
+    /// Terminal UUID → Workspace ID to which it belongs (used for query by workspace)
     private(set) var terminalWorkspaceMap: [UUID: UUID] = [:]
-    /// 终端 UUID → SwiftTermProvider（取代旧的 TerminalProviderRegistry）
+    /// Terminal UUID → SwiftTermProvider (replaces the old TerminalProviderRegistry)
     private(set) var providers: [UUID: SwiftTermProvider] = [:]
-    /// 已完成 shell 初始化的终端 ID 集合
+    /// Collection of terminal IDs for which shell initialization has been completed
     private(set) var completedProviders: Set<UUID> = []
 
     private(set) var isShuttingDown = false
 
     private init() {}
 
-    // MARK: - 终端创建
+    // MARK: - Terminal Creation
 
     func createTerminal(
         id: UUID,
@@ -57,7 +57,7 @@ final class TerminalManager {
             }
         }
 
-        // 并行启动：直接创建 provider 并启动 PTY，不排队等待
+        // Parallel startup: Create provider directly and start PTY without queuing
         startProvider(
             id: id,
             command: command,
@@ -70,7 +70,7 @@ final class TerminalManager {
         return session
     }
 
-    /// 便捷方法：通过 AgentPreset 创建终端（用于测试和工具栏）
+    /// Convenience method: Create terminal via AgentPreset (for testing and toolbars)
     @discardableResult
     func createTerminal(
         id: UUID,
@@ -89,7 +89,7 @@ final class TerminalManager {
         )
     }
 
-    /// 补填终端所属工作区映射（用于复用 provider 时 workspaceId 未随 session 传入的情况）
+    /// Fill in the workspace mapping to which the terminal belongs (used when the workspaceId is not passed in with the session when reusing the provider)
     func registerWorkspace(terminalId: UUID, workspaceId: UUID) {
         terminalWorkspaceMap[terminalId] = workspaceId
     }
@@ -112,7 +112,7 @@ final class TerminalManager {
         terminals.removeAll()
     }
 
-    // MARK: - PTY 写入（所有写入的唯一入口）
+    // MARK: - PTY write (sole entry for all writes)
 
     func write(to terminalId: UUID, text: String) {
         guard let session = terminals[terminalId] else {
@@ -126,7 +126,7 @@ final class TerminalManager {
         write(to: terminalId, text: text + "\n")
     }
 
-    // MARK: - 并行启动（每个终端独立启动 PTY，互不等待）
+    // MARK: - Parallel startup (each terminal starts PTY independently, without waiting for each other)
 
     private func startProvider(
         id: UUID,
@@ -148,7 +148,7 @@ final class TerminalManager {
         }
         providers[id] = provider
 
-        // shellReadyCallback：shell 初始化完成 → 标记 → 发通知（不再阻塞其他终端）
+        // shellReadyCallback: shell initialization completed → mark → send notification (no longer blocks other terminals)
         provider.shellReadyCallback = { [weak self] in
             guard let self else { return }
             self.completedProviders.insert(id)
@@ -161,21 +161,21 @@ final class TerminalManager {
             }
         }
 
-        // 绑定 PTY 输出 → session.recordOutput，并建立 session 写入通道
+        // Bind PTY output → session.recordOutput and establish session write channel
         if let session = terminals[id] {
             provider.onDataReceived = { [weak session] text in
                 Task { @MainActor in session?.recordOutput(text) }
             }
-            // 建立 session → provider 写入路径（PTY 启动后 pendingWrites 需要能发送）
+            // Establish session → provider write path (pendingWrites needs to be able to be sent after PTY is started)
             session.onOutput = { [weak provider] text in provider?.write(text) }
         }
 
-        // 直接启动 PTY（不依赖 TerminalEmbeddedView 是否已 attach）。
-        // 对标 Maestri：终端创建时立刻启动 PTY 进程，无 viewport culling 延迟。
-        // TerminalEmbeddedView 随后 attach 时走 re-attach 分支（已有 terminalView）。
+        // Start PTY directly (not dependent on whether TerminalEmbeddedView is attached).
+        // Benchmarking Maestri: Start PTY process immediately when terminal is created, no viewport culling delay.
+        // TerminalEmbeddedView then takes the re-attach branch when attaching it (there is already a terminalView).
         provider.start(in: NSRect(x: 0, y: 0, width: 600, height: 400))
 
-        // 通知 TerminalEmbeddedView（如已存在）可以 attach provider 的 terminalView
+        // Notify TerminalEmbeddedView (if it already exists) that the provider's terminalView can be attached
         NotificationCenter.default.post(
             name: .terminalProviderReady,
             object: nil,
@@ -184,31 +184,31 @@ final class TerminalManager {
     }
 }
 
-/// 单个终端会话状态
+/// Single terminal session state
 @MainActor
 final class TerminalSession {
     let id: UUID
     let command: String
     let workingDirectory: String
     let roleName: String?
-    /// 节点的 agent 类型（来自 TerminalContent.agentType），供 AskHandler 选择等待策略
+    /// The node's agent type (from TerminalContent.agentType) for AskHandler to select a waiting strategy
     var agentType: String = "generic_shell"
-    /// 用户在 UI 中为此节点设置的显示名称（来自 TerminalContent.name）
+    /// The display name set by the user in the UI for this node (from TerminalContent.name)
     var displayName: String?
-    /// Agent 实际分配的名称（来自 OMAESTRI_AGENT_NAME 环境变量，由 MaestroHandlers.recruit 注入）
+    /// Agent actual assigned name (from OMAESTRI_AGENT_NAME environment variable, injected by MaestroHandlers.recruit)
     var agentName: String?
-    /// 终端当前工作目录（由 PTY OSC 7 回调实时更新）
+    /// Current working directory of the terminal (updated in real time by PTY OSC 7 callback)
     private(set) var currentDirectory: String?
     private(set) var isRunning: Bool = false
     private(set) var isIdle: Bool = true
-    /// 是否有通过 IPC（omaestri ask 等）触发的任务正在执行中
-    /// 只有此标志为 true 时，任务完成后才会触发红点通知
+    /// Is there any task triggered by IPC (omaestri ask, etc.) being executed?
+    /// Only when this flag is true, the red dot notification will be triggered after the task is completed
     private(set) var hasActiveTask: Bool = false
 
-    /// PTY 写入回调（TerminalEmbeddedView.makeNSView 后设置）
+    /// PTY write callback (set after TerminalEmbeddedView.makeNSView)
     var onOutput: ((String) -> Void)? {
         didSet {
-            // onOutput 一旦设置，立即 flush 待写队列（解决时序竞态）
+            // Once onOutput is set, immediately flush the queue to be written (solve timing race conditions)
             if onOutput != nil && !pendingWrites.isEmpty {
                 let pending = pendingWrites
                 pendingWrites.removeAll()
@@ -217,14 +217,14 @@ final class TerminalSession {
         }
     }
 
-    /// onOutput 未就绪时暂存待写文本
+    /// onOutput temporarily stores text to be written when it is not ready
     private var pendingWrites: [String] = []
 
-    /// 近期输出环形缓冲区（最多 500 行，供 omaestri check 使用）
-    /// 使用环形索引避免 removeFirst 的 O(n) 拷贝开销
+    /// Recent output ring buffer (max 500 lines, for use by omaestri check)
+    /// Use circular indexes to avoid the O(n) copy overhead of removeFirst
     private var outputRing: [String] = []
-    private var outputRingStart: Int = 0  // 逻辑起始位置
-    private var outputRingCount: Int = 0  // 当前有效行数
+    private var outputRingStart: Int = 0  // Logical start position
+    private var outputRingCount: Int = 0  // Current number of valid rows
     private let bufferMaxLines = 500
 
     private let activityMonitor = TerminalActivityMonitor()
@@ -248,12 +248,12 @@ final class TerminalSession {
         if let cb = onOutput {
             cb(text)
         } else {
-            // PTY 尚未初始化，暂存到队列（最多缓存 100 条）
+            // PTY has not been initialized and is temporarily stored in the queue (up to 100 items can be cached)
             if pendingWrites.count < 100 { pendingWrites.append(text) }
         }
     }
 
-    /// 记录 PTY 输出到缓存（由 SwiftTermProvider 在收到输出时调用）
+    /// Logging PTY output to cache (called by SwiftTermProvider when output is received)
     func recordOutput(_ text: String) {
         let newLines = text.components(separatedBy: "\n")
         appendToRing(newLines)
@@ -261,19 +261,19 @@ final class TerminalSession {
         activityMonitor.recordOutput()
     }
 
-    /// 批量加载历史记录（仅写入 buffer，不触发 activityMonitor 或 Notification）
-    /// 用于 scrollback 恢复场景，避免逐行触发大量副作用
+    /// Batch loading history (only writes to buffer, does not trigger activityMonitor or Notification)
+    /// Use scrollback to restore the scene to avoid triggering a lot of side effects line by line
     func bulkLoadHistory(_ lines: [String]) {
         appendToRing(lines)
     }
 
-    /// 获取最近 N 行输出
+    /// Get the last N lines of output
     func recentOutput(lines: Int = 20) -> String {
         let count = min(lines, outputRingCount)
         guard count > 0 else { return "" }
         var result: [String] = []
         result.reserveCapacity(count)
-        // 从环形缓冲区尾部取 count 行
+        // Take count lines from the end of the ring buffer
         let startIdx = (outputRingStart + outputRingCount - count) % outputRing.count
         for i in 0..<count {
             result.append(outputRing[(startIdx + i) % outputRing.count])
@@ -281,11 +281,11 @@ final class TerminalSession {
         return result.joined(separator: "\n")
     }
 
-    // MARK: - Ring Buffer 内部实现
+    // MARK: - Ring Buffer internal implementation
 
-    /// 将新行追加到环形缓冲区（O(1) 均摊，无数组元素移动）
+    /// Append new row to ring buffer (O(1) amortized, no array elements moved)
     private func appendToRing(_ newLines: [String]) {
-        // 初始化环形缓冲区（首次写入时分配固定容量）
+        // Initializing ring buffer (fixed capacity allocated on first write)
         if outputRing.isEmpty {
             outputRing = Array(repeating: "", count: bufferMaxLines)
         }
@@ -295,19 +295,19 @@ final class TerminalSession {
             if outputRingCount < bufferMaxLines {
                 outputRingCount += 1
             } else {
-                // 缓冲区已满，覆盖最旧元素，移动起始指针
+                // Buffer full, overwriting oldest element, moving start pointer
                 outputRingStart = (outputRingStart + 1) % bufferMaxLines
             }
         }
     }
 
-    /// 标记存在通过 IPC 触发的活跃任务（由 AskHandler 在注入 prompt 前调用）
+    /// Mark the presence of an active task triggered via IPC (called by AskHandler before injecting prompt)
     func markActiveTask() {
         hasActiveTask = true
     }
 
-    /// 标记空闲（由 activityMonitor 回调触发）
-    /// 仅当从非空闲切换到空闲，且有活跃 IPC 任务时才发出通知（避免普通 shell 输出误触发红点）
+    /// Mark idle (triggered by activityMonitor callback)
+    /// Notify only when switching from non-idle to idle and there is an active IPC task (to avoid normal shell output accidentally triggering red dots)
     func markIdle() {
         guard !isIdle else { return }
         isIdle = true
@@ -320,7 +320,7 @@ final class TerminalSession {
         )
     }
 
-    /// 更新当前工作目录（由 SwiftTermProvider.hostCurrentDirectoryUpdate 调用）
+    /// Update current working directory (called by SwiftTermProvider.hostCurrentDirectoryUpdate)
     func updateCurrentDirectory(_ directory: String?) {
         guard let dir = directory, !dir.isEmpty, dir != currentDirectory else { return }
         currentDirectory = dir

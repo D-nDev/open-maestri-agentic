@@ -3,10 +3,10 @@ import XCTest
 
 final class InterAgentServerTests: XCTestCase {
 
-    // MARK: - NFR7: 安全约束验证
+    // MARK: - NFR7: Security Constraint Verification
 
     func testServerBindsToLoopbackOnly() {
-        // Constants.interAgentServerHost 必须是 127.0.0.1
+        // Constants.interAgentServerHost must be 127.0.0.1
         XCTAssertEqual(Constants.interAgentServerHost, "127.0.0.1",
                        "NFR7: InterAgentServer must only bind to loopback interface")
     }
@@ -16,13 +16,13 @@ final class InterAgentServerTests: XCTestCase {
                        "NFR6: Server must restart within 3 seconds after crash")
     }
 
-    // MARK: - CLIRouter 路由完整性
+    // MARK: - CLIRouter routing integrity
 
     func testCLIRouterHandlesAllKnownCommands() async {
         let router = CLIRouter.shared
         let tid = UUID()
 
-        // 所有命令必须不返回 "error: unknown command"
+        // All commands must not return "error: unknown command"
         let commands = [
             ["list"],
             ["ask", "agent", "prompt"],
@@ -45,17 +45,17 @@ final class InterAgentServerTests: XCTestCase {
         }
     }
 
-    // MARK: - HTTP 请求解析
+    // MARK: - HTTP request parsing
 
     func testHTTPResponseFormat() {
-        // HTTP 响应应包含状态行和 Content-Type
+        // HTTP response should contain status line and Content-Type
         let server = InterAgentServer.shared
-        // 通过反射获取 buildHTTPResponse（private 方法测试通过公开接口验证）
-        // 验证 port 初始值为 0（未启动时）
+        // Obtain buildHTTPResponse through reflection (private method test is verified through public interface)
+        // Verify port initial value is 0 (when not started)
         XCTAssertEqual(server.port, 0, "Port should be 0 before server starts")
     }
 
-    // MARK: - NoteHandler 文件 I/O 集成测试
+    // MARK: - NoteHandler file I/O integration test
 
     func testNoteHandlerReadWriteRoundTrip() throws {
         let nm = NoteFileManager.shared
@@ -91,7 +91,7 @@ final class InterAgentServerTests: XCTestCase {
         XCTAssertFalse(result.contains("Line 5"))
     }
 
-    // MARK: - SkillInjector（简化版，CLI 二进制通过 PATH 注入）
+    // MARK: - SkillInjector (simplified version, CLI binary injected via PATH)
 
     func testSkillInjectorIsSingleton() {
         let a = SkillInjector.shared
@@ -99,7 +99,7 @@ final class InterAgentServerTests: XCTestCase {
         XCTAssertTrue(a === b, "SkillInjector should be a singleton")
     }
 
-    // MARK: - 数据格式兼容性（NFR14）
+    // MARK: - Data format compatibility (NFR14)
 
     func testWorkspaceDocumentSchemaVersion() {
         let payload = WorkspacePayload(name: "test", workingDirectory: "/tmp")
@@ -115,7 +115,7 @@ final class InterAgentServerTests: XCTestCase {
         let data = try pm.encoder.encode(node)
         let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
         let frameArr = try XCTUnwrap(json["frame"] as? [[Double]])
-        // 必须是 [[x,y],[w,h]] 格式（与 Maestri 格式一致）
+        // Must be in [[x,y],[w,h]] format (consistent with Maestri format)
         XCTAssertEqual(frameArr[0][0], 100, accuracy: 0.01)  // x
         XCTAssertEqual(frameArr[0][1], 200, accuracy: 0.01)  // y
         XCTAssertEqual(frameArr[1][0], 300, accuracy: 0.01)  // width
@@ -130,7 +130,7 @@ final class InterAgentServerTests: XCTestCase {
         let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
         let payloadDict = try XCTUnwrap(json["payload"] as? [String: Any])
         let createdAt = try XCTUnwrap(payloadDict["createdAt"] as? String)
-        // ISO8601 格式示例：2026-05-16T03:30:00Z
+        // ISO8601 format example: 2026-05-16T03:30:00Z
         XCTAssertTrue(createdAt.contains("T"), "Date must be ISO8601, got: \(createdAt)")
         XCTAssertTrue(createdAt.contains("Z") || createdAt.contains("+00"),
                       "Date must be UTC, got: \(createdAt)")

@@ -17,20 +17,20 @@ struct OpenMaestriApp: App {
                 .environment(appState)
                 .environment(\.locale, l10n.locale)
                 .task {
-                    // 将 appState 绑定到 AppDelegate，供退出时访问
+                    // Bind appState to AppDelegate for access on exit
                     appDelegate.appState = appState
                     await appState.loadOnLaunch()
-                    // 启动后同步语言设置到 LocalizationManager
+                    // Synchronize language settings to LocalizationManager after startup
                     LocalizationManager.shared.sync(from: appState.preferences.language)
                     appState.startAutosave()
                     BackupManager.shared.startHourlyBackups()
-                    // InterAgentServer 已在 AppDelegate.applicationDidFinishLaunching 启动
+                    // InterAgentServer started at AppDelegate.applicationDidFinishLaunching
                     do {
                         try RoutineScheduler.shared.loadRoutines()
                     } catch {
                         appLogger.error("Failed to load routines on launch: \(error.localizedDescription)")
                     }
-                    // Spotlight: 重建索引
+                    // Spotlight: Rebuild index
                     let wsNodes = Dictionary(
                         uniqueKeysWithValues: appState.workspaces.map { ws in
                             (ws.id, ws.nodes)
@@ -40,12 +40,12 @@ struct OpenMaestriApp: App {
                         workspaces: appState.manifest.workspaces,
                         nodes: wsNodes
                     )
-                    // 配置窗口样式
+                    // Configure window style
                     WindowStateObserver.shared.configureMainWindow()
                 }
                 .onDisappear {
-                    // 注意：主要清理逻辑已移至 AppDelegate.applicationShouldTerminate
-                    // 此处仅作为窗口关闭的备份清理（非退出场景时触发）
+                    // Note: The main cleanup logic has been moved to AppDelegate.applicationShouldTerminate
+                    // This is only used as a backup cleanup when the window is closed (not triggered when exiting the scene)
                     appState.stopAutosave()
                     BackupManager.shared.stopBackups()
                 }
@@ -57,7 +57,7 @@ struct OpenMaestriApp: App {
         }
         .windowStyle(.hiddenTitleBar)
         .commands {
-            // MARK: File 菜单
+            // MARK: File menu
             CommandGroup(after: .newItem) {
                 Button("menu.app.new_workspace") {
                     NotificationCenter.default.post(name: .showCreateWorkspace, object: nil)
@@ -72,7 +72,7 @@ struct OpenMaestriApp: App {
                 .keyboardShortcut("r", modifiers: [.command, .option])
             }
 
-            // MARK: View 菜单
+            // MARK: View menu
             CommandMenu("menu.view") {
                 Button("menu.view.toggle_zoom") {
                     NotificationCenter.default.post(name: .toggleCanvasZoom, object: nil)
@@ -116,7 +116,7 @@ struct OpenMaestriApp: App {
                 .keyboardShortcut("e", modifiers: [.command, .shift])
             }
 
-            // MARK: Window 菜单補充
+            // MARK: Window menu supplement
             CommandGroup(after: .windowSize) {
                 Button("menu.view.next_workspace") {
                     NotificationCenter.default.post(name: .nextWorkspace, object: nil)

@@ -1,6 +1,6 @@
 import Foundation
 
-/// 应用统一错误类型
+/// Apply unified error type
 enum MaestriError: LocalizedError {
     case workspaceNotFound(UUID)
     case terminalConnectionFailed(String)

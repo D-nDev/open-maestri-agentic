@@ -1,10 +1,10 @@
 import SwiftUI
 
-/// Routine 创建/编辑视图
+/// Routine Create/Edit View
 struct RoutineEditView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var routines: [Routine]
-    /// 可选目标终端列表（(id, displayName)）
+    /// Optional target terminal list ((id, displayName))
     var availableTerminals: [(id: UUID, name: String)]
 
     @State private var name = ""

@@ -1,6 +1,6 @@
 import AppKit
 
-/// 手绘选中交互层（连接线上方），为选中的 drawing 节点绘制选中边框。
+/// Freehand select the interaction layer (above the connecting line) and draw a selection border for the selected drawing node.
 final class DrawingOverlayView: NSView {
     override var isFlipped: Bool { true }
 
@@ -8,7 +8,7 @@ final class DrawingOverlayView: NSView {
     var canvasOrigin: CGPoint = .zero { didSet { needsDisplay = true } }
     var zoom: CGFloat = 1.0 { didSet { needsDisplay = true } }
 
-    /// (节点 id, 节点画布 frame) 对，由外部在 sync 时更新
+    /// (node id, node canvas frame) pair, updated externally during sync
     var drawingNodeFrames: [(id: UUID, frame: CGRect)] = [] {
         didSet { needsDisplay = true }
     }

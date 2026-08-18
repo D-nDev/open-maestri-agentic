@@ -1,7 +1,7 @@
 import Foundation
 
-/// 节点内容枚举，与 Maestri v0.25.4 数据格式完全兼容
-/// Maestri 格式：{ "terminal": { "_0": {...} } }
+/// Node content enumeration, fully compatible with Maestri v0.25.4 data format
+/// Maestri format: { "terminal": { "_0": {...} } }
 enum NodeContent: Codable, Equatable {
     case terminal(TerminalContent)
     case stickyNote(StickyNoteContent)
@@ -92,7 +92,7 @@ enum NodeContent: Codable, Equatable {
         return nil
     }
 
-    /// 节点是否可作为连线端点（fileTree、text、shape 不支持连线）
+    /// Whether the node can be used as a connection endpoint (fileTree, text, and shape do not support connections)
     var isConnectable: Bool {
         switch self {
         case .terminal, .stickyNote, .portal: return true
@@ -107,7 +107,7 @@ struct TerminalContent: Codable, Equatable {
     var agentType: String       // "claude_code" | "codex" | "gemini_cli" | "open_code" | "generic_shell"
     var command: String
     var name: String
-    var icon: String            // SF Symbol 名称
+    var icon: String            // SF Symbol name
     var color: String           // hex
     var id: UUID
     var shellPath: String
@@ -121,9 +121,9 @@ struct TerminalContent: Codable, Equatable {
     var scrollbackFile: String?
     var scrollbackLineCount: Int
     var lastActiveAt: Date?
-    var themeId: String?            // nil 表示跟随全局设置
-    var fontFamily: String?         // nil 表示跟随全局设置
-    var fontSize: CGFloat?          // nil 表示跟随全局设置
+    var themeId: String?            // nil means follow global settings
+    var fontFamily: String?         // nil means follow global settings
+    var fontSize: CGFloat?          // nil means follow global settings
 
     init(name: String, agentType: String = "generic_shell", command: String = "", workingDirectory: String = "") {
         self.agentType = agentType
@@ -168,7 +168,7 @@ struct ShortcutMode: Codable, Equatable {
     static let automatic = ShortcutMode(kind: .automatic)
     static let none = ShortcutMode(kind: .none)
 
-    /// 获取显示名称
+    /// Get display name
     @MainActor var displayName: String {
         switch kind {
         case .automatic: return "terminal.shortcut.automatic".localized
@@ -191,8 +191,8 @@ struct ShortcutMode: Codable, Equatable {
 // MARK: - StickyNote Content
 
 struct StickyNoteContent: Codable, Equatable {
-    var color: String           // hex, e.g. "#FEFDE8" 或 Maestri 颜色名 "yellow"
-    var fileName: String?       // .md 文件名（仅文件名，不含路径）
+    var color: String           // hex, e.g. "#FEFDE8" or Maestri color name "yellow"
+    var fileName: String?       // .md file name (only file name, without path)
     var fontSize: Int
     var hasCustomName: Bool
     var isPreviewing: Bool
@@ -306,14 +306,14 @@ struct FileTreeContent: Codable, Equatable {
 
 // MARK: - Text Content
 
-/// 画布文本标签节点（轻量级，无 header，直接编辑）
+/// Canvas text label node (lightweight, no header, direct editing)
 struct TextContent: Codable, Equatable {
     var text: String
     var fontSize: CGFloat
     var fontWeight: String      // "regular" | "medium" | "bold"
     var color: String           // hex
     var alignment: String       // "left" | "center" | "right"
-    var fontFamily: String      // "sans" | "serif" | "mono" | 具体字体名
+    var fontFamily: String      // "sans" | "serif" | "mono" | specific font name
 
     init(text: String = "") {
         self.text = text
@@ -375,13 +375,13 @@ enum ShapeFillStyle: String, Codable {
     case solid, none, hatched, crossHatched
 }
 
-// MARK: - Stroke Content（线条/箭头）
+// MARK: - Stroke Content (line/arrow)
 
 struct StrokeContent: Codable, Equatable {
     var strokeType: StrokeType
-    var startPoint: CGPoint        // 归一化坐标（0.0–1.0，相对节点 frame 宽高）
-    var endPoint: CGPoint          // 归一化坐标
-    var controlPoint: CGPoint?     // 仅 arrow 有效，贝塞尔控制点，归一化坐标
+    var startPoint: CGPoint        // Normalized coordinates (0.0–1.0, relative to node frame width and height)
+    var endPoint: CGPoint          // Normalized coordinates
+    var controlPoint: CGPoint?     // Valid only for arrow, Bezier control points, normalized coordinates
     var strokeColor: String        // hex
     var strokeWidth: CGFloat
     var strokeStyle: ShapeStrokeStyle
@@ -402,15 +402,15 @@ enum StrokeType: String, Codable {
     case arrow
 }
 
-// MARK: - Freehand Content（手绘/荧光笔）
+// MARK: - Freehand Content (hand-drawn/highlighter)
 
 struct FreehandContent: Codable, Equatable {
     var freehandType: FreehandType
-    var points: [CGPoint]          // 归一化坐标点序列（0.0–1.0）
+    var points: [CGPoint]          // Normalized coordinate point sequence (0.0–1.0)
     var strokeColor: String
     var strokeWidth: CGFloat
     var opacity: CGFloat           // pen=1.0, highlighter=0.4
-    var rotation: CGFloat          // 旋转角度（弧度）
+    var rotation: CGFloat          // Rotation angle (radians)
 
     init(freehandType: FreehandType) {
         self.freehandType = freehandType

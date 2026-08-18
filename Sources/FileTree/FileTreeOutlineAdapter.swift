@@ -2,24 +2,24 @@ import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
-// MARK: - 扩大展开按钮热区
+// MARK: - Expand expand button hot area
 
-/// 隐藏原生 disclosure triangle（改用 cell 内手动渲染的 chevron 图标）
+/// Hide the native disclosure triangle (use the manually rendered chevron icon in the cell instead)
 private final class LargeDisclosureOutlineView: NSOutlineView {
     override func frameOfOutlineCell(atRow row: Int) -> NSRect {
-        // 返回零区域，隐藏原生 disclosure triangle
-        // 展开/折叠改由 handleClickAtLocalPoint 程序化处理 + cell 内的 chevron 图标指示状态
+        // Return to zero area, hide the native disclosure triangle
+        // Expand/collapse is handled programmatically by handleClickAtLocalPoint + chevron icon in cell indicates status
         return .zero
     }
 }
 
-/// File Tree List 视图（NSOutlineView 包装）
+/// File Tree List View (NSOutlineView wrapper)
 ///
-/// 交互模式（对标 Maestri File Tree）：
-/// - 单击任意项：选中高亮（所有项目均可选中）
-/// - 双击文件夹：通过 onNavigateTo 回调导航进入（Finder 式，不在视图内展开）
-/// - 双击文件：通过 onFileOpened 回调，由外部用系统默认应用打开
-/// - 右键：弹出上下文菜单（Create / Rename / Delete）
+/// Interactive mode (compared to Maestri File Tree):
+/// - Click on any item: Highlight selected (all items can be selected)
+/// - Double-click the folder: navigate through the onNavigateTo callback (Finder style, not expanded in the view)
+/// - Double-click the file: Open it externally with the system default application through the onFileOpened callback
+/// - Right click: Pop up context menu (Create/Rename/Delete)
 final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewDataSource {
 
     // MARK: - Sub-views
@@ -28,13 +28,13 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
     private let outlineView = LargeDisclosureOutlineView()
     private(set) var store: FileTreeStateStore
 
-    /// 暴露 scrollView 引用，供 FileTreeOutlineView 转发滚动事件
+    /// Expose scrollView reference for FileTreeOutlineView to forward scroll events
     var scrollViewRef: NSScrollView { scrollView }
 
-    /// 防止 reload 时频繁刷新
+    /// Prevent frequent refresh during reload
     private var pendingReloadWorkItem: DispatchWorkItem?
 
-    /// 搜索过滤词（空字符串表示不过滤）
+    /// Search filter words (empty string means no filtering)
     var filterQuery: String = "" {
         didSet {
             guard filterQuery != oldValue else { return }
@@ -48,16 +48,16 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
         }
     }
 
-    /// 是否显示隐藏文件（以 . 开头的文件/目录）
+    /// Whether to display hidden files (files/directories starting with .)
     var showHiddenFiles: Bool = false
 
-    /// 搜索结果（仅搜索模式下使用，后台 FileManager 枚举填充）
+    /// Search results (only used in search mode, background FileManager enumeration and filling)
     private var searchResults: [FileTreeItem] = []
 
-    /// 正在执行的搜索 Task（用于取消上一次未完成的搜索）
+    /// Search Task in progress (used to cancel the last unfinished search)
     private var pendingSearchTask: Task<Void, Never>?
 
-    /// 当前数据源：搜索模式用 searchResults，否则用正常树根节点
+    /// Current data source: use searchResults for search mode, otherwise use normal tree root node
     private var displayItems: [FileTreeItem] {
         if !filterQuery.isEmpty {
             return searchResults
@@ -69,12 +69,12 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
         return items
     }
 
-    /// 启动防抖搜索：300ms 内只执行最新一次
+    /// Start anti-shake search: only execute the latest one within 300ms
     private func scheduleSearch(query: String) {
         pendingSearchTask?.cancel()
         pendingSearchTask = Task { [weak self] in
             guard let self else { return }
-            // 300ms 防抖
+            // 300ms anti-shake
             try? await Task.sleep(nanoseconds: 300_000_000)
             guard !Task.isCancelled else { return }
             let root = self.store.rootPath
@@ -91,7 +91,7 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
         }
     }
 
-    /// 用 FileManager.enumerator 在后台递归搜索，返回扁平匹配列表
+    /// Use FileManager.enumerator to search recursively in the background, returning a flat match list
     private nonisolated static func searchFiles(root: String, query: String, showHidden: Bool) -> [FileTreeItem] {
         let fm = FileManager.default
         guard let enumerator = fm.enumerator(
@@ -112,20 +112,20 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
                 isDirectory: isDir.boolValue,
                 children: nil
             ))
-            if results.count >= 200 { break }  // 防止结果爆炸
+            if results.count >= 200 { break }  // Prevent result explosion
         }
         return results
     }
 
     // MARK: - Callbacks
 
-    /// 双击/单击文件夹时导航进入的回调（传入目录绝对路径）
+    /// Callback for navigation when double-clicking/clicking a folder (pass in the absolute path to the directory)
     var onNavigateTo: ((String) -> Void)?
-    /// 双击文件时打开的回调
+    /// Callback that opens when a file is double-clicked
     var onFileOpened: ((String) -> Void)?
-    /// Git 分支加载完成回调
+    /// Git branch loading completion callback
     var onBranchLoaded: ((String) -> Void)?
-    /// 任意点击时通知 Canvas 选中此节点
+    /// Notify Canvas that this node is selected when any click is made
     var onTapped: (() -> Void)?
 
     // MARK: - Init
@@ -146,7 +146,7 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
     // MARK: - Setup
 
     private func setupViews() {
-        // ── OutlineView 配置 ──
+        // ── OutlineView configuration ──
         let col = NSTableColumn(identifier: .init("name"))
         col.title = ""
         outlineView.addTableColumn(col)
@@ -163,16 +163,16 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
         outlineView.action = #selector(handleSingleClick)
         outlineView.doubleAction = #selector(handleDoubleClick)
 
-        // 允许拖拽（文件拖到 Terminal / 画布）
+        // Allow dragging (files to Terminal/Canvas)
         outlineView.setDraggingSourceOperationMask(.copy, forLocal: true)
         outlineView.setDraggingSourceOperationMask(.copy, forLocal: false)
 
-        // 右键菜单
+        // Right-click menu
         let menu = NSMenu()
         menu.delegate = self
         outlineView.menu = menu
 
-        // ── ScrollView 配置 ──
+        // ── ScrollView configuration ──
         scrollView.documentView = outlineView
         scrollView.hasVerticalScroller = true
         scrollView.hasHorizontalScroller = false
@@ -188,7 +188,7 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
         scrollView.frame = bounds
     }
 
-    // MARK: - 外部刷新
+    // MARK: - External refresh
 
     func reloadData() {
         scheduleReload()
@@ -202,7 +202,7 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
 
     func reloadBranch() {
         let path = store.rootPath
-        let callback = onBranchLoaded  // 捕获值类型快照，避免 SendableClosureCaptures 警告
+        let callback = onBranchLoaded  // Capture value type snapshots to avoid SendableClosureCaptures warnings
         Task.detached(priority: .utility) {
             let provider = GitStatusProvider(workingDirectory: path)
             guard provider.isGitRepository,
@@ -214,13 +214,13 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
         }
     }
 
-    /// 防抖 reload：合并 100ms 内的多次调用；非搜索模式下 reload 后恢复展开状态
+    /// Anti-shake reload: merge multiple calls within 100ms; restore the expanded state after reload in non-search mode
     private func scheduleReload() {
         pendingReloadWorkItem?.cancel()
         let work = DispatchWorkItem { [weak self] in
             guard let self else { return }
             self.outlineView.reloadData()
-            // 搜索模式不需要恢复展开状态（扁平列表）
+            // Search mode does not need to restore expanded state (flattened list)
             guard self.filterQuery.isEmpty else { return }
             self.restoreExpandedPaths()
         }
@@ -228,10 +228,10 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: work)
     }
 
-    /// 将 store.expandedPaths 中记录的路径在 NSOutlineView 中重新展开
+    /// Re-expand the paths recorded in store.expandedPaths in NSOutlineView
     private func restoreExpandedPaths() {
         guard !store.expandedPaths.isEmpty else { return }
-        // 按路径深度升序展开，确保父节点先于子节点展开
+        // Expand in ascending order of path depth, ensuring that parent nodes are expanded before child nodes
         let sorted = store.expandedPaths.sorted { $0.count < $1.count }
         for path in sorted {
             if let item = findItem(path: path, in: store.items) {
@@ -240,7 +240,7 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
         }
     }
 
-    /// 在 items 树中按路径查找 FileTreeItem
+    /// Find FileTreeItem by path in items tree
     private func findItem(path: String, in items: [FileTreeItem]) -> FileTreeItem? {
         for item in items {
             if item.id == path { return item }
@@ -255,29 +255,29 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
 
     func outlineView(_ outlineView: NSOutlineView, numberOfChildrenOfItem item: Any?) -> Int {
         if item == nil { return displayItems.count }
-        // 搜索模式：扁平列表，不展示子层级
+        // Search mode: flat list, no sublevels displayed
         guard filterQuery.isEmpty else { return 0 }
         guard let fi = item as? FileTreeItem, fi.isDirectory else { return 0 }
         if let children = fi.children {
             let visible = showHiddenFiles ? children : children.filter { !$0.name.hasPrefix(".") }
             return visible.count
         }
-        // 子项尚未加载：返回 1（占位）让 NSOutlineView 允许展开，
-        // 展开后 outlineViewItemDidExpand 会异步加载并 reloadItem 替换为真实数量
+        // Child not loaded yet: return 1 (placeholder) to allow NSOutlineView to expand,
+        // After expansion, outlineViewItemDidExpand will be loaded asynchronously and reloadItem will be replaced with the real number
         return 1
     }
 
     func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
         if item == nil, index < displayItems.count { return displayItems[index] }
         guard let fi = item as? FileTreeItem else { return NSNull() }
-        // children 已加载
+        // children loaded
         if let children = fi.children {
             let visible = showHiddenFiles ? children : children.filter { !$0.name.hasPrefix(".") }
             if index < visible.count { return visible[index] }
             return NSNull()
         }
-        // 占位行：返回 fi 自身作为临时占位（reloadItem 后会被替换）
-        // 这里返回 NSNull 也可以，NSOutlineView 在 viewFor 里会得到 nil 并跳过
+        // Placeholder line: return fi itself as a temporary placeholder (will be replaced after reloadItem)
+        // You can also return NSNull here. NSOutlineView will get nil in viewFor and skip it.
         return NSNull()
     }
 
@@ -295,13 +295,13 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
     }
 
     func outlineView(_ outlineView: NSOutlineView, shouldSelectItem item: Any) -> Bool {
-        return true   // 所有项目均可选中
+        return true   // All items can be selected
     }
 
     func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
-        // 使用自定义 row view 强制 emphasized 状态，
-        // 确保即使 outlineView 未获得 first responder（嵌入画布场景），
-        // 选中行也始终绘制系统标准蓝色背景（而非灰色非活跃态）
+        // Use custom row view to force emphasized state,
+        // Ensure that even if outlineView does not get first responder (embedded canvas scene),
+        // Selected rows are also always drawn with the system standard blue background (instead of the gray inactive state)
         let rowId = NSUserInterfaceItemIdentifier("FileTreeRow")
         if let existing = outlineView.makeView(withIdentifier: rowId, owner: self) as? EmphasizedRowView {
             return existing
@@ -318,16 +318,16 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
     func outlineViewItemDidExpand(_ notification: Notification) {
         guard let fi = notification.userInfo?["NSObject"] as? FileTreeItem else { return }
         store.expandedPaths.insert(fi.id)
-        // 更新 chevron 方向
+        // Update chevron direction
         updateChevron(for: fi, expanded: true)
-        // 若子项尚未加载，异步加载后刷新
+        // If the sub-item has not been loaded yet, refresh after loading asynchronously
         guard fi.children == nil else { return }
         Task { @MainActor [weak self] in
             guard let self else { return }
             await self.store.loadChildren(for: fi.id)
-            // 加载完毕后完整刷新 outline 并重新展开该项
-            // 注意：reloadItem(_:reloadChildren:) 在某些情况下不会重新查询 numberOfChildren，
-            // 因此改用 reloadData() 确保数据源完全同步
+            // After loading, completely refresh the outline and re-expand the item
+            // Note: reloadItem(_:reloadChildren:) does not requery numberOfChildren in some cases,
+            // So use reloadData() instead to ensure the data source is fully synchronized
             self.outlineView.reloadData()
             self.outlineView.expandItem(fi)
         }
@@ -336,11 +336,11 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
     func outlineViewItemDidCollapse(_ notification: Notification) {
         guard let fi = notification.userInfo?["NSObject"] as? FileTreeItem else { return }
         store.expandedPaths.remove(fi.id)
-        // 更新 chevron 方向
+        // Update chevron direction
         updateChevron(for: fi, expanded: false)
     }
 
-    /// 更新指定 item 对应行的 chevron 图标方向
+    /// Update the chevron icon direction of the row corresponding to the specified item
     private func updateChevron(for item: FileTreeItem, expanded: Bool) {
         let row = outlineView.row(forItem: item)
         guard row >= 0, let cell = outlineView.view(atColumn: 0, row: row, makeIfNecessary: false) as? NSTableCellView else { return }
@@ -350,26 +350,26 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
         }
     }
 
-    // MARK: - 鼠标事件
+    // MARK: - Mouse events
 
     override func mouseDown(with event: NSEvent) {
-        // 通知 Canvas 选中此 fileTree 节点（在 AppKit hit-test 直接路由到 NSOutlineView 时
-        // CanvasNodesView.mouseDown 不会被调用，需要在此主动触发选中）
+        // Notify Canvas that this fileTree node is selected (when AppKit hit-test routes directly to NSOutlineView
+        // CanvasNodesView.mouseDown will not be called, you need to actively trigger the selection here)
         onTapped?()
         super.mouseDown(with: event)
     }
 
-    // MARK: - 单击/双击处理
+    // MARK: - Single click/double click processing
 
-    /// 单击：仅选中高亮行，不触发任何导航
+    /// Click: Only the highlighted row is selected, no navigation is triggered
     @objc private func handleSingleClick() {
-        // NSOutlineView 会自动处理选中高亮，无需额外逻辑
+        // NSOutlineView will automatically handle selection highlighting without additional logic
         _ = outlineView.clickedRow
     }
 
-    /// 双击处理：
-    ///  - 文件夹 → Finder 式导航进入子目录（通过 onNavigateTo 回调）
-    ///  - 文件   → 通过回调用默认应用打开
+    /// Double-click processing:
+    ///  - Folder → Finder-style navigation into subdirectories (via onNavigateTo callback)
+    ///  - File → Open with default app via callback
     @objc private func handleDoubleClick() {
         let row = outlineView.clickedRow
         guard row >= 0, let item = outlineView.item(atRow: row) as? FileTreeItem else { return }
@@ -381,48 +381,48 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
         }
     }
 
-    /// 折叠所有展开的项目
+    /// Collapse all expanded items
     func collapseAll() {
         outlineView.collapseItem(nil, collapseChildren: true)
         store.expandedPaths.removeAll()
     }
 
-    // MARK: - 程序化点击处理（由 CanvasNodesView 调用）
+    // MARK: - Programmatic click handling (called by CanvasNodesView)
 
-    /// 根据本地坐标执行点击操作（单击选中/展开折叠，双击导航/打开）
+    /// Perform click operations based on local coordinates (single click to select/expand collapse, double click to navigate/open)
     /// - Parameters:
-    ///   - localPoint: 相对于 outlineView 左上角的坐标（y 向下）
-    ///   - clickCount: 1=单击, 2=双击
+    ///   - localPoint: Coordinates relative to the upper left corner of outlineView (y downward)
+    ///   - clickCount: 1=click, 2=double click
     func handleClickAtLocalPoint(_ localPoint: NSPoint, clickCount: Int) {
-        // 计算行号：localPoint.y / rowHeight（考虑 scrollView 的 contentOffset）
+        // Calculate row number: localPoint.y / rowHeight (consider scrollView's contentOffset)
         let scrollOffset = scrollView.contentView.bounds.origin
         let adjustedPoint = NSPoint(x: localPoint.x + scrollOffset.x, y: localPoint.y + scrollOffset.y)
         let row = outlineView.row(at: adjustedPoint)
 
         guard row >= 0, let item = outlineView.item(atRow: row) as? FileTreeItem else {
-            // 点击空白区域：取消选中
+            // Click on an empty area: Uncheck
             outlineView.deselectAll(nil)
             return
         }
 
-        // 计算 disclosure（chevron）热区
-        // Cell 布局：[缩进 level*20] + [chevron 16pt] + [gap 2pt] + [icon 20pt] + [gap 6pt] + [text]
+        // Calculate disclosure (chevron) hot zone
+        // Cell layout: [indent level*20] + [chevron 16pt] + [gap 2pt] + [icon 20pt] + [gap 6pt] + [text]
         let rowRect = outlineView.rect(ofRow: row)
         let level = outlineView.level(forRow: row)
-        // 缩进 + chevron(16) + gap(2) + icon(20) = 缩进 + 38，覆盖到 icon 右边缘
+        // Indent + chevron(16) + gap(2) + icon(20) = indent + 38, covering the right edge of the icon
         let disclosureMaxX = CGFloat(level) * outlineView.indentationPerLevel + 38
         let isInDisclosureZone = item.isDirectory && (adjustedPoint.x - rowRect.minX) < disclosureMaxX
 
         if clickCount >= 2 {
             if isInDisclosureZone {
-                // 双击在 disclosure 区域：仅展开/折叠，不触发导航（避免与展开操作冲突）
+                // Double-click in the disclosure area: only expand/collapse, not trigger navigation (to avoid conflict with the expand operation)
                 if outlineView.isItemExpanded(item) {
                     outlineView.collapseItem(item)
                 } else {
                     outlineView.expandItem(item)
                 }
             } else {
-                // 双击在非 disclosure 区域：目录导航进入 / 文件打开
+                // Double-click in non-disclosure area: directory navigation/file opening
                 if item.isDirectory {
                     onNavigateTo?(item.id)
                 } else {
@@ -432,7 +432,7 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
             return
         }
 
-        // 单击：disclosure 区域切换展开/折叠
+        // Click: disclosure area switch expand/collapse
         if isInDisclosureZone {
             if outlineView.isItemExpanded(item) {
                 outlineView.collapseItem(item)
@@ -441,19 +441,19 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
             }
         }
 
-        // 选中行
+        // Select row
         outlineView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
         onTapped?()
     }
 
-    // MARK: - 拖拽支持
+    // MARK: - Drag and drop support
 
     func outlineView(_ outlineView: NSOutlineView, pasteboardWriterForItem item: Any) -> NSPasteboardWriting? {
         guard let fi = item as? FileTreeItem else { return nil }
         return URL(fileURLWithPath: fi.id) as NSURL
     }
 
-    // MARK: - Cell 构建
+    // MARK: - Cell construction
 
     private func makeCell(for fi: FileTreeItem, in outlineView: NSOutlineView) -> NSView {
         let cellId = NSUserInterfaceItemIdentifier("FileCell")
@@ -469,9 +469,9 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
         return cell
     }
 
-    /// chevron 标识用的 tag
+    /// tag used for chevron identification
     private static let chevronTag = 9999
-    /// 副标题路径标签的 tag（搜索模式下显示相对路径）
+    /// tag of subtitle path tag (relative path displayed in search mode)
     private static let subtitleTag = 9998
 
     private func buildCellTemplate() -> NSTableCellView {
@@ -490,7 +490,7 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
         cell.addSubview(imgView)
         cell.imageView = imgView
 
-        // 文件名主标题
+        // File name main title
         let textField = NSTextField(labelWithString: "")
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.font = .systemFont(ofSize: 13)
@@ -499,7 +499,7 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
         cell.addSubview(textField)
         cell.textField = textField
 
-        // 副标题：搜索结果下方显示相对路径
+        // Subtitle: Show relative path below search results
         let subtitle = NSTextField(labelWithString: "")
         subtitle.translatesAutoresizingMaskIntoConstraints = false
         subtitle.font = .systemFont(ofSize: 10)
@@ -535,7 +535,7 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
     private func configureCellContents(_ cell: NSTableCellView, with fi: FileTreeItem, in outlineView: NSOutlineView) {
         let isSearching = !filterQuery.isEmpty
 
-        // 副标题：搜索模式下显示相对于 rootPath 的路径，否则隐藏
+        // Subtitle: Show paths relative to rootPath in search mode, hide otherwise
         if let subtitle = cell.viewWithTag(Self.subtitleTag) as? NSTextField {
             if isSearching {
                 let root = store.rootPath
@@ -554,7 +554,7 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
         cell.imageView?.image = fileIcon(for: fi)
 
         if let chevron = cell.viewWithTag(Self.chevronTag) as? NSImageView {
-            // 搜索模式下扁平列表，不显示展开指示器
+            // Flat list in search mode, no expansion indicator displayed
             if !isSearching && fi.isDirectory {
                 chevron.isHidden = false
                 let symbolName = outlineView.isItemExpanded(fi) ? "chevron.down" : "chevron.right"
@@ -582,7 +582,7 @@ final class FileTreeOutlineNSView: NSView, NSOutlineViewDelegate, NSOutlineViewD
     }
 }
 
-// MARK: - 右键菜单（NSMenuDelegate）
+// MARK: - Right-click menu (NSMenuDelegate)
 
 extension FileTreeOutlineNSView: NSMenuDelegate {
 
@@ -591,7 +591,7 @@ extension FileTreeOutlineNSView: NSMenuDelegate {
 
         let row = outlineView.clickedRow
         guard row >= 0 else {
-            // 点击空白区域：只提供创建选项
+            // Clicking on an empty area: Only create options are available
             menu.addItem(makeMenuItem(
                 title: "filetree.menu.new_file".localized,
                 icon: "doc.badge.plus",
@@ -605,7 +605,7 @@ extension FileTreeOutlineNSView: NSMenuDelegate {
             return
         }
 
-        // 选中点击的行
+        // Select the clicked row
         outlineView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
         guard let item = outlineView.item(atRow: row) as? FileTreeItem else { return }
 
@@ -689,7 +689,7 @@ extension FileTreeOutlineNSView: NSMenuDelegate {
     @objc private func openInFinder(_ sender: NSMenuItem) {
         guard let path = sender.representedObject as? String else { return }
         let url = URL(fileURLWithPath: path)
-        // 文件夹 → 导航进入；文件 → Finder 高亮
+        // Folder → Navigate to enter; File → Finder highlight
         var isDir: ObjCBool = false
         FileManager.default.fileExists(atPath: path, isDirectory: &isDir)
         if isDir.boolValue {
@@ -755,7 +755,7 @@ extension FileTreeOutlineNSView: NSMenuDelegate {
         }
     }
 
-    // MARK: - 新建/重命名 Alert
+    // MARK: - New/Rename Alert
 
     private func presentInlineRename(parentPath: String, isFolder: Bool) {
         let alert = NSAlert()
@@ -847,11 +847,11 @@ extension FileTreeOutlineNSView: NSMenuDelegate {
 
 // MARK: - EmphasizedRowView
 
-/// 始终返回 `isEmphasized = true` 的 row view，
-/// 使选中行在 NSOutlineView 未获得焦点时也使用蓝色高亮（而非灰色）。
+/// Always return row views with `isEmphasized = true`,
+/// Make selected rows highlighted blue (instead of gray) when the NSOutlineView does not have focus.
 final class EmphasizedRowView: NSTableRowView {
     override var isEmphasized: Bool {
         get { true }
-        set { /* 忽略系统设置，始终保持 emphasized 状态 */ }
+        set { /* Ignore system settings and always remain in emphasized state */ }
     }
 }

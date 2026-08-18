@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - 工作区画布视图
+// MARK: - Workspace canvas view
 
 struct WorkspaceCanvasView: View {
     @Environment(AppState.self) private var appState
@@ -27,7 +27,7 @@ struct WorkspaceCanvasView: View {
         ZStack(alignment: .top) {
             canvasBody
 
-            // 顶部浮动工具栏区域
+            // Top floating toolbar area
             toolbarOverlay
         }
         .onReceive(NotificationCenter.default.publisher(for: .strokeNodeDrawn)) { notif in
@@ -42,22 +42,22 @@ struct WorkspaceCanvasView: View {
         }
     }
 
-    /// 当前是否全屏
+    /// Whether the current full screen
     private var isFullScreen: Bool { WindowStateObserver.shared.isFullScreen }
 
-    /// 顶部工具栏覆盖层
+    /// Top toolbar overlay
     @ViewBuilder
     private var toolbarOverlay: some View {
         VStack(spacing: 0) {
-            // 浮动工具栏（距窗口顶部 8px）
+            // Floating toolbar (8px from top of window)
             CanvasToolbar(workspace: workspace, isConnecting: $isConnecting, activeDrawingTool: $activeDrawingTool, activeShapeSubtool: $activeShapeSubtool)
                 .padding(.top, 8)
 
-            // 二级操作工具栏（选中节点时显示）
-            // 与一级工具栏间距加大
+            // Secondary operation toolbar (displayed when a node is selected)
+            // Increase the distance between the first-level toolbar and the first-level toolbar
             Spacer().frame(height: 12)
 
-            // 绘制工具激活时隐藏节点工具栏（二级工具栏唯一实例）
+            // Hide node toolbar when drawing tool is active (only instance of secondary toolbar)
             if activeDrawingTool == nil && !selectedNodeIds.isEmpty && selectedNodeIds.contains(where: { id in
                 workspace.nodes.contains { $0.id == id }
             }) {
@@ -196,7 +196,7 @@ struct WorkspaceCanvasView: View {
                     NodeContextToolbar(
                         onEdit: { editSelectedNode() },
                         onConnect: { startConnectionFromSelected() },
-                        onRefresh: { /* 预留刷新操作 */ },
+                        onRefresh: { /* Reserve refresh operation */ },
                         onDelete: { deleteSelectedNodes() },
                         connections: selectedNodeConnections,
                         onDeleteConnection: { deleteConnection(id: $0) }
@@ -210,13 +210,13 @@ struct WorkspaceCanvasView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        // 非全屏模式：忽略顶部安全区域，让工具栏延伸到标题栏区域
-        // 全屏模式：不忽略安全区域，工具栏在 NavigationSplitView toolbar 下方正常显示
+        // Non-full screen mode: ignore top safe area and let toolbar extend into title bar area
+        // Full screen mode: safe area is not ignored, toolbar is displayed normally below NavigationSplitView toolbar
         .modifier(ConditionalIgnoreSafeAreaTop(ignore: !isFullScreen))
         .zIndex(100)
     }
 
-    /// 构建 CanvasViewportRepresentable（单独提取以帮助编译器推断类型）
+    /// Building CanvasViewportRepresentable (extracted separately to help compiler infer types)
     private var canvasViewportRepresentable: CanvasViewportRepresentable {
         CanvasViewportRepresentable(
             canvasOrigin: $canvasOrigin,
@@ -233,10 +233,10 @@ struct WorkspaceCanvasView: View {
                 workspace.canvasZoom = z
             },
             onDeleteSelectedNodes: {
-                // CanvasNodeRenderer 通过 onClose 回调处理节点删除
+                // CanvasNodeRenderer handles node deletion through onClose callback
             },
             onNodeJumpNumbersRequested: { _ in
-                // 数字徽章由 TerminalNodeView 自行管理
+                // Digital badges are managed by TerminalNodeView itself
             },
             onConnectionCreated: handleConnectionCreated(idA:idB:),
             onNodeDrawn: { nodeType, canvasRect in
@@ -278,15 +278,15 @@ struct WorkspaceCanvasView: View {
             canvasViewportRepresentable
             .ignoresSafeArea()
 
-            // 底部右下角控件组
+            // Bottom right corner control group
             VStack {
                 Spacer()
                 HStack(alignment: .bottom) {
                     Spacer()
 
-                    // 底部右侧控件组
+                    // Bottom right control group
                     HStack(spacing: 8) {
-                        // Floor 按钮
+                        // Floor button
                         Button {
                             showFloorOverview = true
                         } label: {
@@ -299,7 +299,7 @@ struct WorkspaceCanvasView: View {
                         .clipShape(Circle())
                         .help("floor.overview".localized)
 
-                        // 缩略图按钮
+                        // Thumbnail button
                         Button {
                             showMinimap.toggle()
                         } label: {
@@ -317,7 +317,7 @@ struct WorkspaceCanvasView: View {
                                 canvasOrigin: canvasOrigin,
                                 zoom: zoom,
                                 onJumpTo: { targetPoint in
-                                    // 通过 Notification 触发 CanvasViewportView 平滑动画跳转
+                                    // Trigger CanvasViewportView smooth animation jump through Notification
                                     NotificationCenter.default.post(
                                         name: .canvasJumpToOrigin,
                                         object: nil,
@@ -329,7 +329,7 @@ struct WorkspaceCanvasView: View {
                             .environment(\.locale, LocalizationManager.shared.locale)
                         }
 
-                        // Zoom 控件
+                        // Zoom Control
                         HStack(spacing: 0) {
                             Button {
                                 NotificationCenter.default.post(name: .canvasZoomOut, object: nil)
@@ -549,7 +549,7 @@ struct WorkspaceCanvasView: View {
         .environment(\.textNodeEditingId, textNodeEditingId)
     }
 
-    // MARK: - 拖拽绘制创建节点
+    // MARK: - Drag and draw to create nodes
 
     private func handleNodeDrawn(nodeType: String, frame: CGRect) {
         switch nodeType {
@@ -586,7 +586,7 @@ struct WorkspaceCanvasView: View {
     }
 
     private func handleConnectionCreated(idA: UUID, idB: UUID) {
-        // 防止同一对节点重复连接
+        // Prevent repeated connections of the same pair of nodes
         let alreadyConnected = workspace.connections.contains {
             ($0.terminalIdA == idA && $0.terminalIdB == idB) ||
             ($0.terminalIdA == idB && $0.terminalIdB == idA)
@@ -608,7 +608,7 @@ struct WorkspaceCanvasView: View {
             return
         }
 
-        // 根据节点内容类型选择正确的连接类型
+        // Select the correct connection type based on node content type
         let typeA = workspace.nodes.first { $0.id == idA }.map { contentTypeName($0.content) }
         let typeB = workspace.nodes.first { $0.id == idB }.map { contentTypeName($0.content) }
         let cm = ConnectionManager.shared
@@ -649,7 +649,7 @@ struct WorkspaceCanvasView: View {
 
     // MARK: - Canvas Blank Area Context Menu Handlers
 
-    /// 画布空白区域右键菜单：创建指定类型节点
+    /// Right-click menu of blank area of canvas: Create nodes of specified type
     private func handleCanvasContextCreateNode(nodeType: String, at canvasPoint: CGPoint) {
         let size = defaultNodeSize(for: nodeType)
         let frame = CGRect(
@@ -664,20 +664,20 @@ struct WorkspaceCanvasView: View {
         case "fileTree":
             createFileTreeAtFrame(frame)
         case "portal":
-            // Portal 需要弹 sheet 输入 URL
+            // Portal needs to pop up sheet and enter URL
             showPortalDrawnFrame = frame
             showPortalSheetForDrawing = true
         case "text":
             createTextAtFrame(frame)
         case "linkedFile":
-            // 链接文件：弹出文件选择面板
+            // Linked files: Pop up file selection panel
             createLinkedFileAtFrame(frame)
         default:
             break
         }
     }
 
-    /// 画布空白区域右键菜单：根据预设索引创建终端节点
+    /// Right-click menu of blank area of canvas: Create terminal node based on preset index
     private func handleCanvasContextCreateTerminal(presetIndex: Int, at canvasPoint: CGPoint) {
         let activePresets = appState.preferences.agentPresets.filter { $0.isActive }
         guard presetIndex >= 0, presetIndex < activePresets.count else { return }
@@ -692,10 +692,10 @@ struct WorkspaceCanvasView: View {
         createTerminalAtFrame(frame, preset: preset, role: nil, isManager: false)
     }
 
-    /// 画布空白区域右键菜单：粘贴
+    /// Right-click menu of blank area of canvas: Paste
     private func handleCanvasContextPaste(at canvasPoint: CGPoint) {
         guard let text = NSPasteboard.general.string(forType: .string) else { return }
-        // 粘贴文本内容为 Note 节点
+        // Paste text content as Note node
         let name = "Pasted-\(UUID().uuidString.prefix(6))"
         let fileName = "\(name).md"
         var nc = StickyNoteContent(name: name)
@@ -720,7 +720,7 @@ struct WorkspaceCanvasView: View {
         Task { try? await workspace.save() }
     }
 
-    /// 链接文件：弹出文件选择器并在指定位置创建节点
+    /// Link File: Pops up the file selector and creates a node at the specified location
     private func createLinkedFileAtFrame(_ frame: CGRect) {
         let panel = NSOpenPanel()
         panel.canChooseFiles = true
@@ -741,16 +741,16 @@ struct WorkspaceCanvasView: View {
         }
     }
 
-    /// 节点类型对应的默认尺寸（复用 CanvasViewportView 的定义）
+    /// Default size corresponding to node type (reusing the definition of CanvasViewportView)
     @State private var showTerminalDrawnFrame: CGRect = .zero
     @State private var showTerminalSheetForDrawing = false
     @State private var showPortalDrawnFrame: CGRect = .zero
     @State private var showPortalSheetForDrawing = false
-    // MARK: - Maestro Recruit 处理
-    // MARK: - 终端预初始化
+    // MARK: - Maestro Recruit processing
+    // MARK: - terminal pre-initialization
 
-    /// 进入工作区时立即并行初始化所有终端（PTY 同时 fork）
-    /// 对标 Maestri：所有终端并行启动，5s 内全部就绪
+    /// Initialize all terminals in parallel immediately upon entering the workspace (PTY forks simultaneously)
+    /// Benchmarking Maestri: All terminals start in parallel and are ready within 5 seconds
     @MainActor
     private func preInitializeAllTerminals() {
         let nodes = workspace.nodes
@@ -758,7 +758,7 @@ struct WorkspaceCanvasView: View {
         let wsDir = workspace.workingDirectory
         let rolePresets = appState.preferences.rolePresets
 
-        // 筛出需要初始化的终端节点
+        // Filter out terminal nodes that need to be initialized
         let pending = nodes.filter { node -> Bool in
             guard case .terminal(let tc) = node.content else { return false }
             guard tc.agentType != "orca_external" else { return false }
@@ -766,7 +766,7 @@ struct WorkspaceCanvasView: View {
         }
         guard !pending.isEmpty else { return }
 
-        // 并行启动所有终端（PTY fork 本身很轻量，不阻塞 UI 线程）
+        // Start all terminals in parallel (PTY fork itself is lightweight and does not block the UI thread)
         for node in pending {
             guard case .terminal(let tc) = node.content else { continue }
             guard TerminalManager.shared.terminals[tc.id] == nil else { continue }
@@ -776,7 +776,7 @@ struct WorkspaceCanvasView: View {
                 rolePresets.first { $0.id == roleId }
             }
             let baseDir = tc.workingDirectory.isEmpty ? wsDir : tc.workingDirectory
-            // 有角色时在 role 子目录启动，确保 CLAUDE.md/role.json 存在后再启动
+            // When there is a role, start it in the role subdirectory. Make sure CLAUDE.md/role.json exists before starting it.
             let startDir: String
             if let role {
                 RoleInjector.shared.prepareRoleDirectory(roleId: role.id, rolePreset: role, workingDirectory: baseDir)
@@ -796,9 +796,9 @@ struct WorkspaceCanvasView: View {
         }
     }
 
-    // MARK: - 浮动工具栏操作
+    // MARK: - Floating toolbar operation
 
-    // MARK: Note 工具栏辅助方法
+    // MARK: Note toolbar auxiliary method
     private func duplicateSelectedNodes() {
         for id in selectedNodeIds {
             guard let original = workspace.nodes.first(where: { $0.id == id }) else { continue }
@@ -842,7 +842,7 @@ struct WorkspaceCanvasView: View {
         Task { try? await workspace.save() }
     }
 
-    /// 编辑选中的节点（对 Terminal 弹出编辑 Sheet）
+    /// Edit the selected node (pop up the editing sheet in Terminal)
     private func editSelectedNode() {
         guard let firstId = selectedNodeIds.first,
               let node = workspace.nodes.first(where: { $0.id == firstId }),
@@ -850,13 +850,13 @@ struct WorkspaceCanvasView: View {
         terminalToEdit = (nodeId: firstId, content: tc)
     }
 
-    /// 从选中节点开始创建连线
+    /// Create a connection starting from the selected node
     private func startConnectionFromSelected() {
         guard !selectedNodeIds.isEmpty else { return }
         isConnecting = true
     }
 
-    /// 当前选中节点的所有连接（用于工具栏徽章）
+    /// All connections to currently selected node (used for toolbar badges)
     private var selectedNodeConnections: [ToolbarConnectionItem] {
         guard let nodeId = selectedNodeIds.first else { return [] }
         var items: [ToolbarConnectionItem] = []
@@ -905,7 +905,7 @@ struct WorkspaceCanvasView: View {
         return items
     }
 
-    /// 删除单条连接
+    /// Delete a single connection
     private func deleteConnection(id connId: UUID) {
         workspace.connections.removeAll { $0.id == connId }
         workspace.noteConnections.removeAll { $0.id == connId }
@@ -916,7 +916,7 @@ struct WorkspaceCanvasView: View {
         Task { try? await workspace.save() }
     }
 
-    /// 切换终端节点的 Maestro 模式
+    /// Toggle Maestro mode for endpoints
     private func toggleMaestroMode(nodeId: UUID?) {
         guard let nodeId,
               let idx = workspace.nodes.firstIndex(where: { $0.id == nodeId }),
@@ -932,7 +932,7 @@ struct WorkspaceCanvasView: View {
         Task { try? await workspace.save() }
     }
 
-    /// 当前要分配角色的节点已有的角色 ID
+    /// The existing role ID of the node where the role is currently to be assigned
     private var currentAssignedRoleId: UUID? {
         guard let nodeId = assignRoleNodeId,
               let node = workspace.nodes.first(where: { $0.id == nodeId }),
@@ -940,7 +940,7 @@ struct WorkspaceCanvasView: View {
         return tc.assignedRoleId
     }
 
-    /// EditTerminalSheet dismiss 时检测 assignedRoleId 是否变化，若变化则重启终端
+    /// Check whether assignedRoleId changes when EditTerminalSheet dismisses. If it changes, restart the terminal.
     private func handleRoleChangeIfNeeded(nodeId: UUID, oldContent: NodeContent, newContent: NodeContent) {
         guard case .terminal(let oldTc) = oldContent,
               case .terminal(let newTc) = newContent else { return }
@@ -953,13 +953,13 @@ struct WorkspaceCanvasView: View {
             let roleDir = RoleInjector.shared.roleDirPath(roleId: role.id, workingDirectory: workDir)
             restartTerminalWithRole(terminalId: newTc.id, role: role, workingDirectory: roleDir)
         } else {
-            // assignedRoleId == nil 或 role 已不存在（orphan id），均重启回原始目录
+            // assignedRoleId == nil or role no longer exists (orphan id), restart back to the original directory
             let dir = newTc.workingDirectory.isEmpty ? workspace.workingDirectory : newTc.workingDirectory
             restartTerminalInOriginalDir(terminalId: newTc.id, workingDirectory: dir)
         }
     }
 
-    /// 为终端节点分配角色，同时调用 RoleInjector 写入文件
+    /// Assign roles to endpoints and call RoleInjector to write files
     private func applyRole(_ role: RolePreset, toNodeId nodeId: UUID?) {
         guard let nodeId,
               let idx = workspace.nodes.firstIndex(where: { $0.id == nodeId }),
@@ -975,7 +975,7 @@ struct WorkspaceCanvasView: View {
             userInfo: ["nodeId": nodeId, "content": newContent]
         )
 
-        // 写入 CLAUDE.md / AGENTS.md 到角色目录
+        // Write CLAUDE.md/AGENTS.md to roles directory
         let workDir = tc.workingDirectory.isEmpty ? workspace.workingDirectory : tc.workingDirectory
         RoleInjector.shared.prepareRoleDirectory(
             roleId: role.id,
@@ -983,21 +983,21 @@ struct WorkspaceCanvasView: View {
             workingDirectory: workDir
         )
 
-        // 重启终端，在 role 目录下启动（agent 读取 CLAUDE.md 后得知真实工作区）
+        // Restart the terminal and start it in the role directory (the agent learns the real workspace after reading CLAUDE.md)
         let roleDir = RoleInjector.shared.roleDirPath(roleId: role.id, workingDirectory: workDir)
         restartTerminalWithRole(terminalId: tc.id, role: role, workingDirectory: roleDir)
 
         Task { try? await workspace.save() }
     }
 
-    /// 取消终端节点的角色分配
+    /// Cancel role assignment of endpoint
     private func unassignRole(fromNodeId nodeId: UUID?) {
         guard let nodeId,
               let idx = workspace.nodes.firstIndex(where: { $0.id == nodeId }),
               case .terminal(var tc) = workspace.nodes[idx].content else { return }
         let oldRoleId = tc.assignedRoleId
         tc.assignedRoleId = nil
-        // 恢复默认颜色和图标
+        // Restore default colors and icons
         tc.color = "#007AFF"
         tc.icon = "terminal"
         let unassignedContent = NodeContent.terminal(tc)
@@ -1008,7 +1008,7 @@ struct WorkspaceCanvasView: View {
             userInfo: ["nodeId": nodeId, "content": unassignedContent]
         )
 
-        // 清理角色目录（如果没有其他终端使用该角色）
+        // Clean role directory (if no other terminal uses the role)
         if let roleId = oldRoleId {
             let stillUsed = workspace.nodes.contains { node in
                 if case .terminal(let otherTc) = node.content, otherTc.assignedRoleId == roleId, node.id != nodeId {
@@ -1017,29 +1017,29 @@ struct WorkspaceCanvasView: View {
                 return false
             }
             if !stillUsed {
-                // 不删除角色目录，因为其他工作区可能使用
+                // Do not delete role directory because other workspaces may use
             }
         }
 
-        // 重启终端在原始工作目录
+        // Restart the terminal in the original working directory
         let dir = tc.workingDirectory.isEmpty ? workspace.workingDirectory : tc.workingDirectory
         restartTerminalInOriginalDir(terminalId: tc.id, workingDirectory: dir)
 
         Task { try? await workspace.save() }
     }
 
-    /// 重启终端并应用角色
+    /// Restart terminal and apply role
     private func restartTerminalWithRole(terminalId: UUID, role: RolePreset, workingDirectory: String) {
-        // 先移除旧终端
+        // Remove the old terminal first
         TerminalManager.shared.removeTerminal(id: terminalId)
 
-        // 查找对应的 TerminalContent
+        // Find the corresponding TerminalContent
         guard let node = workspace.nodes.first(where: {
             if case .terminal(let tc) = $0.content { return tc.id == terminalId }
             return false
         }), case .terminal(let tc) = node.content else { return }
 
-        // 重新创建终端（RoleInjector 已在调用方写入文件）
+        // Recreate terminal (RoleInjector has written file on caller)
         _ = TerminalManager.shared.createTerminal(
             id: terminalId,
             command: tc.command,
@@ -1051,7 +1051,7 @@ struct WorkspaceCanvasView: View {
         )
     }
 
-    /// 重启终端在原始工作目录（取消角色后）
+    /// Restart the terminal in the original working directory (after canceling the role)
     private func restartTerminalInOriginalDir(terminalId: UUID, workingDirectory: String) {
         TerminalManager.shared.removeTerminal(id: terminalId)
 
@@ -1073,7 +1073,7 @@ struct WorkspaceCanvasView: View {
         )
     }
 
-    /// 获取当前选中节点的内容类型（单选时）
+    /// Get the content type of the currently selected node (when single selection)
     private var selectedNodeContentType: String? {
         guard selectedNodeIds.count == 1,
               let firstId = selectedNodeIds.first,
@@ -1081,7 +1081,7 @@ struct WorkspaceCanvasView: View {
         return contentTypeName(node.content)
     }
 
-    /// FileTree 节点：在访达中显示
+    /// FileTree node: shown in Finder
     private func revealFileTreeInFinder() {
         guard let firstId = selectedNodeIds.first,
               let node = workspace.nodes.first(where: { $0.id == firstId }),
@@ -1089,7 +1089,7 @@ struct WorkspaceCanvasView: View {
         NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: fc.rootPath)
     }
 
-    /// FileTree 节点：更改根目录
+    /// FileTree node: change root directory
     private func changeFileTreeRoot() {
         guard let firstId = selectedNodeIds.first,
               let idx = workspace.nodes.firstIndex(where: { $0.id == firstId }),
@@ -1104,7 +1104,7 @@ struct WorkspaceCanvasView: View {
         guard panel.runModal() == .OK, let url = panel.url else { return }
         let newPath = url.path
 
-        // 更新数据模型
+        // Update data model
         var content = fc
         content.rootPath = newPath
         content.name = url.lastPathComponent
@@ -1116,10 +1116,10 @@ struct WorkspaceCanvasView: View {
             userInfo: ["nodeId": firstId, "content": newContent]
         )
 
-        // 通知 CanvasNodeRenderer 刷新视图（通过 save + reload）
+        // Notify CanvasNodeRenderer to refresh view (via save + reload)
         Task { try? await workspace.save() }
 
-        // 发送通知让 renderer 更新文件树视图
+        // Send notification to let renderer update file tree view
         NotificationCenter.default.post(
             name: .fileTreeRootChanged,
             object: nil,
@@ -1128,7 +1128,7 @@ struct WorkspaceCanvasView: View {
     }
 }
 
-// MARK: - 节点类型辅助
+// MARK: - Node type assist
 
 private func contentTypeName(_ content: NodeContent) -> String {
     switch content {
@@ -1143,7 +1143,7 @@ private func contentTypeName(_ content: NodeContent) -> String {
     }
 }
 
-// MARK: - 空画布占位
+// MARK: - Empty canvas placeholder
 
 struct EmptyCanvasPlaceholder: View {
     var body: some View {
@@ -1163,10 +1163,10 @@ struct EmptyCanvasPlaceholder: View {
 
 // MARK: - Autosave Modifier
 
-/// 自动保存修饰符：每 30 秒定时保存 + 视图消失时立即保存（符合 NFR5）
+/// Autosave modifier: scheduled save every 30 seconds + save immediately when view disappears (NFR5 compliant)
 private struct AutosaveModifier: ViewModifier {
     let workspace: WorkspaceManager
-    /// 30 秒定时器
+    /// 30 second timer
     private let timer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
 
     func body(content: Content) -> some View {
@@ -1188,8 +1188,8 @@ private extension View {
 
 // MARK: - Stroke Point Drag Modifier
 
-/// 处理 stroke 控制点拖拽结束时的 workspace 持久化。
-/// 独立提取为 ViewModifier，避免 body 链过长导致 Swift 编译器类型推断超时。
+/// Handle workspace persistence at the end of stroke control point dragging.
+/// Independently extracted as ViewModifier to avoid Swift compiler type inference timeout caused by too long body chain.
 private struct StrokePointDragModifier: ViewModifier {
     @Bindable var workspace: WorkspaceManager
 
@@ -1216,8 +1216,8 @@ private extension View {
 
 // MARK: - Conditional Safe Area
 
-/// 根据条件决定是否忽略顶部安全区域。
-/// 非全屏时忽略（工具栏延伸到标题栏）；全屏时不忽略（工具栏在可视区域内正常显示）。
+/// Determine whether to ignore the top safe area based on conditions.
+/// Ignored when not full screen (the toolbar extends to the title bar); not ignored when full screen (the toolbar is displayed normally within the visible area).
 private struct ConditionalIgnoreSafeAreaTop: ViewModifier {
     let ignore: Bool
 

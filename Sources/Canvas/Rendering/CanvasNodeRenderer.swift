@@ -3,40 +3,40 @@ import SwiftUI
 import SwiftTerm
 import OSLog
 
-/// 画布节点渲染引擎
-/// 使用单个 CanvasNodesView（NSHostingView）渲染所有节点，无 per-node NSView 管理
+/// Canvas node rendering engine
+/// Rendering all nodes using a single CanvasNodesView (NSHostingView), no per-node NSView management
 @MainActor
 final class CanvasNodeRenderer {
     let logger = Logger.make(category: "CanvasNodeRenderer")
     weak var canvas: CanvasViewportView?
-    /// 当前工作区（供节点回调使用）
+    /// Current workspace (for use by node callbacks)
     weak var currentWorkspace: WorkspaceManager?
     var notificationObservers: [NSObjectProtocol] = []
-    /// 当前可用角色列表（由外部在 sync 前注入）
+    /// List of currently available roles (injected externally before sync)
     var rolePresets: [RolePreset] = []
 
-    /// 节点 SwiftUI 容器（单一 HostingView）
+    /// Node SwiftUI container (single HostingView)
     var nodesHostingView: CanvasNodesView?
 
-    // 连线层
+    // Wiring layer
     private(set) var overlayView: ConnectionOverlayView?
 
-    /// 复用的悬链线计算器（避免每条连线每帧都 alloc 新实例）
+    /// Reused catenary calculator (avoids allocating new instances of each connection every frame)
     let ropeSimulation = RopeSimulation()
 
-    // MARK: - 连线物理状态（由 CanvasNodeRenderer+Physics.swift 管理）
+    // MARK: - Wired physics state (managed by CanvasNodeRenderer+Physics.swift)
 
-    /// 连接元数据（用于渲染时查找 status）
+    /// Connection metadata (used to find status when rendering)
     struct ConnectionMeta {
         let id: UUID
         let nodeIdA: UUID
         let nodeIdB: UUID
     }
 
-    /// 当前活跃的连接元数据列表（在 syncConnections 中构建）
+    /// List of currently active connection metadata (built in syncConnections)
     var activeConnections: [ConnectionMeta] = []
 
-    /// 连接状态缓存（避免每条连线每帧 O(n) 查找）
+    /// Connection state cache (avoids O(n) lookups per connection per frame)
     var connectionStatusCache: [UUID: ConnectionStatus] = [:]
 
     init(canvas: CanvasViewportView) {
@@ -50,7 +50,7 @@ final class CanvasNodeRenderer {
         setupDropTargetObserver()
         setupNodeStateObservers()
         setupPhysicsCallbacks()
-        // 画布 pan/zoom 变化时直接刷新连线屏幕坐标（绕过 SwiftUI 时序问题）
+        // Directly refresh the screen coordinates of the connection when the canvas pan/zoom changes (bypassing SwiftUI timing issues)
         canvas.onViewportPanned = { [weak self] in
             self?.rerenderConnections()
             self?.canvas?.syncTemporaryConnectionToOverlay()
@@ -67,12 +67,12 @@ final class CanvasNodeRenderer {
             workspace: nil
         )
         let hostingView = CanvasNodesView(rootView: rootView)
-        // 禁止 NSHostingView 向 SwiftUI 传播 safe area insets，
-        // 确保 GeometryReader 尺寸与 NSHostingView frame 完全一致（修复 hitTest 坐标偏移）
+        // Disable NSHostingView from propagating safe area insets to SwiftUI,
+        // Ensure GeometryReader dimensions are exactly the same as NSHostingView frame (fix hitTest coordinate offset)
         hostingView.safeAreaRegions = []
         hostingView.frame = canvas.bounds
         hostingView.autoresizingMask = [.width, .height]
-        // 注入 canvas 引用，供 fileTree NavBar 区域的 mouseDown 路由使用
+        // Inject canvas reference for use by mouseDown routing in fileTree NavBar area
         hostingView.canvas = canvas
         canvas.addSubview(hostingView)
         nodesHostingView = hostingView
@@ -80,10 +80,10 @@ final class CanvasNodeRenderer {
     }
 
     private func setupNodeDragCallback(canvas: CanvasViewportView) {
-        // 拖动中帧级回调：实时更新物理引擎端点
+        // Frame-level callback during dragging: Update physics engine endpoint in real time
         canvas.onNodeFramesDuringDrag = { [weak self] draggedIds in
             guard let self, let ws = self.currentWorkspace else { return }
-            // 只更新涉及被拖动节点的连接绳索端点
+            // Only update the connecting rope endpoints involving the dragged node
             self.updatePhysicsAnchorsForNodes(draggedIds, workspace: ws)
         }
 
@@ -99,7 +99,7 @@ final class CanvasNodeRenderer {
             }
             self.saveWorkspace()
         }
-        // Resize 结束：持久化新 frame
+        // End of Resize: Persisting new frame
         canvas.onNodeResizeEnded = { [weak self] nodeId, canvasFrame in
             guard let self else { return }
             self.currentWorkspace?.updateNodeFrame(id: nodeId, frame: canvasFrame)
@@ -108,12 +108,12 @@ final class CanvasNodeRenderer {
         canvas.onDuplicateNode = { [weak self] id in
             self?.handleDuplicate(id: id)
         }
-        // 右键菜单回调
+        // Right-click menu callback
         canvas.onContextMenuClose = { [weak self] id in
             self?.removeNode(id: id, from: self?.currentWorkspace)
         }
         canvas.onContextMenuRename = { [weak self] id in
-            // 通过通知让 UI 层弹出重命名输入框
+            // Let the UI layer pop up the rename input box through notifications
             NotificationCenter.default.post(
                 name: .editTerminalRequested,
                 object: nil,
@@ -126,7 +126,7 @@ final class CanvasNodeRenderer {
             let newLocked = !ws.nodes[idx].isLocked
             self?.handleLockToggle(id: id, locked: newLocked)
         }
-        // 右键菜单：编辑终端（发送通知，附带 TerminalContent 数据）
+        // Right-click menu: Edit terminal (send notification with TerminalContent data)
         canvas.onContextMenuEditTerminal = { [weak self] id in
             guard let ws = self?.currentWorkspace,
                   let node = ws.nodes.first(where: { $0.id == id }),
@@ -137,7 +137,7 @@ final class CanvasNodeRenderer {
                 userInfo: ["nodeId": id, "terminalContent": tc]
             )
         }
-        // 右键菜单：开始连接（直接在 NSView 层设置起点，避免 SwiftUI 往返延迟）
+        // Right-click menu: Start connection (set the starting point directly in the NSView layer to avoid SwiftUI round-trip delay)
         canvas.onContextMenuConnect = { [weak canvas] id in
             canvas?.selectedNodeIds = [id]
             canvas?.connectingFromNodeId = id
@@ -147,7 +147,7 @@ final class CanvasNodeRenderer {
                 userInfo: ["nodeId": id]
             )
         }
-        // 右键菜单：分配角色（Terminal 专属）
+        // Right-click menu: Assign role (Terminal exclusive)
         canvas.onContextMenuAssignRole = { id in
             NotificationCenter.default.post(
                 name: .contextMenuAssignRole,
@@ -155,7 +155,7 @@ final class CanvasNodeRenderer {
                 userInfo: ["nodeId": id]
             )
         }
-        // 右键菜单：切换 Maestro 模式（Terminal 专属）
+        // Right-click menu: Switch Maestro mode (Terminal exclusive)
         canvas.onContextMenuToggleMaestro = { id in
             NotificationCenter.default.post(
                 name: .contextMenuToggleMaestro,
@@ -163,23 +163,23 @@ final class CanvasNodeRenderer {
                 userInfo: ["nodeId": id]
             )
         }
-        // 右键菜单：清除缓冲区（Terminal 专属）
+        // Right-click menu: Clear buffer (Terminal exclusive)
         canvas.onContextMenuClearBuffer = { [weak self] id in
             self?.handleClearBuffer(terminalId: id)
         }
-        // 右键菜单：重新加载终端（Terminal 专属）
+        // Right-click menu: Reload terminal (Terminal exclusive)
         canvas.onContextMenuReloadTerminal = { [weak self] id in
             self?.handleReloadTerminal(terminalId: id)
         }
-        // 右键菜单：拷贝终端内容（Terminal 专属）
+        // Right-click menu: Copy terminal content (Terminal exclusive)
         canvas.onContextMenuCopyTerminal = { [weak self] id in
             self?.handleCopyTerminal(terminalId: id)
         }
-        // 右键菜单：切换监控活动（Terminal 专属）
+        // Right-click menu: Switch monitoring activities (Terminal exclusive)
         canvas.onContextMenuToggleMonitor = { [weak self] id in
             self?.handleToggleMonitor(terminalId: id)
         }
-        // 节点层级变更：同步到 workspace 持久化（canvas.currentNodes 已由 bringNodesToFront 更新）
+        // Node level changes: synchronized to workspace persistence (canvas.currentNodes has been updated by bringNodesToFront)
         canvas.onNodeZIndexChanged = { [weak self] nodeId, newZIndex in
             guard let ws = self?.currentWorkspace,
                   let idx = ws.nodes.firstIndex(where: { $0.id == nodeId }) else { return }
@@ -210,20 +210,20 @@ final class CanvasNodeRenderer {
     private func setupOverlay(canvas: CanvasViewportView) {
         let overlay = ConnectionOverlayView(frame: canvas.bounds)
         overlay.autoresizingMask = [.width, .height]
-        // 连接线层插在节点层之下，节点重叠时节点始终显示在连接线上方
+        // The connection line layer is inserted below the node layer. When nodes overlap, the nodes are always displayed above the connection line.
         if let nodesView = canvas.nodesHostingView {
             canvas.addSubview(overlay, positioned: .below, relativeTo: nodesView)
         } else {
             canvas.addSubview(overlay)
         }
         overlayView = overlay
-        // 注册 overlay 引用到画布（供临时连线同步使用）
+        // Register overlay reference to canvas (for temporary connection synchronization)
         canvas.connectionOverlayView = overlay
 
-        // 连线右键删除回调
+        // Delete callback when right-clicking on a connection
         overlay.onDeleteConnection = { [weak self] connectionId in
             guard let self, let ws = self.currentWorkspace else { return }
-            // 从所有连接类型中查找并删除
+            // Find and remove from all connection types
             ws.connections.removeAll { $0.id == connectionId }
             ws.noteConnections.removeAll { $0.id == connectionId }
             ws.portalConnections.removeAll { $0.id == connectionId }
@@ -240,17 +240,17 @@ final class CanvasNodeRenderer {
         notificationObservers.forEach { NotificationCenter.default.removeObserver($0) }
     }
 
-    // MARK: - 同步节点列表
+    // MARK: - sync node list
 
-    /// 使用单个 HostingView 全量替换节点渲染
+    /// Use a single HostingView to fully replace node rendering
     func sync(nodes: [CanvasNode], workspace: WorkspaceManager) {
         guard let canvas else { return }
         currentWorkspace = workspace
 
         let lockedIds = Set(nodes.filter { $0.isLocked }.map { $0.id })
 
-        // 先更新 currentNodes（触发排序缓存更新），再用排序后的数组构建 SwiftUI 视图
-        // 重建 nodeCanvasFrames：清理已删除节点的旧条目，避免旧 UUID 残留干扰 hitTest 和拖拽
+        // Update currentNodes first (trigger sorting cache update), then use the sorted array to build the SwiftUI view
+        // Rebuild nodeCanvasFrames: Clean up old entries of deleted nodes to avoid old UUID residues interfering with hitTest and drag
         let activeIds = Set(nodes.map { $0.id })
         canvas.nodeCanvasFrames = canvas.nodeCanvasFrames.filter { activeIds.contains($0.key) }
         for node in nodes {
@@ -258,10 +258,10 @@ final class CanvasNodeRenderer {
         }
         canvas.currentNodes = nodes
 
-        // 视口裁剪：仅将可见节点传入 SwiftUI 渲染层
-        // 同时强制使视口缓存失效：sync() 直接写 rootView 绕过了 layout() 的缓存更新路径，
-        // 若不置脏，拖拽分支会用旧 _cachedViewportNodes 作过滤白名单，
-        // 导致 sync() 之后立即拖拽新节点时节点消失。
+        // Viewport clipping: Pass only visible nodes into SwiftUI render layer
+        // At the same time, the viewport cache is forced to invalidate: sync() writes directly to rootView, bypassing the cache update path of layout().
+        // If not dirty, the drag branch will use the old _cachedViewportNodes for filtering whitelist.
+        // Causes nodes to disappear when dragging a new node immediately after sync().
         canvas.invalidateViewportCache()
         let visibleNodes = canvas.viewportCulledNodes()
 
@@ -278,7 +278,7 @@ final class CanvasNodeRenderer {
                    let tv = provider.terminalView {
                     tv.window?.makeFirstResponder(tv)
                 }
-                // bringNodesToFront 会更新 zIndex 并触发 canvasSelectionChanged 通知（重建 rootView 显示选中框）
+                // bringNodesToFront will update zIndex and trigger canvasSelectionChanged notification (rebuild rootView to display the selected box)
                 canvas.bringNodesToFront([id])
                 canvas.selectedNodeIds = [id]
             },
@@ -296,29 +296,29 @@ final class CanvasNodeRenderer {
             }
         )
 
-        // 确保连接线层始终在节点层之下（节点重叠时节点遮挡连接线）
+        // Ensure that the connection line layer is always below the node layer (nodes obscure the connection line when nodes overlap)
         if let overlay = overlayView, let nodesView = nodesHostingView {
             canvas.addSubview(overlay, positioned: .below, relativeTo: nodesView)
         } else if let overlay = overlayView {
             canvas.addSubview(overlay)
         }
 
-        // drawingOverlayView 在节点层上方（用于 drawing 选中边框）
+        // drawingOverlayView above node layer (for drawing selected border)
         if let drawingOverlay = canvas.drawingOverlayView {
             canvas.addSubview(drawingOverlay)
         }
 
-        // 保证 snapGuideView 始终在最顶层
+        // Ensure snapGuideView is always at the top level
         if let snapView = canvas.snapGuideView {
             canvas.addSubview(snapView)
         }
     }
 
-    // MARK: - 节点删除
+    // MARK: - Node deleted
 
     func removeNode(id: UUID, from workspace: WorkspaceManager?) {
         guard workspace?.isExternallyManagedNode(id: id) != true else { return }
-        // Note 节点删除时同时删除磁盘 .md 文件（官方行为：docs/05-notes.md）
+        // Note The disk .md file is also deleted when a node is deleted (official behavior: docs/05-notes.md)
         if let (nc, wsId) = noteInfo(nodeId: id, workspace: workspace) {
             switch nc.storageMode {
             case .managed:
@@ -332,7 +332,7 @@ final class CanvasNodeRenderer {
                     }
                 }
             case .custom(let customPath):
-                // custom 路径由用户管理，不自动删除（与官方行为一致）
+                // custom paths are managed by users and are not automatically deleted (consistent with official behavior)
                 logger.debug("Custom note at \(customPath) not deleted (user-managed)")
             }
             _ = wsId
@@ -350,7 +350,7 @@ final class CanvasNodeRenderer {
         return (nc, ws.id)
     }
 
-    // MARK: - 节点操作回调
+    // MARK: - Node operation callback
 
     private func handleRename(id: UUID, newName: String) {
         guard let ws = currentWorkspace,
@@ -375,7 +375,7 @@ final class CanvasNodeRenderer {
         }
         if let content = newContent {
             ws.nodes[idx].content = content
-            // canvasNodeContentChanged observer 统一处理：updateNodeContentInPlace + displayName + rootView 刷新
+            // canvasNodeContentChanged observer unified processing: updateNodeContentInPlace + displayName + rootView refresh
             NotificationCenter.default.post(
                 name: .canvasNodeContentChanged,
                 object: nil,
@@ -392,7 +392,7 @@ final class CanvasNodeRenderer {
         copy.id = UUID()
         copy.frame = copy.frame.offsetBy(dx: 30, dy: 30)
         copy.zIndex = (ws.nodes.map { $0.zIndex }.max() ?? 0) + 1
-        // 对 Terminal 内容生成新 ID
+        // Generate new IDs for Terminal content
         if case .terminal(var tc) = copy.content {
             tc.id = UUID()
             copy.content = .terminal(tc)

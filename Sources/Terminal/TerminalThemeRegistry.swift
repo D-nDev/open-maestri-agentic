@@ -1,7 +1,7 @@
 import AppKit
 import SwiftTerm
 
-/// 终端主题定义
+/// Terminal theme definition
 struct TerminalTheme: Codable, Identifiable, Equatable {
     let id: String
     let name: String
@@ -27,8 +27,8 @@ struct TerminalTheme: Codable, Identifiable, Equatable {
     let ansiBrightWhite: String
 }
 
-/// 终端主题注册表
-/// 管理所有内置主题，提供应用主题到 TerminalView 的能力
+/// Terminal theme registry
+/// Manage all built-in themes, providing the ability to apply themes to TerminalView
 @MainActor
 final class TerminalThemeRegistry {
     static let shared = TerminalThemeRegistry()
@@ -39,29 +39,29 @@ final class TerminalThemeRegistry {
         themes = Self.builtInThemes
     }
 
-    /// 根据 ID 获取主题
+    /// Get topic based on ID
     func theme(for id: String) -> TerminalTheme? {
         themes.first { $0.id == id }
     }
 
-    /// 将主题应用到终端视图（即时生效）
+    /// Apply theme to terminal view (effective immediately)
     func apply(themeId: String, to terminalView: LocalProcessTerminalView) {
         guard let theme = theme(for: themeId) else {
-            // 回退到系统默认
+            // Fall back to system default
             terminalView.configureNativeColors()
             return
         }
         apply(theme: theme, to: terminalView)
     }
 
-    /// 将主题应用到终端视图
+    /// Apply theme to terminal view
     func apply(theme: TerminalTheme, to terminalView: LocalProcessTerminalView) {
         terminalView.nativeForegroundColor = NSColor(hex: theme.foreground) ?? .textColor
         terminalView.nativeBackgroundColor = NSColor(hex: theme.background) ?? .textBackgroundColor
         terminalView.caretColor = NSColor(hex: theme.cursor) ?? .textColor
         terminalView.selectedTextBackgroundColor = NSColor(hex: theme.selection) ?? .selectedTextBackgroundColor
 
-        // 设置 ANSI 16 色（使用 SwiftTerm.Color，范围 0-65535）
+        // Set ANSI 16 colors (using SwiftTerm.Color, range 0-65535)
         let paletteColors: [SwiftTerm.Color] = [
             Self.swiftTermColor(hex: theme.ansiBlack),
             Self.swiftTermColor(hex: theme.ansiRed),
@@ -84,7 +84,7 @@ final class TerminalThemeRegistry {
         terminalView.getTerminal().updateFullScreen()
     }
 
-    /// 将 hex 字符串转为 SwiftTerm.Color（16-bit RGB）
+    /// Convert hex string to SwiftTerm.Color (16-bit RGB)
     private static func swiftTermColor(hex: String) -> SwiftTerm.Color {
         var hexStr = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         if hexStr.hasPrefix("#") { hexStr.removeFirst() }
@@ -97,13 +97,13 @@ final class TerminalThemeRegistry {
         return SwiftTerm.Color(red: r, green: g, blue: b)
     }
 
-    /// 根据偏好推断要使用的主题 ID
-    /// "system" 模式会根据系统外观自动选择 dark/light
-    /// 自定义主题直接返回其 ID
+    /// Infer topic ID to use based on preferences
+    /// "system" mode automatically selects dark/light based on system appearance
+    /// Custom theme directly returns its ID
     static func resolveThemeId(from preference: String) -> String {
         switch preference {
         case "system":
-            // 根据系统外观决定
+            // Depends on system appearance
             let isDark = NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
             return isDark ? "maestri-dark" : "maestri-light"
         case "dark":
@@ -111,8 +111,8 @@ final class TerminalThemeRegistry {
         case "light":
             return "maestri-light"
         default:
-            // 自定义主题：直接使用 ID（如 dracula, nord, catppuccin-mocha 等）
-            // 验证主题是否存在，不存在则回退到系统
+            // Custom theme: use ID directly (such as dracula, nord, catppuccin-mocha, etc.)
+            // Verify whether the topic exists. If it does not exist, fall back to the system.
             if TerminalThemeRegistry.shared.theme(for: preference) != nil {
                 return preference
             }
@@ -121,10 +121,10 @@ final class TerminalThemeRegistry {
         }
     }
 
-    // MARK: - 内置主题
+    // MARK: - Built-in theme
 
     static let builtInThemes: [TerminalTheme] = [
-        // Maestri 默认深色
+        // Maestri default dark color
         TerminalTheme(
             id: "maestri-dark",
             name: "Maestri Dark",
@@ -149,7 +149,7 @@ final class TerminalThemeRegistry {
             ansiBrightCyan: "#29B8DB",
             ansiBrightWhite: "#FFFFFF"
         ),
-        // Maestri 默认浅色
+        // Maestri default light color
         TerminalTheme(
             id: "maestri-light",
             name: "Maestri Light",

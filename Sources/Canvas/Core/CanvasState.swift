@@ -2,7 +2,7 @@ import OSLog
 import Foundation
 import CoreGraphics
 
-/// 画布状态，@MainActor 强制所有修改在主线程（Epic 2 实现）
+/// Canvas state, @MainActor forces all modifications to the main thread (Epic 2 implementation)
 @MainActor
 @Observable
 final class CanvasState {

@@ -1,10 +1,10 @@
 import Foundation
 
-/// sidebar-layout.json 持久化模型（schemaVersion:2，对标 maestri-tech-analysis.md 第 247 行）
+/// sidebar-layout.json persistence model (schemaVersion:2, benchmarking maestri-tech-analysis.md line 247)
 struct SidebarLayout: Codable {
     var schemaVersion: Int = 2
-    var topLevelItems: [UUID]   // 工作区 ID 的显示顺序
-    var groups: [SidebarGroup]  // 折叠分组
+    var topLevelItems: [UUID]   // Display order of workspace IDs
+    var groups: [SidebarGroup]  // Collapse grouping
 
     init() {
         topLevelItems = []
@@ -16,7 +16,7 @@ struct SidebarGroup: Codable, Identifiable {
     var id: UUID
     var name: String
     var isCollapsed: Bool
-    var items: [UUID]   // 工作区 ID
+    var items: [UUID]   // Workspace ID
 
     init(id: UUID = UUID(), name: String) {
         self.id = id

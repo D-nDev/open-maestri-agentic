@@ -1,21 +1,21 @@
 import Foundation
 import OSLog
 
-/// Note 文件管理器
-/// - Note 内容存储为 .md 文件
-/// - 支持 managed（~/.open-maestri/workspaces/{id}/notes/）和 custom（任意路径）两种存储模式
-/// - 所有文件 I/O 通过 PersistenceManager 的原子写入
+/// Note File Manager
+/// - Note contents are stored as .md files
+/// - Supports two storage modes: managed (~/.open-maestri/workspaces/{id}/notes/) and custom (any path)
+/// - All file I/O via atomic writes via PersistenceManager
 final class NoteFileManager {
     static let shared = NoteFileManager()
     private let logger = Logger.make(category: "NoteFileManager")
     private let pm = PersistenceManager.shared
     private init() {}
 
-    // MARK: - 读取
+    // MARK: - Read
 
-    /// 读取 Note 内容
-    /// - Parameter filePath: .md 文件绝对路径
-    /// - Returns: 文件内容字符串
+    /// Read Note content
+    /// - Parameter filePath: .md file absolute path
+    /// - Returns: file content string
     func read(filePath: String) throws -> String {
         let url = URL(fileURLWithPath: filePath)
         guard FileManager.default.fileExists(atPath: filePath) else {
@@ -24,8 +24,8 @@ final class NoteFileManager {
         return try String(contentsOf: url, encoding: .utf8)
     }
 
-    /// 读取 Note 内容（带行范围）
-    /// 格式与 Maestri CLI 一致：`[14 lines total]\n1    内容...`
+    /// Read Note content (with line range)
+    /// The format is consistent with Maestri CLI: `[14 lines total]\n1 content...`
     func readWithLineRange(filePath: String, offset: Int? = nil, limit: Int? = nil) throws -> String {
         let content = try read(filePath: filePath)
         let lines = content.components(separatedBy: "\n")
@@ -49,13 +49,13 @@ final class NoteFileManager {
         return "\(header)\n\(numbered)"
     }
 
-    // MARK: - 写入
+    // MARK: - Write
 
-    /// 完整替换 Note 内容
+    /// Completely replace Note content
     func write(filePath: String, content: String) throws {
         let url = URL(fileURLWithPath: filePath)
         let data = Data(content.utf8)
-        // 确保父目录存在
+        // Make sure the parent directory exists
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(),
             withIntermediateDirectories: true
@@ -73,7 +73,7 @@ final class NoteFileManager {
         }
     }
 
-    /// 局部编辑（替换第一个匹配的文本）
+    /// Partial editing (replaces first matching text)
     func edit(filePath: String, oldText: String, newText: String) throws {
         let current = try read(filePath: filePath)
         guard current.contains(oldText) else {
@@ -83,16 +83,16 @@ final class NoteFileManager {
         try write(filePath: filePath, content: updated)
     }
 
-    // MARK: - 路径管理
+    // MARK: - Path Management
 
-    /// 为新 Note 生成 managed 路径
+    /// Generate managed paths for new Notes
     func managedPath(workspaceId: UUID, noteName: String) -> String {
         pm.notesDirURL(workspaceId: workspaceId)
             .appendingPathComponent("\(sanitizeFilename(noteName)).md")
             .path
     }
 
-    /// 创建新 Note 文件（内容为空）
+    /// Create new Note file (empty content)
     func createNote(workspaceId: UUID, name: String) throws -> String {
         let path = managedPath(workspaceId: workspaceId, noteName: name)
         if !FileManager.default.fileExists(atPath: path) {
@@ -101,12 +101,12 @@ final class NoteFileManager {
         return path
     }
 
-    // MARK: - Note Chain 遍历（FR30）
+    // MARK: - Note Chain traversal (FR30)
 
-    /// 遍历 Note Chain，收集所有连接的 Note 内容
+    /// Traverse the Note Chain and collect all connected Note contents
     /// - Parameters:
-    ///   - entryNote: 入口 Note 的 filePath
-    ///   - visited: 已访问路径集合（防止循环）
+    ///   - entryNote: filePath of entry Note
+    ///   - visited: visited path collection (to prevent loops)
     func readChain(entryNotePath: String, visited: inout Set<String>) throws -> String {
         guard !visited.contains(entryNotePath) else { return "" }
         visited.insert(entryNotePath)
@@ -114,7 +114,7 @@ final class NoteFileManager {
         return content
     }
 
-    // MARK: - 工具
+    // MARK: - Tools
 
     private func sanitizeFilename(_ name: String) -> String {
         name.components(separatedBy: .init(charactersIn: "/\\:*?\"<>|"))

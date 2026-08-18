@@ -1,8 +1,8 @@
 import AppKit
 
-/// 画布背景层（点阵/纯色/透明），替代 CanvasViewportView.drawLineGrid。
-/// 使用 CGPattern 实现网格绘制：每个 tile 只绘制一个网格单元，Core Graphics 自动平铺。
-/// pan 时仅更新 pattern phase offset（O(1)），zoom 变化时重建 pattern。
+/// Canvas background layer (lattice/solid color/transparent), replaces CanvasViewportView.drawLineGrid.
+/// Use CGPattern to implement grid drawing: each tile only draws one grid unit, and Core Graphics automatically tiles it.
+/// Only the pattern phase offset (O(1)) is updated when pan is used, and the pattern is rebuilt when zoom changes.
 final class CanvasBackground: NSView {
     override var isFlipped: Bool { true }
 
@@ -10,7 +10,7 @@ final class CanvasBackground: NSView {
     var zoom: CGFloat = 1.0 {
         didSet {
             if oldValue != zoom {
-                cachedPattern = nil  // zoom 变化时 tile 大小改变，需要重建 pattern
+                cachedPattern = nil  // The tile size changes when zoom changes, and the pattern needs to be rebuilt.
             }
             needsDisplay = true
         }
@@ -22,7 +22,7 @@ final class CanvasBackground: NSView {
         }
     }
 
-    /// 缓存当前 zoom 下的 CGPattern，避免每帧重建
+    /// Cache the CGPattern under the current zoom to avoid rebuilding every frame
     private var cachedPattern: CGPattern?
     private var cachedPatternZoom: CGFloat = 0
 
@@ -42,21 +42,21 @@ final class CanvasBackground: NSView {
         }
     }
 
-    // MARK: - CGPattern 网格绘制
+    // MARK: - CGPattern grid drawing
 
     private func drawLineGridWithPattern(in rect: NSRect) {
         guard let ctx = NSGraphicsContext.current?.cgContext else { return }
 
-        // 白色背景
+        // White background
         ctx.setFillColor(NSColor.white.cgColor)
         ctx.fill(rect)
 
         let gridSpacing = Constants.canvasGridSpacing * zoom
 
-        // 如果 gridSpacing 太小（zoom 非常小），跳过网格绘制避免性能问题
+        // If gridSpacing is too small (zoom is very small), skip grid drawing to avoid performance issues
         guard gridSpacing >= 4.0 else { return }
 
-        // 构建或复用 pattern
+        // Build or reuse patterns
         let pattern: CGPattern
         if let cached = cachedPattern, cachedPatternZoom == zoom {
             pattern = cached
@@ -67,12 +67,12 @@ final class CanvasBackground: NSView {
             pattern = newPattern
         }
 
-        // 计算 pattern phase：通过 offset 实现 pan 跟随
-        // phase 使得 pattern 随 canvasOrigin 移动
+        // Calculate pattern phase: implement pan following through offset
+        // phase causes pattern to move with canvasOrigin
         let phaseX = -(canvasOrigin.x * zoom).truncatingRemainder(dividingBy: gridSpacing)
         let phaseY = -(canvasOrigin.y * zoom).truncatingRemainder(dividingBy: gridSpacing)
 
-        // 使用 pattern 颜色空间绘制
+        // Drawing using pattern color space
         var alpha: CGFloat = 1.0
         let patternSpace = CGColorSpace(patternBaseSpace: nil)!
         ctx.setFillColorSpace(patternSpace)
@@ -81,8 +81,8 @@ final class CanvasBackground: NSView {
         ctx.fill(rect)
     }
 
-    /// 创建一个 tileSize × tileSize 的网格 pattern tile
-    /// tile 内容：右边缘竖线 + 底边缘横线（平铺后形成完整网格）
+    /// Create a tileSize × tileSize grid pattern tile
+    /// Tile content: right edge vertical line + bottom edge horizontal line (to form a complete grid after tiles)
     private func makeGridPattern(tileSize: CGFloat) -> CGPattern? {
         var callbacks = CGPatternCallbacks(
             version: 0,
@@ -95,11 +95,11 @@ final class CanvasBackground: NSView {
                 ctx.setStrokeColor(color)
                 ctx.setLineWidth(lineWidth)
 
-                // 绘制 tile 右边缘竖线
+                // Draw a vertical line on the right edge of the tile
                 ctx.move(to: CGPoint(x: size, y: 0))
                 ctx.addLine(to: CGPoint(x: size, y: size))
 
-                // 绘制 tile 底边缘横线
+                // Draw tile bottom edge horizontal line
                 ctx.move(to: CGPoint(x: 0, y: size))
                 ctx.addLine(to: CGPoint(x: size, y: size))
 
@@ -110,7 +110,7 @@ final class CanvasBackground: NSView {
             }
         )
 
-        // 传递 tileSize 给 callback
+        // Pass tileSize to callback
         let infoPtr = UnsafeMutableRawPointer.allocate(byteCount: MemoryLayout<CGFloat>.size, alignment: MemoryLayout<CGFloat>.alignment)
         infoPtr.storeBytes(of: tileSize, as: CGFloat.self)
 

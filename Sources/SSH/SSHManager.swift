@@ -1,19 +1,19 @@
 import Foundation
 import OSLog
 
-/// SSH 连接配置
+/// SSH connection configuration
 struct SSHConfig: Codable {
     var host: String
     var user: String
     var port: Int
-    var scriptPath: String  // 远程服务器上安装 omaestri 的路径
-    var tunnelPort: Int     // 反向隧道本地端口（默认 7433）
-    var addToPath: Bool     // 是否将脚本目录添加到 shell profile PATH
+    var scriptPath: String  // Path to install omaestri on remote server
+    var tunnelPort: Int     // Reverse tunnel local port (default 7433)
+    var addToPath: Bool     // Whether to add script directories to shell profile PATH
 }
 
-/// Remote SSH 管理器（FR59-60，Epic 11）
-/// - 建立 SSH 连接并在远程安装 omaestri 脚本
-/// - 通过反向隧道（-R）将远端 omaestri ask 路由回本地 InterAgentServer
+/// Remote SSH Manager (FR59-60, Epic 11)
+/// - Establish an SSH connection and install the omaestri script remotely
+/// - Route remote omaestri ask back to local InterAgentServer via reverse tunnel (-R)
 final class SSHManager {
     static let shared = SSHManager()
     private let logger = Logger.make(category: "SSHManager")
@@ -21,7 +21,7 @@ final class SSHManager {
     private var isConnected: Bool = false
     private init() {}
 
-    // MARK: - 连接
+    // MARK: - Connect
 
     func connect(config: SSHConfig) throws {
         guard !isConnected else {
@@ -29,14 +29,14 @@ final class SSHManager {
             return
         }
 
-        // 建立反向隧道：远程 tunnelPort → 本地 InterAgentServer
+        // Establishing reverse tunnel: remote tunnelPort → local InterAgentServer
         let localPort = InterAgentServer.shared.port
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/ssh")
         process.arguments = [
-            "-N",                           // 不执行远程命令
+            "-N",                           // Remote command not executed
             "-o", "StrictHostKeyChecking=accept-new",
-            "-R", "\(config.tunnelPort):127.0.0.1:\(localPort)",  // 反向隧道（NFR8）
+            "-R", "\(config.tunnelPort):127.0.0.1:\(localPort)",  // Reverse tunnel (NFR8)
             "-p", "\(config.port)",
             "\(config.user)@\(config.host)"
         ]
@@ -45,7 +45,7 @@ final class SSHManager {
         isConnected = true
         logger.info("SSH tunnel established to \(config.host):\(config.port), tunnelPort=\(config.tunnelPort)")
 
-        // 在远程安装 omaestri 脚本
+        // Installing the omaestri script remotely
         Task { try await installOmaestri(config: config) }
     }
 
@@ -56,9 +56,9 @@ final class SSHManager {
         logger.debug("SSH disconnected")
     }
 
-    // MARK: - 安装 omaestri 脚本
+    // MARK: - Install omaestri script
 
-    /// 生成 omaestri shell 脚本内容（用于安装到远程服务器）
+    /// Generate omaestri shell script content (for installation to remote server)
     private func buildRemoteScript(host: String) -> String {
         """
         #!/usr/bin/env bash
@@ -95,7 +95,7 @@ final class SSHManager {
         let tunnelHost = "127.0.0.1:\(config.tunnelPort)"
         let scriptContent = buildRemoteScript(host: tunnelHost)
 
-        // 使用 base64 编码避免引号/变量展开转义问题
+        // Use base64 encoding to avoid quote/variable expansion escaping issues
         guard let scriptData = scriptContent.data(using: .utf8) else { return }
         let base64Script = scriptData.base64EncodedString()
         let scriptDir = (config.scriptPath as NSString).deletingLastPathComponent
@@ -107,7 +107,7 @@ final class SSHManager {
             "chmod +x \(config.scriptPath)",
         ].joined(separator: " && ")
 
-        // 若用户选择 addToPath，追加到 shell profile
+        // If the user selects addToPath, append to the shell profile
         let addToPathCmd = config.addToPath
             ? " && echo 'export PATH=\"\(scriptDir):$PATH\"' >> ~/.zshrc 2>/dev/null; echo 'export PATH=\"\(scriptDir):$PATH\"' >> ~/.bashrc 2>/dev/null; true"
             : ""

@@ -1,6 +1,6 @@
 import AppKit
 
-/// 全局注册表：nodeId → FileTreeOutlineView（供画布路由滚动事件使用）
+/// Global registry: nodeId → FileTreeOutlineView (for canvas routing scroll events)
 final class FileTreeViewRegistry {
     static let shared = FileTreeViewRegistry()
     private var views: [UUID: FileTreeOutlineView] = [:]
@@ -23,7 +23,7 @@ final class FileTreeViewRegistry {
     }
 }
 
-/// 全局注册表：nodeId → FileTreeIconGridView（供画布路由鼠标事件使用）
+/// Global registry: nodeId → FileTreeIconGridView (used by canvas routing mouse events)
 final class FileTreeGridViewRegistry {
     static let shared = FileTreeGridViewRegistry()
     private var views: [UUID: FileTreeIconGridView] = [:]
@@ -46,31 +46,31 @@ final class FileTreeGridViewRegistry {
     }
 }
 
-/// 轻量适配器：将 FileTreeOutlineNSView 包装为 NSView（供 CanvasNodeRenderer 嵌入节点 contentView）
+/// Lightweight Adapter: Wrap FileTreeOutlineNSView as NSView (for CanvasNodeRenderer to embed node contentView)
 final class FileTreeOutlineView: NSView {
     private var outlineNSView: FileTreeOutlineNSView?
     private(set) var store: FileTreeStateStore
 
-    /// 内部 NSScrollView（供外部路由滚动事件使用）
+    /// Internal NSScrollView (for use by external routed scroll events)
     var innerScrollView: NSScrollView? { outlineNSView?.scrollViewRef }
 
-    /// SwiftUI 层通过此回调得知用户双击进入了某目录，更新 navState
+    /// The SwiftUI layer knows that the user has double-clicked to enter a directory through this callback, and updates navState
     var onNavigateTo: ((String) -> Void)?
-    /// Git 分支加载完成后的回调
+    /// Callback after Git branch loading is completed
     var onBranchLoaded: ((String) -> Void)?
-    /// 任意点击时通知 Canvas 选中此节点
+    /// Notify Canvas that this node is selected when any click is made
     var onTapped: (() -> Void)? {
         get { outlineNSView?.onTapped }
         set { outlineNSView?.onTapped = newValue }
     }
-    /// 后退导航回调（由 CanvasNodesView 在 navBar 区域命中后退按钮时调用）
+    /// Back navigation callback (called by CanvasNodesView when the back button is hit in the navBar area)
     var onGoBack: (() -> Void)?
-    /// 前进导航回调
+    /// Forward navigation callback
     var onGoForward: (() -> Void)?
-    /// 节点底部额外的 SwiftUI 区域高度（如 git panel 展开时），供 fileTreeHitKind 识别
+    /// Additional SwiftUI area height at the bottom of the node (such as when git panel is expanded) for fileTreeHitKind to recognize
     var extraBottomSwiftUIHeight: CGFloat = 0
 
-    /// 是否显示隐藏文件（以 . 开头）
+    /// Whether to display hidden files (starting with .)
     var showHiddenFiles: Bool {
         get { outlineNSView?.showHiddenFiles ?? false }
         set {
@@ -79,7 +79,7 @@ final class FileTreeOutlineView: NSView {
         }
     }
 
-    /// 当前根路径（供 FileTreeRepresentable.updateNSView 比较使用）
+    /// Current root path (for comparison by FileTreeRepresentable.updateNSView)
     var currentRootPath: String { store.rootPath }
 
     init(rootPath: String) {
@@ -90,15 +90,15 @@ final class FileTreeOutlineView: NSView {
         outline.frame = bounds
         outline.autoresizingMask = [.width, .height]
 
-        // 双击目录 → 通知 navState 导航
+        // Double-click directory → notify navState navigation
         outline.onNavigateTo = { [weak self] path in
             self?.onNavigateTo?(path)
         }
-        // 双击文件 → 默认应用打开
+        // Double-click the file → the default application opens
         outline.onFileOpened = { path in
             NSWorkspace.shared.open(URL(fileURLWithPath: path))
         }
-        // 分支信息加载完成
+        // Branch information loading completed
         outline.onBranchLoaded = { [weak self] branch in
             self?.onBranchLoaded?(branch)
         }
@@ -114,19 +114,19 @@ final class FileTreeOutlineView: NSView {
         outlineNSView?.frame = bounds
     }
 
-    /// 更换根目录（切换到新路径并刷新列表）
+    /// Change root directory (switch to new path and refresh list)
     func changeRoot(to newPath: String) {
         store = FileTreeStateStore(rootPath: newPath)
         outlineNSView?.updateStore(store)
         Task { @MainActor [weak self] in
             await self?.store.reload()
             self?.outlineNSView?.reloadData()
-            // 刷新分支信息
+            // Refresh branch information
             self?.outlineNSView?.reloadBranch()
         }
     }
 
-    /// 刷新文件列表
+    /// Refresh file list
     func refresh() {
         Task { @MainActor [weak self] in
             await self?.store.reload()
@@ -134,26 +134,26 @@ final class FileTreeOutlineView: NSView {
         }
     }
 
-    /// 应用搜索过滤词
+    /// Apply search filters
     func applyFilter(_ query: String) {
         guard outlineNSView?.filterQuery != query else { return }
         outlineNSView?.filterQuery = query
-        // 清空搜索时恢复树视图（didSet 已清空 searchResults，这里 reloadData 触发 restoreExpandedPaths）
+        // Restore tree view when clearing search (didSet has cleared searchResults, here reloadData triggers restoreExpandedPaths)
         if query.isEmpty {
             outlineNSView?.reloadData()
         }
-        // 搜索模式：由 didSet → scheduleSearch 异步驱动，无需手动 reloadData
+        // Search mode: driven asynchronously by didSet → scheduleSearch, no need to manually reloadData
     }
 
-    /// 折叠所有已展开的文件夹
+    /// Collapse all expanded folders
     func collapseAll() {
         outlineNSView?.collapseAll()
     }
 
-    /// 程序化处理点击事件（不依赖 NSEvent 转发）
+    /// Process click events programmatically (without relying on NSEvent forwarding)
     /// - Parameters:
-    ///   - localPoint: 相对于 FileTreeOutlineView 左上角的坐标
-    ///   - clickCount: 1=单击, 2=双击
+    ///   - localPoint: coordinates relative to the upper left corner of FileTreeOutlineView
+    ///   - clickCount: 1=click, 2=double click
     func handleClickAtLocalPoint(_ localPoint: NSPoint, clickCount: Int) {
         outlineNSView?.handleClickAtLocalPoint(localPoint, clickCount: clickCount)
     }

@@ -536,7 +536,7 @@ final class PortalHandler {
         return try await PortalWebViewStore.shared.evaluate(portalId: portalId, javascript: js)
     }
 
-        // MARK: - Portal ID 解析
+        // MARK: - Portal ID resolution
 
     @MainActor
     private func resolvePortalId(name: String, callerTid: UUID?) -> UUID? {
@@ -546,7 +546,7 @@ final class PortalHandler {
         }
     }
 
-    // MARK: - JS 工具
+    // MARK: - JS Tools
 
     private func buildSelector(ref: String) -> String {
         if ref.hasPrefix("@e"), let index = Int(ref.replacingOccurrences(of: "@e", with: "")) {

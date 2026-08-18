@@ -2,10 +2,10 @@ import XCTest
 import CoreGraphics
 @testable import open_maestri
 
-// Story 5.1 AC：绳索路径渲染器测试
+// Story 5.1 AC: Rope Path Renderer Test
 final class RopePathRendererTests: XCTestCase {
 
-    // MARK: - 路径生成
+    // MARK: - Path generation
 
     func testBezierPathFromPoints() {
         let points = (0..<21).map { i -> CGPoint in
@@ -31,7 +31,7 @@ final class RopePathRendererTests: XCTestCase {
         XCTAssertTrue(path.isEmpty, "Need at least 2 points")
     }
 
-    // MARK: - 颜色状态编码（UX-DR5）
+    // MARK: - Color status encoding (UX-DR5)
 
     func testIdleColorIsGray() {
         let color = RopePathRenderer.strokeColor(for: .idle)
@@ -53,7 +53,7 @@ final class RopePathRendererTests: XCTestCase {
         XCTAssertEqual(color, NSColor.systemOrange)
     }
 
-    // MARK: - 线宽和虚线
+    // MARK: - Line width and dashed line
 
     func testCommunicatingLineIsThicker() {
         let comm = RopePathRenderer.lineWidth(for: .communicating)
@@ -70,7 +70,7 @@ final class RopePathRendererTests: XCTestCase {
         XCTAssertFalse(RopePathRenderer.isDashed(for: .communicating))
     }
 
-    // MARK: - 中点
+    // MARK: - Midpoint
 
     func testMidpointOfPoints() {
         let points = (0..<21).map { i -> CGPoint in CGPoint(x: Double(i) * 10, y: 0) }

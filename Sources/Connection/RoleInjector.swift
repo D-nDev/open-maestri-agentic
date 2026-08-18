@@ -1,8 +1,8 @@
 import Foundation
 import OSLog
 
-/// Role 注入器
-/// 在 Terminal 分配 Role 时写入 role.json + CLAUDE.md + AGENTS.md：
+/// Role injector
+/// When assigning Role in Terminal, write role.json + CLAUDE.md + AGENTS.md:
 /// {workingDirectory}/.open-maestri/roles/{roleId}/
 final class RoleInjector {
     static let shared = RoleInjector()
@@ -22,7 +22,7 @@ final class RoleInjector {
 
     // MARK: - Public API
 
-    /// 准备 Role 目录（完整版），写入 role.json + CLAUDE.md + AGENTS.md
+    /// Prepare Role directory (full version) and write role.json + CLAUDE.md + AGENTS.md
     @discardableResult
     func prepareRoleDirectory(roleId: UUID, rolePreset: RolePreset, workingDirectory: String) -> String {
         let roleDir = roleDirPath(roleId: roleId, workingDirectory: workingDirectory)
@@ -37,7 +37,7 @@ final class RoleInjector {
         return roleDir
     }
 
-    /// 兼容旧调用签名（prompt-only），只写 CLAUDE.md + AGENTS.md，不写 role.json
+    /// Compatible with old call signature (prompt-only), only write CLAUDE.md + AGENTS.md, do not write role.json
     @discardableResult
     func prepareRoleDirectory(roleId: UUID, rolePrompt: String, workingDirectory: String) -> String {
         let roleDir = roleDirPath(roleId: roleId, workingDirectory: workingDirectory)
@@ -51,7 +51,7 @@ final class RoleInjector {
         return roleDir
     }
 
-    /// 移除 Role 目录（从指定工作区）
+    /// Remove Role directory (from specified workspace)
     func removeRoleDirectory(roleId: UUID, workingDirectory: String) {
         let roleDir = roleDirPath(roleId: roleId, workingDirectory: workingDirectory)
         do {
@@ -62,7 +62,7 @@ final class RoleInjector {
         }
     }
 
-    /// 旧签名兼容：不知道工作区时从全局路径删（向后兼容）
+    /// Old signature compatibility: delete from global path when workspace is not known (backward compatibility)
     func removeRoleDirectory(roleId: UUID) {
         let globalDir = PersistenceManager.shared.appDataURL
             .appendingPathComponent("roles/\(roleId.uuidString)")

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 工作区侧边栏：列表 + 右键菜单 + 快捷键切换
+/// Workspace sidebar: list + right-click menu + shortcut key switching
 struct WorkspaceSidebarView: View {
     @Environment(AppState.self) private var appState
     @Binding var selectedId: UUID?
@@ -59,11 +59,11 @@ struct WorkspaceSidebarView: View {
             sidebarLayout = (try? PersistenceManager.shared.loadSidebarLayout()) ?? SidebarLayout()
         }
         .onChange(of: appState.manifest.workspaces) { _, workspaces in
-            // 保存工作区顺序
+            // Save workspace order
             sidebarLayout.topLevelItems = workspaces.map { $0.id }
             try? PersistenceManager.shared.saveSidebarLayout(sidebarLayout)
         }
-        // 重命名分组 Alert
+        // Rename Group Alert
         .alert("workspace.rename_group.alert", isPresented: $showRenameGroup, presenting: groupToRename) { group in
             TextField("workspace.group_name", text: $renameGroupText)
             Button("button.confirm") {
@@ -80,7 +80,7 @@ struct WorkspaceSidebarView: View {
     private var workspaceListCore: some View {
         let all: [WorkspaceEntry] = appState.manifest.workspaces
         let grouped: Set<UUID> = Set(sidebarLayout.groups.flatMap { $0.items })
-        // 顶层条目：未加入任何分组的工作区
+        // Top-level entry: Workspace not joined to any group
         let topLevel: [WorkspaceEntry]
         if searchText.isEmpty {
             topLevel = all.filter { !grouped.contains($0.id) }
@@ -89,7 +89,7 @@ struct WorkspaceSidebarView: View {
         }
 
         return List(selection: $selectedId) {
-            // 分组（仅在非搜索状态下显示）
+            // Grouping (only displayed in non-search state)
             if searchText.isEmpty {
                 ForEach($sidebarLayout.groups) { $group in
                     let groupEntries = all.filter { group.items.contains($0.id) }
@@ -113,7 +113,7 @@ struct WorkspaceSidebarView: View {
                 }
             }
 
-            // 顶层工作区
+            // Top-level workspace
             ForEach(topLevel, id: \.id) { entry in
                 workspaceRowItem(entry: entry, inGroup: nil)
             }
@@ -168,7 +168,7 @@ struct WorkspaceSidebarView: View {
         .contextMenu(menuItems: { buildContextMenu(for: entry, inGroup: nil) })
     }
 
-    // MARK: - 确认删除按钮
+    // MARK: - Confirm delete button
 
     @ViewBuilder
     private var deleteConfirmButtons: some View {
@@ -178,7 +178,7 @@ struct WorkspaceSidebarView: View {
         Button("button.cancel", role: .cancel) {}
     }
 
-    // MARK: - 右键菜单
+    // MARK: - Right-click menu
 
     @ViewBuilder
     private func buildContextMenu(for entry: WorkspaceEntry, inGroup groupId: UUID?) -> some View {
@@ -204,7 +204,7 @@ struct WorkspaceSidebarView: View {
         Button("button.delete", role: .destructive) { workspaceToDelete = entry; showDeleteConfirm = true }
     }
 
-    // MARK: - 操作
+    // MARK: - Operation
 
     private func navigateWorkspace(direction: Int) {
         let entries = appState.manifest.workspaces
@@ -276,7 +276,7 @@ struct WorkspaceSidebarView: View {
         try? PersistenceManager.shared.saveManifest(manifest)
     }
 
-    // MARK: - 分组管理
+    // MARK: - Group management
 
     private func addNewGroup() {
         let group = SidebarGroup(name: String(format: "workspace.new_group".localized, sidebarLayout.groups.count + 1))
@@ -291,17 +291,17 @@ struct WorkspaceSidebarView: View {
     }
 
     private func deleteGroup(_ group: SidebarGroup) {
-        // 删除分组时将其成员移回顶层
+        // When deleting a group, move its members back to the top
         sidebarLayout.groups.removeAll { $0.id == group.id }
         saveSidebarLayout()
     }
 
     private func moveIn(entry: WorkspaceEntry, toGroup groupId: UUID) {
-        // 先从其他分组移除
+        // Remove from other groups first
         for i in sidebarLayout.groups.indices {
             sidebarLayout.groups[i].items.removeAll { $0 == entry.id }
         }
-        // 加入目标分组
+        // Join target group
         if let idx = sidebarLayout.groups.firstIndex(where: { $0.id == groupId }) {
             sidebarLayout.groups[idx].items.append(entry.id)
         }
@@ -320,7 +320,7 @@ struct WorkspaceSidebarView: View {
     }
 }
 
-// MARK: - 工作区行
+// MARK: - Workspace row
 
 struct WorkspaceRowView: View {
     let entry: WorkspaceEntry
@@ -342,7 +342,7 @@ struct WorkspaceRowView: View {
             }
             Spacer()
             HStack(spacing: 4) {
-                // 未读红点（任务完成角标）
+                // Unread red dot (task completed)
                 if unreadCount > 0 {
                     ZStack {
                         Circle()
@@ -353,7 +353,7 @@ struct WorkspaceRowView: View {
                             .foregroundStyle(.white)
                     }
                 }
-                // 终端计数徽章
+                // Terminal Count Badge
                 if terminalCount > 0 {
                     HStack(spacing: 3) {
                         Image(systemName: "terminal")

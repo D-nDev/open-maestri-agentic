@@ -1,7 +1,7 @@
 import SwiftUI
 import AppKit
 
-// MARK: - Note 专属浮动工具栏
+// MARK: - Note exclusive floating toolbar
 
 struct NoteContextToolbar: View {
     let nodeId: UUID
@@ -25,13 +25,13 @@ struct NoteContextToolbar: View {
 
     var body: some View {
         HStack(spacing: 2) {
-            // 组1：外观
+            // Group 1: Appearance
             colorButton
             fontSizeButton
 
             toolbarSeparator
 
-            // 组2：内联格式
+            // Group 2: Inline format
             noteButton("bold",        tooltip: "Bold")         { insertWrapping("**", "**") }
             noteButton("italic",      tooltip: "Italic")       { insertWrapping("*",  "*") }
             noteButton("strikethrough", tooltip: "Strikethrough") { insertWrapping("~~", "~~") }
@@ -40,7 +40,7 @@ struct NoteContextToolbar: View {
 
             toolbarSeparator
 
-            // 组3：块级格式
+            // Group 3: Block Level Format
             headingButton
             noteButton("checklist",   tooltip: "Task Item")    { insertLinePrefix("- [ ] ") }
             noteButton("list.bullet", tooltip: "List Item")    { insertLinePrefix("- ") }
@@ -48,14 +48,14 @@ struct NoteContextToolbar: View {
 
             toolbarSeparator
 
-            // 组4：媒体 & 操作
+            // Group 4: Media & Operations
             noteButton("photo",              tooltip: "Insert Image") { insertImage() }
             noteButton("doc.on.doc",         tooltip: "Copy All")    { copyAll() }
             noteButton("square.and.arrow.down", tooltip: "Save As")  { onSaveAs() }
 
             toolbarSeparator
 
-            // 组5：节点操作
+            // Group 5: Node Operations
             noteButton("arrow.trianglehead.branch", tooltip: "Connect") { onConnect() }
             if !connections.isEmpty {
                 ConnectionBadgeButton(connections: connections, onDelete: onDeleteConnection)
@@ -78,7 +78,7 @@ struct NoteContextToolbar: View {
         )
     }
 
-    // MARK: - 子视图
+    // MARK: - subview
 
     private var toolbarSeparator: some View {
         Rectangle()
@@ -153,7 +153,7 @@ struct NoteContextToolbar: View {
         )
     }
 
-    // MARK: - 格式化操作（委托给 NoteTextViewRegistry）
+    // MARK: - Formatting operations (delegated to NoteTextViewRegistry)
 
     private func insertWrapping(_ prefix: String, _ suffix: String) {
         NoteTextViewRegistry.shared.insertWrapping(nodeId: nodeId, prefix: prefix, suffix: suffix)
@@ -164,7 +164,7 @@ struct NoteContextToolbar: View {
     }
 
     private func insertCodeBlock() {
-        // 插入代码块并将光标定位到中间空行
+        // Insert a code block and position the cursor on the empty line in the middle
         let text = "```\n\n```"
         NoteTextViewRegistry.shared.insertText(nodeId: nodeId, text: text, cursorOffset: 4)
     }
@@ -177,11 +177,11 @@ struct NoteContextToolbar: View {
         panel.canChooseDirectories = false
         panel.begin { [nodeId] response in
             guard response == .OK, let url = panel.url else { return }
-            // 将图片复制到 Note 的 images/ 子目录，保持相对路径（与粘贴逻辑一致）
+            // Copy the image to the images/ subdirectory of Note, keeping the relative path (consistent with the paste logic)
             Task { @MainActor in
                 guard let tv = NoteTextViewRegistry.shared.textView(for: nodeId) else { return }
-                // 从注册表中找到 note 文件路径（通过 NoteScrollViewRegistry 的关联视图）
-                // 无法直接拿到 filePath，退而使用文件名+绝对路径（可在后续版本优化为复制到相对目录）
+                // Locate note file path from registry (via associated view of NoteScrollViewRegistry)
+                // Unable to get filePath directly, fall back to using file name + absolute path (can be optimized to copy to relative directory in subsequent versions)
                 let filename = url.lastPathComponent
                 let snippet = "![\(filename)](\(url.path))"
                 let range = tv.selectedRange()
@@ -200,7 +200,7 @@ struct NoteContextToolbar: View {
     }
 }
 
-// MARK: - 颜色选择弹出框
+// MARK: - Color selection pop-up box
 
 struct NoteColorPickerPopover: View {
     let selectedColor: String
@@ -283,7 +283,7 @@ struct NoteColorPickerPopover: View {
             .onTapGesture { onSelect(preset.name) }
     }
 
-    /// 将颜色字符串（预设名称或 hex）转为 Color
+    /// Convert color string (default name or hex) to Color
     static func colorFromString(_ str: String) -> Color {
         switch str {
         case "yellow":   return Color(red: 0.99, green: 0.97, blue: 0.72)
@@ -305,7 +305,7 @@ struct NoteColorPickerPopover: View {
     }
 }
 
-// MARK: - 字体大小加减器弹出框
+// MARK: - Font size adder and subtractor popup
 
 struct NoteFontSizePopover: View {
     @Binding var fontSize: Int
@@ -346,7 +346,7 @@ struct NoteFontSizePopover: View {
     }
 }
 
-// MARK: - 标题级别选择弹出框
+// MARK: - Title level selection pop-up box
 
 struct NoteHeadingPickerPopover: View {
     let onSelect: (Int) -> Void
@@ -374,7 +374,7 @@ struct NoteHeadingPickerPopover: View {
     }
 }
 
-// MARK: - Note 工具栏按钮（支持 active / destructive 状态）
+// MARK: - Note toolbar button (supports active / destructive state)
 
 struct NoteToolbarButton: View {
     let icon: String

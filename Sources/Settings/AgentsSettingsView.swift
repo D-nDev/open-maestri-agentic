@@ -15,7 +15,7 @@ struct AgentsSettingsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 子 Tab 切换（Segmented Picker）
+            // Sub-Tab switching (Segmented Picker)
             Picker("", selection: $selectedSubTab) {
                 Text("agents.subtab.roles").tag(AgentsSubTab.roles)
                 Text("agents.subtab.skills").tag(AgentsSubTab.skills)
@@ -25,7 +25,7 @@ struct AgentsSettingsView: View {
             .padding(.top, 16)
             .padding(.bottom, 12)
 
-            // 内容区域
+            // Content area
             switch selectedSubTab {
             case .roles:
                 AgentsRolesSubView()
@@ -39,7 +39,7 @@ struct AgentsSettingsView: View {
     }
 }
 
-// MARK: - 角色子视图
+// MARK: - Character subview
 
 struct AgentsRolesSubView: View {
     @Environment(AppState.self) private var appState
@@ -59,7 +59,7 @@ struct AgentsRolesSubView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // 标题 + 说明
+            // Title + Description
             VStack(alignment: .leading, spacing: 4) {
                 Text("agents.roles.title")
                     .font(.system(size: 13, weight: .medium))
@@ -69,7 +69,7 @@ struct AgentsRolesSubView: View {
             }
             .padding(.horizontal, 20)
 
-            // 搜索框
+            // Search box
             HStack(spacing: 6) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 12))
@@ -90,7 +90,7 @@ struct AgentsRolesSubView: View {
             )
             .padding(.horizontal, 20)
 
-            // 角色列表
+            // Role list
             ScrollView {
                 VStack(spacing: 0) {
                     if filteredRoles.isEmpty {
@@ -127,7 +127,7 @@ struct AgentsRolesSubView: View {
             )
             .padding(.horizontal, 20)
 
-            // 添加角色按钮
+            // Add role button
             Button {
                 showAddRole = true
             } label: {
@@ -182,7 +182,7 @@ struct AgentsRolesSubView: View {
     }
 }
 
-// MARK: - 角色行（匹配参考 UI）
+// MARK: - Character Row (Match Reference UI)
 
 struct AgentsRoleRow: View {
     let role: RolePreset
@@ -191,7 +191,7 @@ struct AgentsRoleRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            // 角色颜色图标徽章
+            // Character Color Icon Badge
             RoundedRectangle(cornerRadius: 4)
                 .fill(Color(hex: role.color) ?? .blue)
                 .frame(width: 28, height: 28)
@@ -201,7 +201,7 @@ struct AgentsRoleRow: View {
                         .foregroundStyle(.white)
                 )
 
-            // 名称 + 描述
+            // Name + Description
             VStack(alignment: .leading, spacing: 2) {
                 Text(role.name)
                     .font(.system(size: 13, weight: .medium))
@@ -214,7 +214,7 @@ struct AgentsRoleRow: View {
 
             Spacer()
 
-            // 编辑按钮
+            // Edit button
             Button(action: onEdit) {
                 Image(systemName: "square.and.pencil")
                     .font(.system(size: 13))
@@ -222,7 +222,7 @@ struct AgentsRoleRow: View {
             }
             .buttonStyle(.plain)
 
-            // 删除按钮
+            // Delete button
             Button(action: onDelete) {
                 Image(systemName: "minus.circle")
                     .font(.system(size: 13))
@@ -236,7 +236,7 @@ struct AgentsRoleRow: View {
     }
 }
 
-// MARK: - 技能子视图
+// MARK: - Skill subview
 
 struct AgentsSkillsSubView: View {
     @Environment(AppState.self) private var appState
@@ -245,7 +245,7 @@ struct AgentsSkillsSubView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // 标题 + 说明
+            // Title + Description
             VStack(alignment: .leading, spacing: 4) {
                 Text("agents.skills.title")
                     .font(.system(size: 13, weight: .medium))
@@ -255,7 +255,7 @@ struct AgentsSkillsSubView: View {
             }
             .padding(.horizontal, 20)
 
-            // 技能路径列表
+            // Skill path list
             ScrollView {
                 VStack(spacing: 0) {
                     if appState.preferences.skillPaths.isEmpty {
@@ -293,7 +293,7 @@ struct AgentsSkillsSubView: View {
             )
             .padding(.horizontal, 20)
 
-            // 底部按钮行
+            // Bottom button row
             HStack {
                 Button {
                     showAddPath = true
@@ -318,7 +318,7 @@ struct AgentsSkillsSubView: View {
             }
             .padding(.horizontal, 20)
 
-            // 底部提示
+            // Bottom tip
             Text("agents.skills.footer")
                 .font(.system(size: 11))
                 .foregroundStyle(.secondary)
@@ -365,7 +365,7 @@ struct AgentsSkillsSubView: View {
     }
 }
 
-// MARK: - 技能路径行
+// MARK: - Skill Path Line
 
 struct SkillPathRow: View {
     let skillPath: SkillPath
@@ -375,7 +375,7 @@ struct SkillPathRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            // 启用/禁用圆形勾选
+            // Enable/disable circular tick
             Button(action: onToggle) {
                 Image(systemName: skillPath.isActive ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 16))
@@ -383,13 +383,13 @@ struct SkillPathRow: View {
             }
             .buttonStyle(.plain)
 
-            // 图标
+            // icon
             Image(systemName: skillPath.icon)
                 .font(.system(size: 14))
                 .frame(width: 20)
                 .foregroundStyle(.primary)
 
-            // 名称 + 路径
+            // name + path
             VStack(alignment: .leading, spacing: 2) {
                 Text(skillPath.name)
                     .font(.system(size: 13, weight: .medium))
@@ -402,7 +402,7 @@ struct SkillPathRow: View {
 
             Spacer()
 
-            // 编辑按钮
+            // Edit button
             Button(action: onEdit) {
                 Image(systemName: "square.and.pencil")
                     .font(.system(size: 13))
@@ -410,7 +410,7 @@ struct SkillPathRow: View {
             }
             .buttonStyle(.plain)
 
-            // 删除按钮
+            // Delete button
             Button(action: onDelete) {
                 Image(systemName: "minus.circle")
                     .font(.system(size: 13))
@@ -426,7 +426,7 @@ struct SkillPathRow: View {
     }
 }
 
-// MARK: - 技能路径编辑 Sheet
+// MARK: - Skill path editing Sheet
 
 struct SkillPathEditSheet: View {
     @Environment(\.dismiss) private var dismiss
@@ -506,7 +506,7 @@ struct SkillPathEditSheet: View {
     }
 }
 
-// MARK: - 新建 Agent 预设 Sheet（供 TerminalSettingsView 使用）
+// MARK: - Create a new Agent default Sheet (for use by TerminalSettingsView)
 
 struct AddAgentPresetSheet: View {
     @Environment(\.dismiss) private var dismiss
@@ -557,7 +557,7 @@ struct AddAgentPresetSheet: View {
     }
 }
 
-// MARK: - 角色编辑 Sheet
+// MARK: - Character Editing Sheet
 
 struct RoleEditSheet: View {
     @Environment(\.dismiss) private var dismiss
@@ -606,7 +606,7 @@ struct RoleEditSheet: View {
             }.padding()
             Divider()
 
-            // Tab 切换
+            // Tab switching
             Picker("", selection: $selectedTab) {
                 Text("agent.tab.basic_info").tag(0)
                 Text("agent.tab.instructions_preview").tag(1)
@@ -615,7 +615,7 @@ struct RoleEditSheet: View {
             .padding(.horizontal, 16)
             .padding(.top, 12)
 
-            // Tab 内容
+            // Tab content
             if selectedTab == 0 {
                 roleBasicInfoTab
             } else {
@@ -625,7 +625,7 @@ struct RoleEditSheet: View {
         .frame(width: 500, height: 560)
     }
 
-    // MARK: - 基本信息 Tab
+    // MARK: - Basic information Tab
 
     @ViewBuilder
     private var roleBasicInfoTab: some View {
@@ -676,12 +676,12 @@ struct RoleEditSheet: View {
         .padding(.horizontal, 4)
     }
 
-    // MARK: - 指令预览 Tab（CLAUDE.md / AGENTS.md 预览）
+    // MARK: - Command preview Tab (CLAUDE.md / AGENTS.md preview)
 
     @ViewBuilder
     private var roleInstructionPreviewTab: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // 预览说明
+            // Preview description
             HStack(spacing: 6) {
                 Image(systemName: "info.circle")
                     .font(.system(size: 11))
@@ -693,7 +693,7 @@ struct RoleEditSheet: View {
             .padding(.horizontal, 16)
             .padding(.top, 12)
 
-            // 文件预览
+            // File preview
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 4) {
                     Image(systemName: "doc.text")
@@ -722,7 +722,7 @@ struct RoleEditSheet: View {
                 .padding(.horizontal, 16)
             }
 
-            // 存储路径提示
+            // Storage path prompt
             HStack(spacing: 4) {
                 Image(systemName: "folder")
                     .font(.system(size: 10))
@@ -738,7 +738,7 @@ struct RoleEditSheet: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
-    /// 生成的文件内容预览
+    /// Generated file content preview
     private var generatedFileContent: String {
         let rolePrompt = prompt.isEmpty ? "agent.role_prompt.placeholder".localized : prompt
         return """
@@ -753,7 +753,7 @@ struct RoleEditSheet: View {
         """
     }
 
-    /// 角色文件存储路径
+    /// Role file storage path
     private var roleDirectoryPath: String {
         let id = role?.id ?? UUID()
         return "~/.open-maestri/roles/\(id.uuidString.prefix(8))…/"

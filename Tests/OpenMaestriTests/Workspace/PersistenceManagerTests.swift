@@ -5,7 +5,7 @@ import CoreGraphics
 final class PersistenceManagerTests: XCTestCase {
     let pm = PersistenceManager.shared
 
-    // MARK: - AC1: WorkspaceDocument 结构验证
+    // MARK: - AC1: WorkspaceDocument structure verification
 
     func testWorkspaceDocumentStructure() throws {
         let payload = WorkspacePayload(name: "Test", workingDirectory: "/tmp")
@@ -15,7 +15,7 @@ final class PersistenceManagerTests: XCTestCase {
         XCTAssertEqual(doc.payload.name, "Test")
     }
 
-    // AC: schemaVersion 必须为 2
+    // AC: schemaVersion must be 2
     func testSchemaVersionIsTwo() {
         let payload = WorkspacePayload(name: "Test", workingDirectory: "/tmp")
         let doc = WorkspaceDocument(payload: payload)
@@ -23,7 +23,7 @@ final class PersistenceManagerTests: XCTestCase {
         XCTAssertEqual(doc.schemaVersion, 2)
     }
 
-    // AC: WorkspacePayload 包含所有必要字段
+    // AC: WorkspacePayload contains all required fields
     func testWorkspacePayloadAllFields() throws {
         let payload = WorkspacePayload(name: "MyWS", workingDirectory: "/home/user")
         XCTAssertNotNil(payload.id)
@@ -37,7 +37,7 @@ final class PersistenceManagerTests: XCTestCase {
         XCTAssertEqual(payload.canvasZoom, 1.0)
     }
 
-    // MARK: - AC2: CanvasNode frame [[x,y],[w,h]] 编解码
+    // MARK: - AC2: CanvasNode frame [[x,y],[w,h]] codec
 
     func testCanvasNodeFrameEncoding() throws {
         let frame = CGRect(x: 100, y: 200, width: 300, height: 400)
@@ -66,7 +66,7 @@ final class PersistenceManagerTests: XCTestCase {
         XCTAssertEqual(decoded.frame.size.height, 150, accuracy: 0.01)
     }
 
-    // MARK: - AC3: NodeContent 枚举 discriminated union
+    // MARK: - AC3: NodeContent enumeration discriminated union
 
     func testNodeContentTerminalRoundTrip() throws {
         let content = NodeContent.terminal(TerminalContent(name: "claude", agentType: "claude_code"))
@@ -89,7 +89,7 @@ final class PersistenceManagerTests: XCTestCase {
         XCTAssertEqual(nc.color, Constants.noteDefaultColor)
     }
 
-    // MARK: - AC4: 日期字段 ISO8601 UTC
+    // MARK: - AC4: Date field ISO8601 UTC
 
     func testDateFieldsAreISO8601() throws {
         let payload = WorkspacePayload(name: "DateTest", workingDirectory: "/tmp")
@@ -98,29 +98,29 @@ final class PersistenceManagerTests: XCTestCase {
         let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
         let innerPayload = try XCTUnwrap(json["payload"] as? [String: Any])
         let createdAt = try XCTUnwrap(innerPayload["createdAt"] as? String)
-        // ISO8601 格式：yyyy-MM-ddTHH:mm:ssZ
+        // ISO8601 format: yyyy-MM-ddTHH:mm:ssZ
         XCTAssertTrue(createdAt.contains("T"), "createdAt should be ISO8601: \(createdAt)")
         XCTAssertTrue(createdAt.contains("Z") || createdAt.contains("+"), "createdAt should be UTC: \(createdAt)")
     }
 
-    // MARK: - AC5: 完整 WorkspaceDocument 序列化/反序列化
+    // MARK: - AC5: Full WorkspaceDocument serialization/deserialization
 
     func testFullWorkspaceDocumentRoundTrip() throws {
         var payload = WorkspacePayload(name: "FullTest", workingDirectory: "/projects/test")
 
-        // 添加 3 个终端节点
+        // Add 3 endpoints
         let t1 = CanvasNode(frame: CGRect(x: 0, y: 0, width: 400, height: 300),
                             content: .terminal(TerminalContent(name: "Agent1")))
         let t2 = CanvasNode(frame: CGRect(x: 500, y: 0, width: 400, height: 300),
                             content: .terminal(TerminalContent(name: "Agent2")))
         let t3 = CanvasNode(frame: CGRect(x: 1000, y: 0, width: 400, height: 300),
                             content: .terminal(TerminalContent(name: "Agent3")))
-        // 添加 1 个 Note 节点
+        // Add 1 Note node
         let n1 = CanvasNode(frame: CGRect(x: 0, y: 400, width: 260, height: 150),
                             content: .stickyNote(StickyNoteContent(name: "Spec")))
         payload.nodes = [t1, t2, t3, n1]
 
-        // 添加 2 条连接
+        // Add 2 connections
         let conn1 = TerminalConnection(id: UUID(), terminalIdA: t1.id, terminalIdB: t2.id,
                                        ropePoints: Array(repeating: [0.0, 0.0], count: 21))
         let conn2 = TerminalConnection(id: UUID(), terminalIdA: t2.id, terminalIdB: t3.id,
@@ -139,17 +139,17 @@ final class PersistenceManagerTests: XCTestCase {
         XCTAssertEqual(decoded.payload.workingDirectory, "/projects/test")
     }
 
-    // MARK: - AC6: 与 Maestri 格式兼容（JSON 键名）
+    // MARK: - AC6: Compatible with Maestri format (JSON keys)
 
     func testJSONKeyNamesAreCamelCase() throws {
         let payload = WorkspacePayload(name: "CamelTest", workingDirectory: "/tmp")
         let doc = WorkspaceDocument(payload: payload)
         let data = try pm.encoder.encode(doc)
         let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
-        // 顶层键
+        // Top level keys
         XCTAssertNotNil(json["schemaVersion"])
         XCTAssertNotNil(json["payload"])
-        // payload 内键
+        // payload internal key
         let p = try XCTUnwrap(json["payload"] as? [String: Any])
         XCTAssertNotNil(p["workingDirectory"])
         XCTAssertNotNil(p["noteConnections"])
@@ -158,7 +158,7 @@ final class PersistenceManagerTests: XCTestCase {
         XCTAssertNotNil(p["canvasZoom"])
     }
 
-    // MARK: - 目录创建
+    // MARK: - Directory creation
 
     func testEnsureDirectoriesExist() throws {
         try pm.ensureDirectoriesExist()

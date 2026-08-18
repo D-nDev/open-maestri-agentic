@@ -1,14 +1,14 @@
 import SwiftUI
 import AppKit
 
-/// 画布顶部工具栏
-/// 支持新建 Terminal/Note/Portal/FileTree 节点（拖拽绘制模式），以及连线工具
+/// Canvas top toolbar
+/// Support new Terminal/Note/Portal/FileTree nodes (drag and drop drawing mode), and connection tools
 struct CanvasToolbar: View {
     let workspace: WorkspaceManager
     @Binding var isConnecting: Bool
-    /// 当前选中的绘制工具（nil = 选择模式，非绘制）
+    /// Currently selected drawing tool (nil = selection mode, not drawing)
     @Binding var activeDrawingTool: String?
-    /// 当前选中的绘制子工具（shape 二级工具）
+    /// The currently selected drawing sub-tool (shape secondary tool)
     @Binding var activeShapeSubtool: String
     @Environment(AppState.self) private var appState
 
@@ -19,12 +19,12 @@ struct CanvasToolbar: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 居中悬浮工具栏（参考 Maestri 产品设计）
+            // Centered floating toolbar (refer to Maestri product design)
             HStack(spacing: 0) {
                 Spacer()
 
                 HStack(spacing: 2) {
-                    // 1. 选择工具（鼠标指针）
+                    // 1. Selection tool (mouse pointer)
                     FloatingToolButton(
                         icon: "cursorarrow",
                         tooltip: "canvas.toolbar.select".localized,
@@ -34,7 +34,7 @@ struct CanvasToolbar: View {
                         isConnecting = false
                     }
 
-                    // 2. Terminal 工具
+                    // 2. Terminal tool
                     FloatingToolButton(
                         icon: "apple.terminal",
                         tooltip: "canvas.toolbar.terminal".localized,
@@ -43,7 +43,7 @@ struct CanvasToolbar: View {
                         toggleDrawingTool("terminal")
                     }
 
-                    // 3. Note 工具
+                    // 3. Note tool
                     FloatingToolButton(
                         icon: "text.document",
                         tooltip: "canvas.toolbar.note".localized,
@@ -52,7 +52,7 @@ struct CanvasToolbar: View {
                         toggleDrawingTool("stickyNote")
                     }
 
-                    // 4. 链接文件（占位，暂未实现）
+                    // 4. Link file (placeholder, not yet implemented)
                     FloatingToolButton(
                         icon: "paperclip",
                         tooltip: "canvas.toolbar.text".localized,
@@ -61,7 +61,7 @@ struct CanvasToolbar: View {
                         toggleDrawingTool("linkedFile")
                     }
 
-                    // 5. FileTree 工具
+                    // 5. FileTree tool
                     FloatingToolButton(
                         icon: "folder",
                         tooltip: "canvas.toolbar.filetree".localized,
@@ -70,7 +70,7 @@ struct CanvasToolbar: View {
                         toggleDrawingTool("fileTree")
                     }
 
-                    // 6. Portal 工具
+                    // 6. Portal tools
                     FloatingToolButton(
                         icon: "globe",
                         tooltip: "canvas.toolbar.portal".localized,
@@ -79,7 +79,7 @@ struct CanvasToolbar: View {
                         toggleDrawingTool("portal")
                     }
 
-                    // TODO: Text Label 工具 — 暂时隐藏，待后续迭代实现文本标签节点的完整交互和样式
+                    // TODO: Text Label Tool - Temporarily hidden until subsequent iterations implement complete interaction and styling of text label nodes
                     // FloatingToolButton(
                     //     icon: "textformat",
                     //     tooltip: "canvas.toolbar.format".localized,
@@ -88,7 +88,7 @@ struct CanvasToolbar: View {
                     //     toggleDrawingTool("text")
                     // }
 
-                    // 8. 图形工具（矩形）
+                    // 8. Graphic Tools (Rectangle)
                     FloatingToolButton(
                         icon: "pencil.and.scribble",
                         tooltip: "canvas.toolbar.shape".localized,
@@ -158,7 +158,7 @@ struct CanvasToolbar: View {
         }
     }
 
-    // MARK: - 创建节点
+    // MARK: - Create node
 
     private func createTerminal(preset: AgentPreset, role: RolePreset?, isManager: Bool = false, workingDirectory: String? = nil) {
         let dir = workingDirectory ?? workspace.workingDirectory
@@ -170,7 +170,7 @@ struct CanvasToolbar: View {
         )
         tc.isManager = isManager
         let origin = nextNodeOrigin(width: 600, height: 400)
-        // 使用 tc.id 作为 CanvasNode.id，确保 node.id == tc.id（避免 removeNode 时失同步）
+        // Use tc.id as CanvasNode.id, ensuring node.id == tc.id (avoids desynchronization when removingNode)
         let node = CanvasNode(
             id: tc.id,
             frame: CGRect(origin: origin, size: CGSize(width: 600, height: 400)),
@@ -210,7 +210,7 @@ struct CanvasToolbar: View {
             frame: CGRect(origin: origin, size: CGSize(width: 260, height: 200)),
             content: .stickyNote(mutableNC)
         )
-        // 创建文件
+        // Create file
         let filePath = PersistenceManager.shared.notesDirURL(workspaceId: workspace.id)
             .appendingPathComponent(fileName).path
         try? FileManager.default.createDirectory(
@@ -246,9 +246,9 @@ struct CanvasToolbar: View {
 
     private func addNode(_ node: CanvasNode) {
         workspace.addNode(node)
-        // 立即保存（不等 autosave 延迟）
+        // Save immediately (without autosave delay)
         Task { try? await workspace.save() }
-        // Spotlight 更新
+        // Spotlight update
         SpotlightIndexer.shared.indexWorkspaceNodes(
             workspaceId: workspace.id,
             nodes: [node],
@@ -257,7 +257,7 @@ struct CanvasToolbar: View {
     }
 
     private func nextNodeOrigin(width: CGFloat, height: CGFloat) -> CGPoint {
-        // 基于现有节点数量偏移，避免完全重叠
+        // Offset based on existing node count to avoid complete overlap
         let count = CGFloat(workspace.nodes.count)
         let col = Int(count) % 4
         let row = Int(count) / 4
@@ -268,7 +268,7 @@ struct CanvasToolbar: View {
         return CGPoint(x: baseX + CGFloat(col) * stepX, y: baseY + CGFloat(row) * stepY)
     }
 
-    /// 根据 baseName 生成唯一终端名称，始终带序号，如 "Claude Code #1"
+    /// Generate a unique terminal name based on baseName, always with a serial number, such as "Claude Code #1"
     private func nextTerminalName(baseName: String) -> String {
         let existingNames = Set(workspace.nodes.compactMap { node -> String? in
             guard case .terminal(let tc) = node.content else { return nil }
@@ -282,7 +282,7 @@ struct CanvasToolbar: View {
         }
     }
 
-    /// 根据现有节点名称查重，生成不冲突的递增编号名称（删除节点后不会产生重复）
+    /// Check for duplication based on existing node names and generate non-conflicting incremental number names (no duplication will occur after deleting nodes)
     private func nextNodeName(for nodeType: String) -> String {
         let prefix: String
         switch nodeType {
@@ -313,7 +313,7 @@ struct CanvasToolbar: View {
     }
 }
 
-// MARK: - 悬浮工具栏按钮
+// MARK: - Floating toolbar button
 
 private struct FloatingToolButton: View {
     let icon: String

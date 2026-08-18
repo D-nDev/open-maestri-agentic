@@ -1,7 +1,7 @@
 import Foundation
 
-/// 数据格式从 v1 迁移到 v2
-/// v2 新增字段：portalToPortalConnections、noteToNoteConnections、crossFloorConnections、floors、drawings
+/// Data format migrated from v1 to v2
+/// v2 new fields: portalToPortalConnections, noteToNoteConnections, crossFloorConnections, floors, drawings
 struct Migration_v1_to_v2 {
     static func migrate(data: Data) throws -> Data {
         guard var dict = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {

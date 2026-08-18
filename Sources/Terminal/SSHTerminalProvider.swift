@@ -1,6 +1,6 @@
 import Foundation
-// SSH 远程终端提供者（SSH 连接的终端，Epic 11 完整实现）
-// 复用 SSHTunnelService 建立的连接
+// SSH Remote Terminal Provider (Terminal for SSH connections, fully implemented in Epic 11)
+// Reuse the connection established by SSHTunnelService
 final class SSHTerminalProvider {
     let terminalId: UUID
     let config: SSHConfig

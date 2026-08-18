@@ -1,18 +1,18 @@
 import Foundation
 import SwiftUI
 
-/// 应用级本地化管理器：支持运行时切换语言（不依赖系统偏好设置）
+/// Application-level localization manager: support for switching languages at runtime (independent of system preferences)
 ///
-/// 工作原理：
-/// 1. 维护当前语言标识（`currentLanguage`），持久化存储在 `Preferences.language`
-/// 2. 根据当前语言加载对应 `.lproj` Bundle，用于 `String(localized:bundle:)` 查找
-/// 3. 通过 SwiftUI `.environment(\.locale, ...)` 使 `Text` 的 String Catalog 自动匹配
+/// Working principle:
+/// 1. Maintain the current language identifier (`currentLanguage`) and persist it in `Preferences.language`
+/// 2. Load the corresponding `.lproj` Bundle according to the current language for `String(localized:bundle:)` search
+/// 3. Use SwiftUI `.environment(\.locale, ...)` to automatically match the String Catalog of `Text`
 @Observable
 @MainActor
 final class LocalizationManager {
     static let shared = LocalizationManager()
 
-    /// 当前语言标识，与 Preferences.language 同步
+    /// Current language identifier, synchronized with Preferences.language
     var currentLanguage: String = "en" {
         didSet {
             if oldValue != currentLanguage {
@@ -21,15 +21,15 @@ final class LocalizationManager {
         }
     }
 
-    /// 当前语言对应的 Locale，注入 SwiftUI 环境
+    /// The Locale corresponding to the current language is injected into the SwiftUI environment
     var locale: Locale {
         Locale(identifier: currentLanguage)
     }
 
-    /// 当前语言对应的本地化 Bundle
+    /// Localization Bundle corresponding to the current language
     private(set) var bundle: Bundle = .main
 
-    /// 支持的语言列表
+    /// Supported language list
     static let supportedLanguages: [(id: String, name: String, localName: String)] = [
         ("en", "English", "English"),
         ("zh-Hans", "Chinese (Simplified)", "简体中文"),
@@ -39,7 +39,7 @@ final class LocalizationManager {
         updateBundle()
     }
 
-    /// 从 Preferences 同步语言设置
+    /// Synchronizing language settings from Preferences
     func sync(from language: String) {
         if currentLanguage != language {
             currentLanguage = language
@@ -51,17 +51,17 @@ final class LocalizationManager {
            let locBundle = Bundle(path: path) {
             bundle = locBundle
         } else {
-            // fallback: 尝试 base
+            // fallback: try base
             bundle = .main
         }
     }
 }
 
-// MARK: - String 便捷本地化扩展
+// MARK: - String convenient localization extension
 
 extension String {
-    /// 使用 LocalizationManager 的 bundle 进行本地化
-    /// 用法：`"button.cancel".localized`
+    /// Localization using LocalizationManager's bundle
+    /// Usage: `"button.cancel".localized`
     @MainActor
     var localized: String {
         String(localized: String.LocalizationValue(self), bundle: LocalizationManager.shared.bundle)

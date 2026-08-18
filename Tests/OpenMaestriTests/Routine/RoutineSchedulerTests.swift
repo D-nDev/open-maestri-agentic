@@ -7,11 +7,11 @@ final class RoutineSchedulerTests: XCTestCase {
 
     override func setUp() async throws {
         scheduler = RoutineScheduler.shared
-        // 清理之前的测试数据
+        // Clean previous test data
         for r in scheduler.routines { scheduler.pause(id: r.id) }
     }
 
-    // MARK: - 基础操作
+    // MARK: - Basic operations
 
     func testAddRoutineAppearsInList() throws {
         let routine = makeRoutine(name: "TestRoutine")
@@ -41,10 +41,10 @@ final class RoutineSchedulerTests: XCTestCase {
         XCTAssertTrue(scheduler.routines.first { $0.id == routine.id }?.isActive ?? false)
     }
 
-    // MARK: - && 分隔符解析
+    // MARK: - && separator parsing
 
     func testPromptParsingWithSeparator() {
-        // Routine 的 && 分隔：用 "&&" 分隔（不含换行）
+        // Routine's && delimitation: separated by "&&" (without newline)
         let routine = Routine(
             name: "Chain",
             prompt: "run tests&&check results&&summarize",
@@ -68,22 +68,22 @@ final class RoutineSchedulerTests: XCTestCase {
         XCTAssertEqual(routine.prompts.count, 1)
     }
 
-    // MARK: - 持久化
+    // MARK: - Persistence
 
     func testSaveAndLoadRoutines() throws {
         let routine = makeRoutine(name: "Persist")
         try scheduler.addRoutine(routine)
         try scheduler.saveRoutines()
 
-        // 重新加载
+        // Reload
         try scheduler.loadRoutines()
         XCTAssertTrue(scheduler.routines.contains { $0.name == "Persist" })
 
-        // 清理
+        // Cleanup
         try? scheduler.removeRoutine(id: routine.id)
     }
 
-    // MARK: - 辅助
+    // MARK: - Auxiliary
 
     private func makeRoutine(name: String) -> Routine {
         Routine(name: name, prompt: "test", intervalSeconds: 3600, targetTerminalId: UUID())

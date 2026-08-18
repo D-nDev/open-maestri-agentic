@@ -1,7 +1,7 @@
 import Foundation
 import CoreGraphics
 
-/// 画布节点，frame 使用 Maestri [[x,y],[w,h]] 格式编码
+/// Canvas node, frame is encoded using Maestri [[x,y],[w,h]] format
 struct CanvasNode: Codable, Identifiable, Equatable {
     var id: UUID
     var frame: CGRect
@@ -11,7 +11,7 @@ struct CanvasNode: Codable, Identifiable, Equatable {
     var createdAt: Date
     var lastModifiedAt: Date
 
-    // MARK: - Codable（frame 使用 [[x,y],[w,h]] 格式与 Maestri 兼容）
+    // MARK: - Codable (frame uses [[x,y],[w,h]] format compatible with Maestri)
 
     private enum CodingKeys: String, CodingKey {
         case id, frame, content, zIndex, isLocked, createdAt, lastModifiedAt
@@ -49,7 +49,7 @@ struct CanvasNode: Codable, Identifiable, Equatable {
         zIndex = (try? container.decode(Int.self, forKey: .zIndex)) ?? 0
         isLocked = (try? container.decode(Bool.self, forKey: .isLocked)) ?? false
         createdAt = (try? container.decode(Date.self, forKey: .createdAt)) ?? Date()
-        // decodeIfPresent 兼容旧数据（v0.24 以前可能无此字段）
+        // decodeIfPresent is compatible with old data (this field may not be available before v0.24)
         lastModifiedAt = (try? container.decode(Date.self, forKey: .lastModifiedAt)) ?? Date()
     }
 
@@ -64,7 +64,7 @@ struct CanvasNode: Codable, Identifiable, Equatable {
         try container.encode(lastModifiedAt, forKey: .lastModifiedAt)
     }
 
-    // MARK: - Equatable（布局字段 + content，供 SwiftUI ForEach diff 使用）
+    // MARK: - Equatable (layout field + content, used by SwiftUI ForEach diff)
     static func == (lhs: CanvasNode, rhs: CanvasNode) -> Bool {
         lhs.id == rhs.id &&
         lhs.frame == rhs.frame &&

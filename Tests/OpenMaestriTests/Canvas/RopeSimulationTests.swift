@@ -23,7 +23,7 @@ final class RopeSimulationTests: XCTestCase {
     }
 
     func testMiddlePointHasSag() {
-        // 水平绳子中点应该比直线高（y 更大，因为下垂）
+        // The horizontal rope midpoint should be higher than the straight line (y is larger because of the sag)
         let start = CGPoint(x: 0, y: 0)
         let end = CGPoint(x: 200, y: 0)
         let points = sim.compute(from: start, to: end)
@@ -43,13 +43,13 @@ final class RopeSimulationTests: XCTestCase {
     }
 
     func testBendRatioWithinBounds() {
-        // 验证中点下垂量在合理范围内（非绳长，因为折线近似误差较大）
+        // Verify that the midpoint sag is within a reasonable range (not the rope length, because the polyline approximation error is large)
         let dist: CGFloat = 200
         let start = CGPoint(x: 0, y: 0)
         let end = CGPoint(x: dist, y: 0)
         let points = sim.compute(from: start, to: end)
         let midPoint = points[points.count / 2]
-        // 期望下垂量 > 0（有下垂），且不超过绳长的 20%
+        // Desired sag > 0 (with sag) and no more than 20% of rope length
         XCTAssertGreaterThan(midPoint.y, 0)
         XCTAssertLessThan(midPoint.y, dist * 0.20)
     }

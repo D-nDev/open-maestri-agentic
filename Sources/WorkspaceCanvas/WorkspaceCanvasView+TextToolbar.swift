@@ -78,7 +78,7 @@ extension WorkspaceCanvasView {
         NotificationCenter.default.post(name: .canvasNodeContentChanged, object: nil, userInfo: userInfo)
     }
 
-    /// 根据 TextContent 的字体+文字测量节点应有的尺寸（含 padding）。
+    /// Measure the size of the node (including padding) based on the font + text of TextContent.
     func measuredTextNodeSize(_ tc: TextContent) -> CGSize {
         let nsWeight: NSFont.Weight = {
             switch tc.fontWeight {
@@ -106,8 +106,8 @@ extension WorkspaceCanvasView {
         let textWidth = tc.text.isEmpty
             ? 60
             : (tc.text as NSString).size(withAttributes: attrs).width
-        let width  = max(80, textWidth + 20)   // 左右各 8pt padding + 余量
-        let height = tc.fontSize + 16           // 上下各 6pt padding + 余量
+        let width  = max(80, textWidth + 20)   // 8pt padding + margin on left and right
+        let height = tc.fontSize + 16           // 6pt padding + margin on top and bottom
         return CGSize(width: width, height: height)
     }
 }

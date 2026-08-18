@@ -2,10 +2,10 @@ import Foundation
 import Network
 import OSLog
 
-/// 本地 HTTP IPC 服务器
-/// - 绑定 127.0.0.1 动态端口，仅接受本机连接（安全约束）
-/// - 单一路由：POST /cli
-/// - 所有 omaestri CLI 命令通过此服务路由
+/// Local HTTP IPC Server
+/// - Bind 127.0.0.1 dynamic port, only accept local connections (security constraints)
+/// - Single route: POST /cli
+/// - All omaestri CLI commands are routed through this service
 final class InterAgentServer {
     static let shared = InterAgentServer()
     private let logger = Logger.make(category: "InterAgentServer")
@@ -13,14 +13,14 @@ final class InterAgentServer {
     private var listener: NWListener?
     private(set) var port: UInt16 = 0
 
-    // MARK: - Unix Socket 支持
+    // MARK: - Unix Socket support
     private var unixSocketFd: Int32 = -1
     private var unixSocketSource: DispatchSourceRead?
 
-    /// 当前活跃的 Unix socket 路径（供 SwiftTermProvider 注入 MAESTRI_SOCKET）
+    /// Currently active Unix socket path (for SwiftTermProvider to inject MAESTRI_SOCKET)
     private(set) var currentSocketPath: String?
 
-    /// 全局固定 socket 路径（不再绑定 workspace UUID，避免切换工作区后旧终端 CLI 断联）
+    /// Globally fixed socket path (no longer bound to workspace UUID to avoid old terminal CLI disconnection after switching workspaces)
     static var globalSocketPath: String {
         let runDir = PersistenceManager.shared.appDataURL
             .appendingPathComponent("run").path
@@ -29,7 +29,7 @@ final class InterAgentServer {
 
     private init() {}
 
-    // MARK: - 启动
+    // MARK: - Start
 
     /// Starts the TCP HTTP server on a dynamic port. Throws if the listener cannot be created.
     func start() throws {
@@ -42,7 +42,7 @@ final class InterAgentServer {
 
         listener = try NWListener(using: params)
 
-        // 用信号量等待端口就绪，确保 SwiftTermProvider 能读取到正确端口
+        // Use a semaphore to wait for the port to be ready to ensure that SwiftTermProvider can read the correct port
         let semaphore = DispatchSemaphore(value: 0)
         var startError: Error? = nil
 
@@ -60,7 +60,7 @@ final class InterAgentServer {
         }
         listener?.start(queue: .global(qos: .userInitiated))
 
-        // 最多等待 2 秒
+        // Wait up to 2 seconds
         let result = semaphore.wait(timeout: .now() + 2.0)
         if result == .timedOut {
             logger.warning("InterAgentServer: timed out waiting for port assignment")
@@ -69,12 +69,12 @@ final class InterAgentServer {
         logger.debug("InterAgentServer starting on \(Constants.interAgentServerHost):\(self.port)")
     }
 
-    // MARK: - Unix Socket 生命周期
+    // MARK: - Unix Socket life cycle
 
-    /// 启动全局 Unix socket（应用生命周期内只调用一次）
-    /// 不再随 workspace 切换重建，终端通过 X-Terminal-ID 标识身份
+    /// Start global Unix socket (only called once in application life cycle)
+    /// No longer rebuilt with workspace switching, the terminal identifies its identity through X-Terminal-ID
     func startUnixSocketIfNeeded() {
-        guard unixSocketFd < 0 else { return }  // 已在运行
+        guard unixSocketFd < 0 else { return }  // Already running
         do {
             try startUnixSocket()
         } catch {
@@ -86,7 +86,7 @@ final class InterAgentServer {
         let path = Self.globalSocketPath
         currentSocketPath = path
 
-        // 创建 run/ 目录
+        // Create run/ directory
         let runDir = (path as NSString).deletingLastPathComponent
         try FileManager.default.createDirectory(
             atPath: runDir,
@@ -94,10 +94,10 @@ final class InterAgentServer {
             attributes: nil
         )
 
-        // 清理旧 socket 文件（防崩溃残留）
+        // Clean up old socket files (anti-crash residue)
         unlink(path)
 
-        // 创建 Unix socket
+        // Create Unix socket
         let fd = socket(AF_UNIX, SOCK_STREAM, 0)
         guard fd >= 0 else {
             throw NSError(domain: "InterAgentServer", code: Int(errno),
@@ -105,7 +105,7 @@ final class InterAgentServer {
         }
         unixSocketFd = fd
 
-        // 绑定
+        // Binding
         var addr = sockaddr_un()
         addr.sun_family = sa_family_t(AF_UNIX)
         let pathBytes = path.utf8.prefix(103)
@@ -123,14 +123,14 @@ final class InterAgentServer {
                           userInfo: [NSLocalizedDescriptionKey: "bind() failed: \(String(cString: strerror(errno)))"])
         }
 
-        // 监听
+        // Monitoring
         guard listen(fd, 10) == 0 else {
             close(fd)
             throw NSError(domain: "InterAgentServer", code: Int(errno),
                           userInfo: [NSLocalizedDescriptionKey: "listen() failed"])
         }
 
-        // DispatchSource accept 循环
+        // DispatchSource accept loop
         let source = DispatchSource.makeReadSource(fileDescriptor: fd, queue: .global(qos: .userInitiated))
         source.setEventHandler { [weak self] in
             self?.acceptUnixConnection(serverFd: fd)
@@ -164,12 +164,12 @@ final class InterAgentServer {
     private func handleUnixClient(fd: Int32) {
         var accumulated = Data()
         var buffer = [UInt8](repeating: 0, count: 65536)
-        // 接收完整 HTTP 请求（阻塞 recv 保留在 DispatchQueue 线程上）
+        // Receive full HTTP request (blocking recv remains on DispatchQueue thread)
         while true {
             let n = recv(fd, &buffer, buffer.count, 0)
             guard n > 0 else { break }
             accumulated.append(contentsOf: buffer[..<n])
-            // 检查 HTTP 请求是否完整
+            // Check HTTP request for completeness
             if let headerEnd = accumulated.range(of: Data("\r\n\r\n".utf8)) {
                 let headerStr = String(decoding: accumulated[..<headerEnd.upperBound], as: UTF8.self)
                 let contentLength = Self.parseContentLength(from: headerStr)
@@ -178,7 +178,7 @@ final class InterAgentServer {
             }
         }
         guard !accumulated.isEmpty else { return }
-        // 读取完成后进入 async 上下文路由命令，不再阻塞 GCD 线程
+        // After reading is completed, enter the async context routing command and no longer block the GCD thread
         Task { [weak self, fd] in
             if let self {
                 let parsed = await self.parseHTTPRequest(accumulated)
@@ -191,7 +191,7 @@ final class InterAgentServer {
 
     /// Gracefully shuts down the TCP listener and cancels all in-flight connections.
     func stop() {
-        // 先取消 listener 阻止新连接进入
+        // Cancel the listener first to prevent new connections from entering.
         listener?.cancel()
         listener = nil
         stopUnixSocket()
@@ -199,13 +199,13 @@ final class InterAgentServer {
         logger.debug("InterAgentServer stopped")
     }
 
-    // MARK: - 状态处理
+    // MARK: - Status processing
 
     private func handleStateChange(_ state: NWListener.State) {
         switch state {
         case .ready:
             port = listener?.port?.rawValue ?? 0
-            restartCount = 0  // 成功后重置退避计数
+            restartCount = 0  // Reset backoff count after success
             logger.info("InterAgentServer ready on port \(self.port)")
         case .failed(let error):
             logger.error("InterAgentServer failed: \(error)")
@@ -223,7 +223,7 @@ final class InterAgentServer {
             logger.error("InterAgentServer: max restart attempts (\(self.maxRestarts)) reached, giving up")
             return
         }
-        // 指数退避：3s, 6s, 12s, 24s, 48s
+        // Exponential backoff: 3s, 6s, 12s, 24s, 48s
         let delay = Constants.serverRestartDelay * pow(2.0, Double(restartCount))
         restartCount += 1
         logger.warning("InterAgentServer restarting in \(Int(delay))s (attempt \(self.restartCount)/\(self.maxRestarts))")
@@ -232,7 +232,7 @@ final class InterAgentServer {
         }
     }
 
-    // MARK: - 连接处理（HTTP POST /cli）
+    // MARK: - Connection handling (HTTP POST /cli)
 
     private func handleConnection(_ connection: NWConnection) {
         connection.start(queue: .global(qos: .userInitiated))
@@ -240,7 +240,7 @@ final class InterAgentServer {
     }
 
     private func receiveRequest(on connection: NWConnection) {
-        // 分块累积接收，最大 1MB（支持大型 portal evaluate 命令）
+        // Chunked cumulative reception, maximum 1MB (supports large portal evaluate command)
         receiveData(on: connection, accumulated: Data())
     }
 
@@ -248,16 +248,16 @@ final class InterAgentServer {
         connection.receive(minimumIncompleteLength: 1, maximumLength: 262144) { [weak self] data, _, isComplete, error in
             guard error == nil else { connection.cancel(); return }
             let total = accumulated + (data ?? Data())
-            // 检测 HTTP 请求是否完整（找到 header/body 分隔符）
+            // Check whether HTTP request is complete (find header/body delimiter)
             if let headerEnd = total.range(of: Data("\r\n\r\n".utf8)) {
-                // 解析 Content-Length 决定是否继续读取
+                // Parse Content-Length to decide whether to continue reading
                 let headerData = total[..<headerEnd.upperBound]
                 let headerStr = String(decoding: headerData, as: UTF8.self)
                 let bodyStart = headerEnd.upperBound
                 let contentLength = Self.parseContentLength(from: headerStr)
                 let bodyReceived = total.count - bodyStart
                 if contentLength <= 0 || bodyReceived >= contentLength {
-                    // 请求完整 — 进入 async 上下文路由命令
+                    // Request complete - entering async context routing command
                     Task { [weak self] in
                         guard let self else { connection.cancel(); return }
                         let parsed = await self.parseHTTPRequest(total)
@@ -268,11 +268,11 @@ final class InterAgentServer {
                     return
                 }
             }
-            // 请求不完整，继续读取
+            // The request is incomplete, continue reading
             if !isComplete {
                 self?.receiveData(on: connection, accumulated: total)
             } else {
-                // 连接提前关闭
+                // Connection closed prematurely
                 Task { [weak self] in
                     guard let self else { connection.cancel(); return }
                     let parsed = await self.parseHTTPRequest(total)
@@ -295,25 +295,25 @@ final class InterAgentServer {
         return 0
     }
 
-    /// 解析结果：响应体 + 请求的 HTTP 版本
+    /// Parsing result: response body + requested HTTP version
     private struct ParsedRequest {
         let responseBody: String
-        let httpVersion: String  // "1.0" 或 "1.1"
+        let httpVersion: String  // "1.0" or "1.1"
     }
 
     private func parseHTTPRequest(_ data: Data) async -> ParsedRequest {
-        // 解析 HTTP 请求，提取 JSON body、X-Terminal-ID header 和 HTTP 版本
+        // Parse HTTP request, extract JSON body, X-Terminal-ID header and HTTP version
         let raw = String(decoding: data, as: UTF8.self)
         var terminalId: UUID?
         var args: [String] = []
-        var httpVersion = "1.1"  // 默认 HTTP/1.1（TCP 通道常见）
+        var httpVersion = "1.1"  // Default HTTP/1.1 (common for TCP channels)
 
-        // 简单解析：找到空行后的 JSON body
+        // Simple parsing: find the JSON body after the empty line
         let parts = raw.components(separatedBy: "\r\n\r\n")
         let headers = parts[0]
         let body = parts.count > 1 ? parts[1] : ""
 
-        // 从请求行提取 HTTP 版本（如 "POST /cli HTTP/1.0"）
+        // Extract HTTP version from request line (e.g. "POST /cli HTTP/1.0")
         let headerLines = headers.components(separatedBy: "\r\n")
         if let requestLine = headerLines.first {
             if requestLine.contains("HTTP/1.0") {
@@ -323,7 +323,7 @@ final class InterAgentServer {
             }
         }
 
-        // 提取 X-Terminal-ID
+        // Extract X-Terminal-ID
         for line in headerLines {
             let lower = line.lowercased()
             if lower.hasPrefix("x-terminal-id:") {
@@ -332,7 +332,7 @@ final class InterAgentServer {
             }
         }
 
-        // 解析 JSON args
+        // Parsing JSON args
         if let bodyData = body.data(using: .utf8),
            let json = try? JSONSerialization.jsonObject(with: bodyData) as? [String: Any],
            let rawArgs = json["args"] as? [String] {
@@ -348,7 +348,7 @@ final class InterAgentServer {
 
     private func buildHTTPResponse(body: String, httpVersion: String = "1.1") -> Data {
         let bodyData = body.data(using: .utf8) ?? Data()
-        // 返回与请求匹配的 HTTP 版本（CLI 使用 HTTP/1.0，SSH/curl 使用 HTTP/1.1）
+        // Return the HTTP version matching the request (HTTP/1.0 for CLI, HTTP/1.1 for SSH/curl)
         let header = "HTTP/\(httpVersion) 200 OK\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: \(bodyData.count)\r\nConnection: close\r\n\r\n"
         return (header.data(using: .utf8) ?? Data()) + bodyData
     }

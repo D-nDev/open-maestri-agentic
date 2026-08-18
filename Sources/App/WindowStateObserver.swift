@@ -1,13 +1,13 @@
 import AppKit
 import SwiftUI
 
-/// 监控主窗口的全屏状态，供 SwiftUI 视图响应布局变化
+/// Monitor the full-screen state of the main window for SwiftUI views to respond to layout changes
 @Observable
 @MainActor
 final class WindowStateObserver {
     static let shared = WindowStateObserver()
 
-    /// 窗口是否处于全屏（最大化）状态
+    /// Whether the window is in full screen (maximized) state
     var isFullScreen: Bool = false
 
     nonisolated(unsafe) private var notificationObservers: [NSObjectProtocol] = []
@@ -35,12 +35,12 @@ final class WindowStateObserver {
         notificationObservers.forEach { NotificationCenter.default.removeObserver($0) }
     }
 
-    /// 配置主窗口样式（透明 title bar、隐藏标题）
+    /// Configure main window style (transparent title bar, hidden title)
     func configureMainWindow() {
         guard let window = NSApplication.shared.mainWindow ?? NSApplication.shared.windows.first else { return }
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
-        // 让内容延伸到 title bar 区域
+        // Let the content extend into the title bar area
         window.styleMask.insert(.fullSizeContentView)
     }
 }

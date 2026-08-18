@@ -1,7 +1,7 @@
 import Foundation
 import OSLog
 
-/// Floor 配置（git worktree 隔离环境）
+/// Floor configuration (git worktree isolation environment)
 struct Floor: Codable, Identifiable {
     var id: UUID
     var name: String
@@ -27,16 +27,16 @@ struct FloorHooks: Codable {
     var autoRunSetup: Bool = false
 }
 
-/// Floor 生命周期管理器（git worktree 操作，FR53-55）
+/// Floor Lifecycle Manager (git worktree operation, FR53-55)
 final class FloorManager {
     static let shared = FloorManager()
     private let logger = Logger.make(category: "FloorManager")
     private init() {}
 
-    // MARK: - Floor 创建
+    // MARK: - Floor creation
 
     func createFloor(name: String, branchName: String, workingDirectory: String) throws -> Floor {
-        // 验证工作目录是 git repo
+        // Verify working directory is git repo
         let gitDir = workingDirectory + "/.git"
         guard FileManager.default.fileExists(atPath: gitDir) else {
             let fmt = Bundle.main.localizedString(forKey: "floor.error.not_git_repo", value: nil, table: nil)
@@ -49,17 +49,17 @@ final class FloorManager {
         return floor
     }
 
-    // MARK: - Floor 删除
+    // MARK: - Floor Delete
 
     func removeFloor(_ floor: Floor, workingDirectory: String) throws {
         try runGit(["worktree", "remove", "--force", floor.worktreePath], in: workingDirectory)
         logger.info("Floor '\(floor.name)' removed")
     }
 
-    // MARK: - Landing（合并提交到目标分支）
+    // MARK: - Landing (merge commit to target branch)
 
     func land(floor: Floor, targetBranch: String, workingDirectory: String) throws {
-        // 获取 Floor 分支提交到主仓库
+        // Get the Floor branch to submit to the main warehouse
         try runGit([
             "fetch",
             floor.worktreePath,
@@ -69,7 +69,7 @@ final class FloorManager {
         logger.info("Floor '\(floor.name)' landed onto '\(targetBranch)'")
     }
 
-    // MARK: - Hooks 执行
+    // MARK: - Hooks execution
 
     func runHooks(_ hooks: [String], floor: Floor, workingDirectory: String) async throws {
         for hook in hooks {
@@ -89,7 +89,7 @@ final class FloorManager {
         }
     }
 
-    // MARK: - 内部 git 调用
+    // MARK: - Internal git call
 
     @discardableResult
     private func runGit(_ args: [String], in directory: String) throws -> String {

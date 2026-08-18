@@ -1,7 +1,7 @@
 import Foundation
 
-/// AppKit 层（CanvasNodesView）向 SwiftUI 层（FileTreeNodeSwiftUIView）传递菜单操作的中继。
-/// 使用 NotificationCenter 广播，SwiftUI 视图通过 .onReceive 监听后修改自身 @State。
+/// AppKit layer (CanvasNodesView) relays menu actions to SwiftUI layer (FileTreeNodeSwiftUIView).
+/// Using NotificationCenter broadcast, the SwiftUI view modifies its own @State after listening through .onReceive.
 enum NavBarMenuAction {
     static let setViewMode  = Notification.Name("NavBarMenu.setViewMode")
     static let toggleHidden = Notification.Name("NavBarMenu.toggleHidden")

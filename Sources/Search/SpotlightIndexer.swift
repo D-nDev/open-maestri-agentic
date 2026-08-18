@@ -2,14 +2,14 @@ import Foundation
 import CoreSpotlight
 import OSLog
 
-/// Spotlight 索引器 - 支持工作区、Note、Terminal 的系统级搜索
+/// Spotlight Indexer - Supports system-level search in workspace, Note, Terminal
 final class SpotlightIndexer {
     static let shared = SpotlightIndexer()
     private let index = CSSearchableIndex.default()
     private let logger = Logger.make(category: "SpotlightIndexer")
     private init() {}
 
-    // MARK: - 工作区索引
+    // MARK: - workspace index
 
     func indexWorkspace(id: UUID, name: String, workingDirectory: String) {
         let attr = CSSearchableItemAttributeSet(contentType: .content)
@@ -32,7 +32,7 @@ final class SpotlightIndexer {
         ) { _ in }
     }
 
-    // MARK: - Note 索引
+    // MARK: - Note index
 
     func indexNote(workspaceId: UUID, noteId: UUID, name: String, content: String) {
         let attr = CSSearchableItemAttributeSet(contentType: .text)
@@ -56,7 +56,7 @@ final class SpotlightIndexer {
         ) { _ in }
     }
 
-    // MARK: - Terminal 索引
+    // MARK: - Terminal index
 
     func indexTerminal(workspaceId: UUID, terminalId: UUID, name: String, agentType: String) {
         let attr = CSSearchableItemAttributeSet(contentType: .content)
@@ -79,9 +79,9 @@ final class SpotlightIndexer {
         ) { _ in }
     }
 
-    // MARK: - 批量操作
+    // MARK: - Batch operation
 
-    /// 对整个工作区（所有节点）建立索引
+    /// Index the entire workspace (all nodes)
     func indexWorkspaceNodes(workspaceId: UUID, nodes: [CanvasNode], workingDirectory: String) {
         var items: [CSSearchableItem] = []
         for node in nodes {
@@ -116,7 +116,7 @@ final class SpotlightIndexer {
         }
     }
 
-    /// 删除工作区下所有索引项
+    /// Delete all index items in the workspace
     func deindexAll(workspaceId: UUID) {
         index.deleteSearchableItems(
             withDomainIdentifiers: [
@@ -127,7 +127,7 @@ final class SpotlightIndexer {
         ) { _ in }
     }
 
-    /// 全量重建（首次启动或恢复时调用）
+    /// Full rebuild (called during first startup or recovery)
     func rebuildIndex(workspaces: [WorkspaceEntry], nodes: [UUID: [CanvasNode]]) {
         index.deleteAllSearchableItems { [weak self] _ in
             guard let self else { return }

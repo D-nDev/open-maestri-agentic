@@ -1,12 +1,12 @@
 import AppKit
 
-/// 8 方向 Resize 枚举，供 CanvasInteractionHandler 和命中测试使用。
-/// 原先定义在已删除的 BaseNodeView（NSView 子类）中，现迁移至此独立文件。
+/// 8-directional Resize enumeration for use with CanvasInteractionHandler and hit testing.
+/// Originally defined in the deleted BaseNodeView (NSView subclass), now moved to this separate file.
 enum ResizeEdge {
     case right, left, top, bottom
     case topLeft, topRight, bottomLeft, bottomRight
 
-    /// macOS 原生 resize 光标（从系统光标资源加载）
+    /// macOS native resize cursor (loaded from system cursor resources)
     var cursor: NSCursor {
         switch self {
         case .right, .left:
@@ -21,14 +21,14 @@ enum ResizeEdge {
     }
 }
 
-// MARK: - 系统原生对角线 Resize 光标
+// MARK: - System native diagonal Resize cursor
 
-/// 从 macOS 系统光标资源目录加载原生对角线 resize 光标。
-/// 路径：HIServices.framework/Resources/cursors/
+/// Load native diagonal resize cursor from macOS system cursor resource directory.
+/// Path: HIServices.framework/Resources/cursors/
 private enum ResizeCursors {
-    /// ↘↖ 对角线（左上-右下 / NW-SE）
+    /// ↘↖ Diagonal (upper left-lower right / NW-SE)
     static let nwse: NSCursor = loadSystemCursor(name: "resizenorthwestsoutheast", hotSpot: NSPoint(x: 11, y: 11))
-    /// ↗↙ 对角线（右上-左下 / NE-SW）
+    /// ↗↙ Diagonal (upper right-lower left / NE-SW)
     static let nesw: NSCursor = loadSystemCursor(name: "resizenortheastsouthwest", hotSpot: NSPoint(x: 11, y: 11))
 
     private static func loadSystemCursor(name: String, hotSpot: NSPoint) -> NSCursor {
@@ -39,7 +39,7 @@ private enum ResizeCursors {
             return NSCursor(image: image, hotSpot: hotSpot)
         }
 
-        // 降级：使用公开 API 的 resizeLeftRight（不应该发生）
+        // Downgrade: resizeLeftRight using public API (should not happen)
         return .crosshair
     }
 }

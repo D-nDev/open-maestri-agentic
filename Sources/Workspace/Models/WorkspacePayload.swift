@@ -1,7 +1,7 @@
 import Foundation
 import CoreGraphics
 
-/// 工作区数据载体，所有字段与 Maestri camelCase 格式完全一致（schemaVersion:2）
+/// Workspace data carrier, all fields are completely consistent with Maestri camelCase format (schemaVersion:2)
 struct WorkspacePayload: Codable {
     var id: UUID
     var name: String
@@ -61,13 +61,13 @@ struct WorkspacePayload: Codable {
 
 // MARK: - Connection Types
 
-/// Terminal↔Terminal 连接
+/// Terminal↔Terminal connection
 struct TerminalConnection: Codable, Identifiable {
     var id: UUID
     var createdAt: Date
     var terminalIdA: UUID
     var terminalIdB: UUID
-    var ropePoints: [[Double]]  // 21 个控制点 [[x,y], ...]
+    var ropePoints: [[Double]]  // 21 control points [[x,y], ...]
 
     init(id: UUID = UUID(), terminalIdA: UUID, terminalIdB: UUID, ropePoints: [[Double]] = []) {
         self.id = id
@@ -78,7 +78,7 @@ struct TerminalConnection: Codable, Identifiable {
     }
 }
 
-/// Terminal↔Note 连接
+/// Terminal↔Note connection
 struct NoteConnection: Codable, Identifiable {
     var id: UUID
     var createdAt: Date
@@ -95,7 +95,7 @@ struct NoteConnection: Codable, Identifiable {
     }
 }
 
-/// Terminal↔Portal 连接
+/// Terminal↔Portal connection
 struct PortalConnection: Codable, Identifiable {
     var id: UUID
     var createdAt: Date
@@ -112,7 +112,7 @@ struct PortalConnection: Codable, Identifiable {
     }
 }
 
-/// Portal↔Portal 连接（共享 storage session）
+/// Portal↔Portal connection (shared storage session)
 struct PortalToPortalConnection: Codable, Identifiable {
     var id: UUID
     var createdAt: Date
@@ -129,7 +129,7 @@ struct PortalToPortalConnection: Codable, Identifiable {
     }
 }
 
-/// Note↔Note 连接（Note Chaining）
+/// Note↔Note connection (Note Chaining)
 struct NoteToNoteConnection: Codable, Identifiable {
     var id: UUID
     var createdAt: Date
@@ -146,7 +146,7 @@ struct NoteToNoteConnection: Codable, Identifiable {
     }
 }
 
-/// 跨 Floor 连接
+/// Cross-Floor connection
 struct CrossFloorConnection: Codable, Identifiable {
     var id: UUID
     var createdAt: Date
@@ -157,7 +157,7 @@ struct CrossFloorConnection: Codable, Identifiable {
     var ropePoints: [[Double]]
 }
 
-/// Floor 条目（workspace.json 中的 floor 引用）
+/// Floor entry (floor reference in workspace.json)
 struct FloorEntry: Codable, Identifiable {
     var id: UUID
     var name: String
@@ -167,7 +167,7 @@ struct FloorEntry: Codable, Identifiable {
     var createdAt: Date
 }
 
-/// 画布手绘（drawings），Maestri 支持基础手绘
+/// Canvas hand-drawing (drawings), Maestri supports basic hand-drawing
 struct Drawing: Codable, Identifiable {
     var id: UUID
     var points: [[Double]]      // [[x,y], ...]

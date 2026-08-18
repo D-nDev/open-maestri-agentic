@@ -2,7 +2,7 @@ import SwiftUI
 import AppKit
 import CoreGraphics
 
-/// 将 MinimapView (NSView) 包装为 SwiftUI 视图
+/// Wrap MinimapView (NSView) as a SwiftUI view
 struct MinimapRepresentable: NSViewRepresentable {
     var nodeFrames: [CGRect]
     var canvasOrigin: CGPoint
@@ -16,7 +16,7 @@ struct MinimapRepresentable: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: MinimapView, context: Context) {
-        // 根据容器视图尺寸和 zoom 估算当前视口大小
+        // Estimate current viewport size based on container view size and zoom
         let viewportWidth: CGFloat = 800 / zoom
         let viewportHeight: CGFloat = 500 / zoom
         let viewportRect = CGRect(

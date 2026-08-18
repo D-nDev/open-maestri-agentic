@@ -1,14 +1,14 @@
 import AppKit
 
-/// 手绘路径渲染层（节点下方），用于将 DrawingContent 渲染为画布上的笔画。
-/// 笔画坐标为节点内部坐标，需结合节点 frame 转换到画布屏幕坐标。
+/// A hand-drawn path rendering layer (below the node) that renders the DrawingContent as strokes on the canvas.
+/// The stroke coordinates are the internal coordinates of the node and need to be converted to the canvas screen coordinates in conjunction with the node frame.
 final class DrawingLayerView: NSView {
     override var isFlipped: Bool { true }
 
     var canvasOrigin: CGPoint = .zero
     var zoom: CGFloat = 1.0
 
-    /// (节点画布 frame, 内容) 对，由外部在 sync 时更新
+    /// (node canvas frame, content) pair, updated externally at sync
     var drawingNodes: [(frame: CGRect, content: ShapeContent)] = [] {
         didSet { needsDisplay = true }
     }

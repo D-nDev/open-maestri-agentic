@@ -1,14 +1,14 @@
 import AppKit
 import SwiftUI
 
-/// 可编辑、实时渲染 Markdown 样式的编辑器
-/// 使用 MarkdownTextStorage 实现输入时即时高亮，内容通过 Binding<String> 双向同步
+/// Editable, real-time rendering Markdown style editor
+/// Use MarkdownTextStorage to achieve instant highlighting during input, and the content is synchronized in both directions through Binding<String>
 struct MarkdownLiveEditor: NSViewRepresentable {
     @Binding var text: String
     var fontSize: CGFloat = NSFont.systemFontSize
     var nodeId: UUID? = nil
     var onChange: ((String) -> Void)? = nil
-    /// view 加入 window hierarchy（viewDidMoveToWindow）时调用，textView 已可接受焦点
+    /// Called when view joins window hierarchy (viewDidMoveToWindow), textView can accept focus
     var onWindowAttached: (() -> Void)? = nil
 
     func makeCoordinator() -> Coordinator {
@@ -28,8 +28,8 @@ struct MarkdownLiveEditor: NSViewRepresentable {
         let textView = NSTextView(frame: .zero, textContainer: textContainer)
         textView.isEditable = true
         textView.isSelectable = true
-        // isRichText 不能设为 false：自定义 NSTextStorage 会设置富文本属性，
-        // false 会导致 NSTextView 拒绝处理带属性的字符串，造成输入失效
+        // isRichText cannot be set to false: custom NSTextStorage will set rich text properties,
+        // false will cause NSTextView to refuse to process strings with attributes, causing input to fail.
         textView.allowsUndo = true
         textView.backgroundColor = .clear
         textView.drawsBackground = false
@@ -50,8 +50,8 @@ struct MarkdownLiveEditor: NSViewRepresentable {
         scrollView.drawsBackground = false
         scrollView.backgroundColor = .clear
 
-        // textView 必须在 documentView 设置之前配置好 min/maxSize，
-        // 否则 NSScrollView 无法根据内容高度正确调整 documentView frame
+        // textView must configure min/maxSize before documentView is set,
+        // Otherwise NSScrollView cannot correctly adjust documentView frame based on content height
         textView.minSize = NSSize(width: 0, height: scrollView.contentSize.height)
         textView.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
         scrollView.documentView = textView
@@ -72,7 +72,7 @@ struct MarkdownLiveEditor: NSViewRepresentable {
         guard let textView = scrollView.documentView as? NSTextView,
               let ts = textView.textStorage as? MarkdownTextStorage else { return }
         ts.fontSize = fontSize
-        // 只响应外部（CLI/文件同步）写入，忽略用户自己输入触发的回调
+        // Only respond to external (CLI/file synchronization) writes, ignoring callbacks triggered by user input
         guard !context.coordinator.isEditing, textView.string != text else { return }
         let sel = textView.selectedRange()
         ts.replaceCharacters(in: NSRange(location: 0, length: ts.length), with: text)
@@ -93,7 +93,7 @@ struct MarkdownLiveEditor: NSViewRepresentable {
         var parent: MarkdownLiveEditor
         weak var textView: NSTextView?
         weak var textStorage: MarkdownTextStorage?
-        /// 用户正在输入时为 true，阻止 updateNSView 干扰
+        /// True when the user is typing, preventing updateNSView from interfering
         var isEditing = false
 
         init(parent: MarkdownLiveEditor) {

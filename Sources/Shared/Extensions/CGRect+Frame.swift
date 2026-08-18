@@ -1,8 +1,8 @@
 import CoreGraphics
 
-/// CGRect 与 Maestri [[x,y],[w,h]] 格式的互转
+/// Conversion between CGRect and Maestri [[x,y],[w,h]] formats
 extension CGRect {
-    /// 从 Maestri JSON 格式 [[x, y], [width, height]] 转换
+    /// Convert from Maestri JSON format [[x, y], [width, height]]
     init?(frameArray: [[Double]]) {
         guard frameArray.count == 2,
               frameArray[0].count == 2,
@@ -17,7 +17,7 @@ extension CGRect {
         )
     }
 
-    /// 转换为 Maestri JSON 格式 [[x, y], [width, height]]
+    /// Convert to Maestri JSON format [[x, y], [width, height]]
     var frameArray: [[Double]] {
         [[origin.x, origin.y], [size.width, size.height]]
     }

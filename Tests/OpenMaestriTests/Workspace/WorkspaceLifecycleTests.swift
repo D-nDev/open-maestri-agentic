@@ -1,7 +1,7 @@
 import XCTest
 @testable import open_maestri
 
-/// 工作区端到端生命周期测试
+/// Workspace end-to-end lifecycle testing
 final class WorkspaceLifecycleTests: XCTestCase {
     private var tmpDir: String!
     private let pm = PersistenceManager.shared
@@ -13,10 +13,10 @@ final class WorkspaceLifecycleTests: XCTestCase {
 
     override func tearDownWithError() throws {
         try? FileManager.default.removeItem(atPath: tmpDir)
-        // 清理测试工作区目录
+        // Clean up the test workspace directory
     }
 
-    // MARK: - 工作区创建
+    // MARK: - Workspace creation
 
     func testCreateWorkspaceDirectoryExists() throws {
         let wsId = UUID()
@@ -24,7 +24,7 @@ final class WorkspaceLifecycleTests: XCTestCase {
         let wsDir = pm.workspaceDirURL(id: wsId)
         XCTAssertTrue(FileManager.default.fileExists(atPath: wsDir.path),
                       "工作区目录应被创建")
-        // 清理
+        // Cleanup
         try? FileManager.default.removeItem(at: wsDir)
     }
 
@@ -33,12 +33,12 @@ final class WorkspaceLifecycleTests: XCTestCase {
         try pm.ensureWorkspaceDirectoryExists(id: wsId)
         defer { try? FileManager.default.removeItem(at: pm.workspaceDirURL(id: wsId)) }
 
-        // 创建并保存
+        // Create and save
         let payload = WorkspacePayload(id: wsId, name: "Test WS", workingDirectory: tmpDir)
         let doc = WorkspaceDocument(payload: payload)
         try pm.saveSync(doc, to: pm.workspaceURL(id: wsId))
 
-        // 重新加载
+        // Reload
         let loaded = try pm.loadWorkspace(id: wsId)
         XCTAssertEqual(loaded.payload.name, "Test WS")
         XCTAssertEqual(loaded.payload.workingDirectory, tmpDir)
@@ -51,7 +51,7 @@ final class WorkspaceLifecycleTests: XCTestCase {
         try pm.ensureWorkspaceDirectoryExists(id: wsId)
         defer { try? FileManager.default.removeItem(at: pm.workspaceDirURL(id: wsId)) }
 
-        // 保存含节点的工作区
+        // Saving workspace with nodes
         var payload = WorkspacePayload(id: wsId, name: "Node WS", workingDirectory: tmpDir)
         let tc = TerminalContent(name: "Claude", agentType: "claude_code", command: "claude")
         let node = CanvasNode(
@@ -62,7 +62,7 @@ final class WorkspaceLifecycleTests: XCTestCase {
         let doc = WorkspaceDocument(payload: payload)
         try pm.saveSync(doc, to: pm.workspaceURL(id: wsId))
 
-        // 通过 WorkspaceManager 加载
+        // Loading via WorkspaceManager
         let entry = WorkspaceEntry(id: wsId, name: "Node WS", workingDirectory: tmpDir)
         let ws = WorkspaceManager(entry: entry)
         try ws.load()
@@ -76,7 +76,7 @@ final class WorkspaceLifecycleTests: XCTestCase {
         }
     }
 
-    // MARK: - 节点增删
+    // MARK: - Node addition and deletion
 
     @MainActor
     func testAddAndRemoveNode() throws {
@@ -113,25 +113,25 @@ final class WorkspaceLifecycleTests: XCTestCase {
         XCTAssertEqual(ws.connections.count, 1)
         XCTAssertEqual(ws.connections.first?.terminalIdA, idA)
 
-        // 验证持久化：保存后重新加载，连接应被还原
+        // Verify persistence: Reload after saving, the connection should be restored
         try ws.saveSync()
         let ws2 = WorkspaceManager(entry: entry)
         try ws2.load()
         XCTAssertEqual(ws2.connections.count, 1, "保存并重新加载后连接应存在")
         XCTAssertEqual(ws2.connections.first?.terminalIdA, idA, "连接的 terminalIdA 应保持一致")
 
-        // 删除连接
+        // Delete connection
         ws.removeConnection(id: conn.id)
         XCTAssertEqual(ws.connections.count, 0)
 
-        // 验证删除后持久化
+        // Verify persistence after deletion
         try ws.saveSync()
         let ws3 = WorkspaceManager(entry: entry)
         try ws3.load()
         XCTAssertEqual(ws3.connections.count, 0, "删除后保存重载连接应为空")
     }
 
-    // MARK: - 快速保存
+    // MARK: - Quick save
 
     @MainActor
     func testSaveCreatesDiskFile() throws {

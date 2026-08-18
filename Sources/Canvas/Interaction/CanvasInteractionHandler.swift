@@ -1,16 +1,16 @@
 import AppKit
 import WebKit
 
-// MARK: - CanvasViewportView 鼠标事件处理
+// MARK: - CanvasViewportView mouse event handling
 
 extension CanvasViewportView {
 
-    // MARK: - 统一鼠标事件处理
+    // MARK: - Unified mouse event handling
 
     override func mouseDown(with event: NSEvent) {
         let loc = convert(event.locationInWindow, from: nil)
 
-        // 0. stroke 控制点优先命中检测（必须在选中状态下，且最高优先级）
+        // 0. Stroke control point priority hit detection (must be selected and has the highest priority)
         for node in currentNodes.reversed() {
             guard selectedNodeIds.contains(node.id),
                   case .stroke(let sc) = node.content,
@@ -35,14 +35,14 @@ extension CanvasViewportView {
             }
         }
 
-        // 1. Space+点击 → 平移模式
+        // 1. Space+click → pan mode
         if isSpaceHeld {
             interaction = .panCanvas(startOrigin: canvasOrigin, startMouse: loc)
             NSCursor.closedHand.set()
             return
         }
 
-        // 2. 连线模式：点击节点建立连接，点击空白取消
+        // 2. Connection mode: Click on the node to establish a connection, click on the blank space to cancel
         if isInConnectingMode {
             let hit = hitTestCanvas(at: loc)
             if case .nodeHeader(let id) = hit {
@@ -57,7 +57,7 @@ extension CanvasViewportView {
             return
         }
 
-        // 兼容：程序触发的连线起点
+        // Compatible: Program-triggered connection starting point
         if connectingFromNodeId != nil {
             let hit = hitTestCanvas(at: loc)
             if case .nodeHeader(let id) = hit {
@@ -77,7 +77,7 @@ extension CanvasViewportView {
             }
         }
 
-        // 3. 节点绘制模式：空白区域开始绘制
+        // 3. Node drawing mode: start drawing in blank area
         if isInDrawingMode {
             let hit = hitTestCanvas(at: loc)
             if case .canvas = hit {
@@ -91,10 +91,10 @@ extension CanvasViewportView {
                 drawingLastSnappedRect = nil
                 return
             }
-            // 绘制模式下点击节点 → fall through 正常走节点交互
+            // Click on a node in drawing mode → fall through normal node interaction
         }
 
-        // 4. 语义化命中测试 → 分发
+        // 4. Semantic hit testing → distribution
         let hit = hitTestCanvas(at: loc)
         switch hit {
         case .canvas:
@@ -115,29 +115,29 @@ extension CanvasViewportView {
             guard !isNodeLocked(id) else { return }
             let wasAlreadySelected = selectedNodeIds.contains(id)
             updateSelection(id, modifiers: event.modifierFlags)
-            // 发送激活通知（聚焦终端等）
+            // Send activation notification (focus terminal, etc.)
             NotificationCenter.default.post(
                 name: .canvasNodeActivated,
                 object: nil,
                 userInfo: ["nodeId": id]
             )
-            // shape 节点
+            // shape node
             if let node = currentNodes.first(where: { $0.id == id }),
                case .shape = node.content {
-                // 已选中时再次点击 → 进入编辑态
-                // NSTextView 始终注册在 ShapeTextViewRegistry，直接转发坐标修正后的 mouseDown，
-                // 由 NSTextView 自身定位光标（与 Note 节点处理路径完全一致）
+                // Click again when selected → enter editing state
+                // NSTextView is always registered in ShapeTextViewRegistry and directly forwards mouseDown after coordinate correction.
+                // Position the cursor by NSTextView itself (exactly the same as the Note node processing path)
                 if wasAlreadySelected,
                    let tv = ShapeTextViewRegistry.shared.textView(for: id) {
-                    // ShapeTextEditor 始终存在，tv 始终注册，无需等待 SwiftUI 更新。
-                    // 1. 先发通知让 SwiftUI 设 isEditing=true（同步触发 @State 变更）
+                    // ShapeTextEditor always exists, tv is always registered, no need to wait for SwiftUI updates.
+                    // 1. Send notification first to let SwiftUI set isEditing=true (trigger @State changes synchronously)
                     NotificationCenter.default.post(
                         name: .shapeNodeShouldBeginEditing,
                         object: nil,
                         userInfo: ["nodeId": id, "selectAll": false]
                     )
-                    // 2. 下一 runloop tick：SwiftUI updateNSView 已将 isEditable=true，
-                    //    用正确坐标转发 mouseDown 定位光标
+                    // 2. Next runloop tick: SwiftUI updateNSView has isEditable=true,
+                    //    Forward mouseDown to position the cursor with correct coordinates
                     let correctedLocation = correctedWindowLocationForShapeTextView(for: event, nodeId: id, textView: tv)
                     let capturedEvent = event
                     DispatchQueue.main.async {
@@ -158,21 +158,21 @@ extension CanvasViewportView {
                     }
                     return
                 }
-                // 未选中或无 NSTextView：走普通 mayDragNode
+                // Unchecked or None NSTextView: Go Normal mayDragNode
                 let startFrame = nodeCanvasFrames[id] ?? .zero
                 interaction = .mayDragNode(id, startMouse: loc, startFrame: startFrame, contentTarget: nil)
                 return
             }
-            // 如果节点已经处于选中状态，将鼠标事件路由给终端视图（支持文字选中）
+            // If the node is already selected, route mouse events to the terminal view (supports text selection)
             if wasAlreadySelected,
                let provider = TerminalManager.shared.providers[id],
                let terminalView = provider.terminalView {
                 interaction = .contentInteraction(id, contentTarget: terminalView)
-                // 坐标修正：SwiftUI 的 .scaleEffect(zoom) 通过 CALayer transform 缩放节点，
-                // 但 NSView.convert(_:from:) 不考虑 layer transform，导致 SwiftTerm 的
-                // calculateMouseHit 计算出错误的行列位置。
-                // 修正方案：自行计算终端视图内部的正确本地坐标，然后合成一个
-                // 让 SwiftTerm convert 能得到正确结果的 locationInWindow。
+                // Coordinate correction: SwiftUI's .scaleEffect(zoom) scales nodes through CALayer transform,
+                // But NSView.convert(_:from:) does not consider layer transform, causing SwiftTerm to
+                // calculateMouseHit calculates wrong row and column positions.
+                // Correction plan: Calculate the correct local coordinates inside the terminal view by yourself, and then synthesize one
+                // Make SwiftTerm convert give correct results for locationInWindow.
                 let correctedLocation = correctedWindowLocation(for: event, nodeId: id, terminalView: terminalView)
                 if let syntheticEvent = NSEvent.mouseEvent(
                     with: .leftMouseDown,
@@ -189,9 +189,9 @@ extension CanvasViewportView {
                 }
                 window?.makeFirstResponder(terminalView)
             }
-            // Note 节点：将 NSTextView 设为 first responder 并发送坐标修正的 mouseDown。
-            // 不使用 contentInteraction，让 AppKit 原生响应链处理后续 drag/up 事件，
-            // 避免在 mouseDragged 中手动转发造成递归崩溃。
+            // Note Node: Set NSTextView as first responder and send coordinate-corrected mouseDown.
+            // Do not use contentInteraction and let the AppKit native response chain handle subsequent drag/up events.
+            // Avoid recursive crash with manual forwarding in mouseDragged.
             if let node = currentNodes.first(where: { $0.id == id }),
                case .stickyNote = node.content {
                 guard let tv = NoteTextViewRegistry.shared.textView(for: id) else { return }
@@ -210,20 +210,20 @@ extension CanvasViewportView {
                 ) {
                     tv.mouseDown(with: syntheticEvent)
                 }
-                // interaction 保持 idle，后续 drag/up 由 AppKit 响应链直接路由给 NSTextView
+                // interaction remains idle, and subsequent drag/up is directly routed to NSTextView by the AppKit response chain
             }
-            // Portal 节点：根据点击位置决定聚焦 URL 输入框还是 WebView
+            // Portal node: Determine whether to focus the URL input box or WebView based on the click position
             if let node = currentNodes.first(where: { $0.id == id }),
                case .portal = node.content {
                 let screenFrame = canvasRectToScreen(node.frame)
                 let localY = loc.y - screenFrame.minY
-                // 导航栏区域（header 之后约 40px * zoom）
+                // Navigation bar area (about 40px * zoom after header)
                 let navBarBottom = (CanvasNodeConstants.headerHeight + 40) * zoom
                 if localY <= navBarBottom,
                    let urlField = PortalWebViewStore.shared.urlTextField(for: id) {
                     window?.makeFirstResponder(urlField)
                 } else if let webView = PortalWebViewStore.shared.webView(for: id) {
-                    // WebView 区域：第一次点击即路由给 WKWebView（无需先选中再二次点击）
+                    // WebView area: The first click is routed to WKWebView (no need to select first and click again)
                     interaction = .contentInteraction(id, contentTarget: webView)
                     let correctedLocation = correctedWindowLocationForWebView(for: event, nodeId: id, webView: webView)
                     if let syntheticEvent = NSEvent.mouseEvent(
@@ -242,14 +242,14 @@ extension CanvasViewportView {
                     window?.makeFirstResponder(webView)
                 }
             }
-            // freehand 节点：内容区点击 → 启动拖动（无文字编辑，直接可拖）
+            // freehand node: click in the content area → start dragging (no text editing, can be dragged directly)
             if let node = currentNodes.first(where: { $0.id == id }),
                case .freehand = node.content {
                 let startFrame = nodeCanvasFrames[id] ?? .zero
                 interaction = .mayDragNode(id, startMouse: loc, startFrame: startFrame, contentTarget: nil)
                 return
             }
-            // stroke 节点：内容区点击 → 启动拖动（控制点拖拽已在 mouseDown 最顶部处理）
+            // Stroke node: Click in the content area → start dragging (control point dragging has been processed at the top of mouseDown)
             if let node = currentNodes.first(where: { $0.id == id }),
                case .stroke = node.content {
                 let startFrame = nodeCanvasFrames[id] ?? .zero
@@ -279,7 +279,7 @@ extension CanvasViewportView {
         }
     }
 
-    // MARK: - 拖动处理
+    // MARK: - Drag handling
 
     private static let dragThreshold: CGFloat = 3.0
 
@@ -288,7 +288,7 @@ extension CanvasViewportView {
 
         switch interaction {
 
-        // --- 画布平移 ---
+        // --- Canvas translation ---
         case .panCanvas(let startOrigin, let startMouse):
             let dx = (loc.x - startMouse.x) / zoom
             let dy = (loc.y - startMouse.y) / zoom
@@ -296,23 +296,23 @@ extension CanvasViewportView {
             needsLayout = true
             notifyViewportChanged()
 
-        // --- 等待判断（点击 or 拖动）---
+        // --- Waiting for judgment (click or drag) ---
         case .mayDragNode(let id, let startMouse, let startFrame, let contentTarget):
             let dx = loc.x - startMouse.x
             let dy = loc.y - startMouse.y
             let dist = sqrt(dx * dx + dy * dy)
             guard dist >= Self.dragThreshold else { return }
-            // 安全检查：必须有物理左键按下，防止触控板双指滚动误触
+            // Security check: There must be a physical left button pressed to prevent accidental touches when scrolling with two fingers on the trackpad
             guard NSEvent.pressedMouseButtons & 1 != 0 else { return }
 
-            // Option+拖动 → 触发节点复制而非移动
+            // Option+drag → trigger node copying instead of moving
             if event.modifierFlags.contains(.option) {
                 interaction = .idle
                 onDuplicateNode?(id)
                 return
             }
 
-            // 若已透传 mouseDown 给内容区，发合成 mouseUp 取消其内部状态
+            // If mouseDown has been transparently transmitted to the content area, send synthesized mouseUp to cancel its internal state.
             if let target = contentTarget {
                 if let cancelEvent = NSEvent.mouseEvent(
                     with: .leftMouseUp,
@@ -328,10 +328,10 @@ extension CanvasViewportView {
                     target.mouseUp(with: cancelEvent)
                 }
             }
-            // 拖动开始时将焦点还给画布，防止 NSTextView 等内容视图在拖动中消费事件
+            // Return focus to the canvas when dragging starts to prevent content views such as NSTextView from consuming events during dragging
             window?.makeFirstResponder(self)
 
-            // 切换为真正拖动
+            // Switch to real drag
             let canvasMouse = screenToCanvas(startMouse)
             if selectedNodeIds.count > 1 && selectedNodeIds.contains(id) {
                 var startFrames: [UUID: CGRect] = [:]
@@ -342,10 +342,10 @@ extension CanvasViewportView {
             } else {
                 interaction = .draggingNode(id, startMouse: canvasMouse, startFrame: startFrame)
             }
-            // 立即处理第一帧拖动（递归调用）
+            // Process first frame drag immediately (recursive call)
             mouseDragged(with: event)
 
-        // --- 单节点拖动 ---
+        // --- Single node drag ---
         case .draggingNode(let id, let startMouse, let startFrame):
             let currentCanvas = screenToCanvas(loc)
             let rawDX = currentCanvas.x - startMouse.x
@@ -391,10 +391,10 @@ extension CanvasViewportView {
             nodeCanvasFrames[id] = newFrame
             updateNodeFrameInPlace(id: id, frame: newFrame)
             needsLayout = true
-            // 通知连线物理引擎：端点已移动
+            // Notify Wire Physics Engine: Endpoint has moved
             onNodeFramesDuringDrag?([id])
 
-        // --- 批量拖动 ---
+        // --- Batch drag ---
         case .batchDragging(let startFrames, let primaryId, let startMouse):
             let currentCanvas = screenToCanvas(loc)
             let rawDX = currentCanvas.x - startMouse.x
@@ -425,7 +425,7 @@ extension CanvasViewportView {
             }
             updateNodeFramesInPlace(frames: updatedFrames)
             needsLayout = true
-            // 通知连线物理引擎：多个端点已移动
+            // Notification to Wired Physics Engine: Multiple endpoints moved
             onNodeFramesDuringDrag?(Set(startFrames.keys))
 
         // --- Resize ---
@@ -435,7 +435,7 @@ extension CanvasViewportView {
             let dy = loc.y - startMouse.y
             applyResizeOnCanvas(id: id, edge: edge, dx: dx, dy: dy, startFrame: startFrame)
 
-        // --- 旋转 ---
+        // --- Rotation ---
         case .rotatingNode(let id, let startAngle, let nodeCenter):
             let dx = loc.x - nodeCenter.x
             let dy = loc.y - nodeCenter.y
@@ -448,7 +448,7 @@ extension CanvasViewportView {
                 userInfo: ["nodeId": id, "rotation": newRotation]
             )
 
-        // --- 框选 ---
+        // --- Frame selection ---
         case .marquee(let start):
             marqueeCurrentPoint = loc
             let rect = CGRect(
@@ -460,13 +460,13 @@ extension CanvasViewportView {
             snapGuideView?.selectionRect = rect
             needsDisplay = true
 
-        // --- stroke 节点绘制模式（直线/箭头）---
+        // --- stroke node drawing mode (line/arrow) ---
         case .drawingStroke(let start):
             drawingCurrentPoint = loc
             snapGuideView?.strokePreviewPath = (start: start, end: loc, type: drawingNodeType)
             needsDisplay = true
 
-        // --- freehand 节点绘制模式（自由笔，采样间距 4pt）---
+        // --- freehand node drawing mode (free pen, sampling interval 4pt) ---
         case .drawingFreehand(var pts):
             let last = pts.last ?? loc
             let dx = loc.x - last.x
@@ -476,16 +476,16 @@ extension CanvasViewportView {
                 interaction = .drawingFreehand(points: pts)
             }
             drawingCurrentPoint = loc
-            // 传递当前累积点（若未追加当前点则附加，保证预览实时跟手）
+            // Pass the current accumulated points (if the current points are not appended, append them to ensure that the preview follows the hand in real time)
             let previewPts = pts.last == loc ? pts : pts + [loc]
             snapGuideView?.freehandPreviewPoints = previewPts
             needsDisplay = true
 
-        // --- 节点绘制模式（网格吸附 + haptic）---
+        // --- Node drawing mode (grid adsorption + haptic) ---
         case .drawing(let start):
             drawingCurrentPoint = loc
 
-            // 将起点和当前点转为画布坐标，吸附到网格
+            // Convert the starting point and current point to canvas coordinates and snap to the grid
             let grid = Constants.canvasGridSpacing
             let canvasStart = screenToCanvas(start)
             let canvasCurrent = screenToCanvas(loc)
@@ -502,13 +502,13 @@ extension CanvasViewportView {
                 height: abs(snappedCurrentY - snappedStartY)
             )
 
-            // 检测网格跨越：矩形变化时触发触觉反馈
+            // Detect grid crossing: trigger haptic feedback when rectangle changes
             if let lastRect = drawingLastSnappedRect, lastRect != snappedCanvasRect {
                 NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
             }
             drawingLastSnappedRect = snappedCanvasRect
 
-            // 将吸附后的画布矩形转回屏幕坐标用于绘制预览
+            // Convert the adsorbed canvas rectangle back to screen coordinates for drawing preview
             let screenOrigin = canvasToScreen(snappedCanvasRect.origin)
             let screenRect = CGRect(
                 x: screenOrigin.x,
@@ -519,7 +519,7 @@ extension CanvasViewportView {
             snapGuideView?.drawingRect = screenRect
             needsDisplay = true
 
-        // --- 内容区交互（终端文字选中 / WebView 点击拖拽等）---
+        // --- Content area interaction (terminal text selection/WebView click and drag, etc.) ---
         case .contentInteraction(let id, let contentTarget):
             let correctedLocation: CGPoint
             if contentTarget is WKWebView {
@@ -541,12 +541,12 @@ extension CanvasViewportView {
                 contentTarget.mouseDragged(with: syntheticEvent)
             }
 
-        // --- stroke 控制点拖拽 ---
+        // --- stroke control point drag ---
         case .draggingStrokePoint(let id, let role, let origContent, let startFrame):
             let canvasLoc = screenToCanvas(loc)
 
             if role == "control" {
-                // 拖动贝塞尔控制点：frame 跟随扩展，start/end 画布绝对坐标保持不变
+                // Drag Bezier control point: frame follows expansion, start/end canvas absolute coordinates remain unchanged
                 let absStart = CGPoint(
                     x: startFrame.minX + origContent.startPoint.x * startFrame.width,
                     y: startFrame.minY + origContent.startPoint.y * startFrame.height
@@ -581,7 +581,7 @@ extension CanvasViewportView {
                     userInfo: ["nodeId": id, "content": newContent, "frame": newFrame]
                 )
             } else {
-                // 拖动 start/end：仅归一化坐标更新，frame 不变
+                // Drag start/end: only the normalized coordinates are updated, the frame remains unchanged
                 let w = startFrame.width
                 let h = startFrame.height
                 let normalized = CGPoint(
@@ -602,7 +602,7 @@ extension CanvasViewportView {
                 )
             }
 
-        // --- idle（连线工具跟踪）---
+        // --- idle (connection tool tracking) ---
         case .idle:
             if connectingFromNodeId != nil {
                 connectionDragPoint = loc
@@ -623,13 +623,13 @@ extension CanvasViewportView {
         switch interaction {
 
         case .mayDragNode(let id, _, _, let contentTarget):
-            // 没有发生拖动 = 点击，发送节点激活通知
+            // No drag occurred = click, node activation notification sent
             NotificationCenter.default.post(
                 name: .canvasNodeActivated,
                 object: nil,
                 userInfo: ["nodeId": id]
             )
-            // text 节点：已选中时再次单击 → 进入编辑态
+            // text node: Click again when selected → enter editing state
             if selectedNodeIds.contains(id),
                let node = currentNodes.first(where: { $0.id == id }),
                case .text = node.content {
@@ -639,8 +639,8 @@ extension CanvasViewportView {
                     userInfo: ["nodeId": id]
                 )
             }
-            // shape 节点编辑态触发已移至 mouseDown（NSTextView 始终注册，直接转发坐标修正事件）
-            // 单击已在多选集合中的节点 → 收窄为单选
+            // Shape node editing state trigger has been moved to mouseDown (NSTextView is always registered and directly forwards coordinate correction events)
+            // Click on a node that is already in the multi-select set → narrow to single selection
             if selectedNodeIds.count > 1 && selectedNodeIds.contains(id) {
                 selectedNodeIds = [id]
             }
@@ -730,7 +730,7 @@ extension CanvasViewportView {
             needsDisplay = true
 
         case .drawingFreehand(let pts):
-            // 清除 freehand 预览
+            // Clear freehand preview
             snapGuideView?.freehandPreviewPoints = []
             guard pts.count >= 2 else {
                 drawingCurrentPoint = nil
@@ -767,7 +767,7 @@ extension CanvasViewportView {
             needsDisplay = true
 
         case .drawing(let start):
-            // 使用网格吸附后的矩形创建节点
+            // Create nodes using rectangles after grid adsorption
             let grid = Constants.canvasGridSpacing
             let canvasStart = screenToCanvas(start)
             let canvasCurrent = screenToCanvas(drawingCurrentPoint ?? start)
@@ -785,7 +785,7 @@ extension CanvasViewportView {
             )
 
             if drawingNodeType == "text" {
-                // text 节点：点击即创建，使用默认尺寸居中于点击点
+                // text node: Created on click, centered on click point using default dimensions
                 let defaultSize = defaultNodeSize(for: drawingNodeType)
                 let canvasRect = CGRect(
                     x: snappedStartX - defaultSize.width / 2,
@@ -795,7 +795,7 @@ extension CanvasViewportView {
                 )
                 onNodeDrawn?(drawingNodeType, canvasRect)
             } else if snappedRect.width > 20 && snappedRect.height > 20 {
-                // 其余节点：必须拖拽超过 20pt 才创建
+                // Remaining nodes: must be dragged over 20pt to create
                 onNodeDrawn?(drawingNodeType, snappedRect)
             }
             NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
@@ -894,13 +894,13 @@ extension CanvasViewportView {
     override func mouseMoved(with event: NSEvent) {
         let loc = convert(event.locationInWindow, from: nil)
 
-        // 连线工具：跟踪鼠标位置
+        // Wiring Tools: Track mouse position
         if connectingFromNodeId != nil {
             connectionDragPoint = loc
             needsDisplay = true
         }
 
-        // 光标：根据命中区域设置
+        // Cursor: Set based on hit area
         if isSpaceHeld {
             NSCursor.openHand.set()
             return

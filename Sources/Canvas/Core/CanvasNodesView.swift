@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-// MARK: - 节点画布常量（替代 BaseNodeView 中的静态常量）
+// MARK: - Node canvas constant (replaces static constant in BaseNodeView)
 enum CanvasNodeConstants {
     static let headerHeight: CGFloat = 32
     static let footerHeight: CGFloat = 26
@@ -12,7 +12,7 @@ enum CanvasNodeConstants {
     static let selectionOutset: CGFloat = 3
 }
 
-// MARK: - 拖放目标 Environment Key
+// MARK: - Drag and drop target Environment Key
 
 private struct DropTargetNodeIdKey: EnvironmentKey {
     static let defaultValue: UUID? = nil
@@ -26,30 +26,30 @@ extension EnvironmentValues {
 }
 
 // MARK: - CanvasNodesView
-/// NSHostingView 子类，作为所有节点的 SwiftUI 容器。
-/// hitTest 默认返回 self（不穿透内部 SwiftUI 视图到 AppKit 层），
-/// 天然实现 Maestri 的 SwiftUIGestureBlocker 效果。
-/// 所有鼠标/滚轮事件透传给父视图 CanvasViewportView 统一处理。
-/// 例外：fileTree 节点的 NavBar 区域（List/Grid 切换、前进/后退等按钮）允许 SwiftUI 响应。
+/// NSHostingView subclass that serves as a SwiftUI container for all nodes.
+/// hitTest returns self by default (does not penetrate the inner SwiftUI view to the AppKit layer),
+/// Naturally implement Maestri's SwiftUIGestureBlocker effect.
+/// All mouse/wheel events are transparently transmitted to the parent view CanvasViewportView for unified processing.
+/// Exception: FileTree node's NavBar area (List/Grid toggle, forward/back, etc. buttons) allows SwiftUI to be responsive.
 final class CanvasNodesView: NSHostingView<CanvasNodesSwiftUIView> {
 
-    /// 注入 canvas 引用，用于 fileTree NavBar 区域的坐标判断
+    /// Inject canvas reference for coordinate judgment of fileTree NavBar area
     weak var canvas: CanvasViewportView?
 
     // MARK: - Responder
 
-    /// NSHostingView 默认 acceptsFirstResponder = false，
-    /// 导致 self 不在 responder chain，NSMenu 认为 target 无法响应 action 而置灰所有菜单项。
+    /// NSHostingView default acceptsFirstResponder = false,
+    /// As a result, self is not in the responder chain. NSMenu thinks that the target cannot respond to the action and grays out all menu items.
     override var acceptsFirstResponder: Bool { true }
 
-    // MARK: - hitTest 拦截
+    // MARK: - hitTest interception
 
-    /// 始终返回 self，确保所有鼠标事件经过 CanvasNodesView.mouseDown 路由。
-    /// NSHostingView 在内部 SwiftUI 设 allowsHitTesting(false) 时可能返回 nil，
-    /// 导致事件绕过本视图直接到达 CanvasViewportView，fileTree 等节点的程序化
-    /// 点击转发逻辑失效（展开按钮、行选中、双击导航均不响应）。
+    /// Always return self to ensure all mouse events are routed through CanvasNodesView.mouseDown.
+    /// NSHostingView may return nil when SwiftUI internally sets allowsHitTesting(false).
+    /// Programming that causes events to bypass this view and directly reach CanvasViewportView, fileTree and other nodes
+    /// The click forwarding logic fails (the expand button, row selection, and double-click navigation do not respond).
     override func hitTest(_ point: NSPoint) -> NSView? {
-        // 仅在点击位于本视图 bounds 内时拦截
+        // Only intercept when the click is within the bounds of this view
         guard bounds.contains(point) else { return nil }
         return self
     }
@@ -62,29 +62,29 @@ final class CanvasNodesView: NSHostingView<CanvasNodesSwiftUIView> {
 
         let loc = canvas.convert(event.locationInWindow, from: nil)
 
-        // Portal 节点导航栏按钮处理（后退/前进/刷新）
+        // Portal node navigation bar button processing (back/forward/refresh)
         if handlePortalNavBarClick(at: loc, event: event, canvas: canvas) {
-            nextResponder?.mouseDown(with: event)  // 允许 canvas 继续选中节点
+            nextResponder?.mouseDown(with: event)  // Allow canvas to continue selecting nodes
             return
         }
 
         if let (nodeId, hitKind) = fileTreeHitKind(at: loc, canvas: canvas) {
             switch hitKind {
             case .navBar:
-                // NavBar 区域：精确分发按钮动作；只有弹出菜单时才消费事件，
-                // 其余情况（后退/前进/标题空白）继续转发给 canvas 完成选中/拖拽
+                // NavBar area: accurately distribute button actions; only consume events when the menu pops up,
+                // In other cases (back/forward/blank title) continue to be forwarded to canvas to complete selection/drag.
                 if handleNavBarClick(nodeId: nodeId, loc: loc, event: event, canvas: canvas) {
                     return
                 }
             case .content:
-                // NSOutlineView/NSCollectionView 区域：先选中节点，再转发事件
+                // NSOutlineView/NSCollectionView area: select nodes first, then forward events
                 canvas.selectFileTreeNode(at: loc, modifiers: event.modifierFlags)
                 forwardMouseDownToFileTreeContent(nodeId: nodeId, event: event)
                 return
             case .swiftUI:
-                // 纯 SwiftUI 区域（搜索栏等）：
-                // 由于节点设置了 allowsHitTesting(false)，super.mouseDown 无法将事件路由给 SwiftUI TextField。
-                // 因此手动查找点击位置下的 NSTextField 并激活第一响应者。
+                // Pure SwiftUI areas (search bar, etc.):
+                // super.mouseDown cannot route events to SwiftUI TextField because the node has allowsHitTesting(false) set.
+                // So manually find the NSTextField under the click location and activate the first responder.
                 canvas.selectFileTreeNode(at: loc, modifiers: event.modifierFlags)
                 let windowPoint = event.locationInWindow
                 let selfPoint = self.convert(windowPoint, from: nil)
@@ -100,8 +100,8 @@ final class CanvasNodesView: NSHostingView<CanvasNodesSwiftUIView> {
         nextResponder?.mouseDown(with: event)
     }
 
-    /// 检测并处理 Portal 节点导航栏中的按钮点击（后退 / 前进 / 刷新）。
-    /// 返回 true 表示命中了导航栏按钮并已处理，调用方应继续将事件传给 canvas 以完成节点选中。
+    /// Detect and handle button clicks (Back/Forward/Refresh) in the Portal node navigation bar.
+    /// Returning true indicates that the navigation bar button was hit and processed, and the caller should continue to pass the event to canvas to complete the node selection.
     @discardableResult
     private func handlePortalNavBarClick(
         at loc: CGPoint, event: NSEvent, canvas: CanvasViewportView
@@ -111,17 +111,17 @@ final class CanvasNodesView: NSHostingView<CanvasNodesSwiftUIView> {
             let sf = canvas.canvasRectToScreen(node.frame)
             guard sf.contains(loc) else { continue }
 
-            // 导航栏区域：header(32) + navBar padding(6 top + 6 bottom) + navBar content(28) = 约 72pt 缩放后高度
-            // 但 PortalNavBarView 实际放在 content 区域的最顶部，content 从 header(32) 下方开始
-            // PortalNavBarView 高度 = padding(6) + 28 + padding(6) = 40pt（canvas 单位）
+            // Navigation bar area: header(32) + navBar padding(6 top + 6 bottom) + navBar content(28) = about 72pt height after scaling
+            // But PortalNavBarView is actually placed at the top of the content area, and content starts below header(32)
+            // PortalNavBarView height = padding(6) + 28 + padding(6) = 40pt (canvas unit)
             let headerH  = CanvasNodeConstants.headerHeight * canvas.zoom
             let navBarH  = 40.0 * canvas.zoom
             let localY   = loc.y - sf.minY
             guard localY > headerH && localY <= headerH + navBarH else { continue }
 
-            // x 坐标（还原 zoom）
-            // PortalNavBarView 左侧胶囊布局：padding(.horizontal, 8) + padding(.horizontal, 4) 内部
-            // = leading 12pt，然后后退(26) 前进(26) 刷新(26)
+            // x coordinate (restore zoom)
+            // PortalNavBarView left capsule layout: padding(.horizontal, 8) + padding(.horizontal, 4) internal
+            // = leading 12pt, then back(26) forward(26) refresh(26)
             let localX = (loc.x - sf.minX) / canvas.zoom
             let backRange    = 12.0...38.0  as ClosedRange<CGFloat>
             let forwardRange = 38.0...64.0  as ClosedRange<CGFloat>
@@ -144,8 +144,8 @@ final class CanvasNodesView: NSHostingView<CanvasNodesSwiftUIView> {
         return false
     }
 
-    /// 处理 navBar 区域点击：根据 x 坐标精确分发到后退/前进/菜单按钮。
-    /// 返回 true 表示事件已被消费（菜单弹出），false 表示应继续交给 canvas 处理（选中/拖拽）。
+    /// Handling navBar area clicks: accurately dispatch to back/forward/menu buttons based on x coordinate.
+    /// Returning true means that the event has been consumed (menu pops up), false means that it should continue to be handed over to canvas for processing (select/drag).
     @discardableResult
     private func handleNavBarClick(
         nodeId: UUID, loc: CGPoint, event: NSEvent, canvas: CanvasViewportView
@@ -155,11 +155,11 @@ final class CanvasNodesView: NSHostingView<CanvasNodesSwiftUIView> {
         let localX    = (loc.x - sf.minX) / canvas.zoom
         let nodeWidth = node.frame.width
 
-        // FileTreeNavigationBar 布局（从左到右）：
-        //   leading(8) + 后退(28) + Divider(~1) + 前进(28) + 标题/Spacer + [git按钮] + 菜单胶囊 + trailing(8)
-        //   菜单胶囊内容：list.dash(12) + spacing(4) + chevron.up.chevron.down(9) ≈ 25pt
-        //   加 padding(.horizontal, 10) × 2 = 45pt 宽，trailing padding 8pt
-        //   → 胶囊热区：menuMinX = nodeWidth - 53，menuMaxX = nodeWidth - 8
+        // FileTreeNavigationBar layout (left to right):
+        //   leading(8) + back(28) + Divider(~1) + forward(28) + title/Spacer + [git button] + menu capsule + trailing(8)
+        //   Menu capsule content: list.dash(12) + spacing(4) + chevron.up.chevron.down(9) ≈ 25pt
+        //   Add padding(.horizontal, 10) × 2 = 45pt wide, trailing padding 8pt
+        //   → Capsule hot zone: menuMinX = nodeWidth - 53, menuMaxX = nodeWidth - 8
         let backRange    = 8.0...35.0 as ClosedRange<CGFloat>
         let forwardRange = 36.0...63.0 as ClosedRange<CGFloat>
         let menuMinX     = nodeWidth - 53.0
@@ -168,20 +168,20 @@ final class CanvasNodesView: NSHostingView<CanvasNodesSwiftUIView> {
         if backRange.contains(localX) {
             FileTreeViewRegistry.shared.view(for: nodeId)?.onGoBack?()
             FileTreeGridViewRegistry.shared.view(for: nodeId)?.onGoBack?()
-            return false   // 后退后仍允许 canvas 选中节点
+            return false   // Canvas is still allowed to select nodes after going back
         } else if forwardRange.contains(localX) {
             FileTreeViewRegistry.shared.view(for: nodeId)?.onGoForward?()
             FileTreeGridViewRegistry.shared.view(for: nodeId)?.onGoForward?()
-            return false   // 前进后仍允许 canvas 选中节点
+            return false   // Still allowing canvas to select nodes after forwarding
         } else if localX >= menuMinX && localX <= menuMaxX {
             showNavBarMenu(nodeId: nodeId, event: event)
-            return true    // 菜单已弹出，消费事件，不再选中/拖拽
+            return true    // The menu has popped up, consume events, no longer select/drag
         }
-        return false       // 标题/空白区域：交给 canvas 拖拽
+        return false       // Title/blank area: leave it to canvas drag and drop
     }
 
-    /// 弹出 navBar 右侧菜单（列表/图标视图切换、显示隐藏文件等）。
-    /// 不再转发 mouseDown 事件，直接构造并弹出 NSMenu，彻底避免递归。
+    /// Pop up the right menu of navBar (list/icon view switching, show hidden files, etc.).
+    /// No longer forward mouseDown events, directly construct and pop up NSMenu, completely avoiding recursion.
     private func showNavBarMenu(nodeId: UUID, event: NSEvent) {
         guard let fileTreeView = FileTreeViewRegistry.shared.view(for: nodeId) else { return }
 
@@ -253,63 +253,63 @@ final class CanvasNodesView: NSHostingView<CanvasNodesSwiftUIView> {
         FileTreeViewRegistry.shared.view(for: nodeId)?.collapseAll()
     }
 
-    /// 处理 fileTree 内容区的点击事件（程序化 API，不依赖 NSEvent 转发）
+    /// Handle click events in the fileTree content area (programmatic API, does not rely on NSEvent forwarding)
     ///
-    /// 由于 NSOutlineView 通过 SwiftUI NSViewRepresentable 嵌入，经过 scaleEffect 变换后
-    /// 其在 window 坐标系中的 frame 与视觉位置不一致，直接转发 NSEvent 会导致坐标错误。
-    /// 因此计算出点击在内容区域内的本地坐标，通过程序化 API 执行操作。
+    /// Since NSOutlineView is embedded through SwiftUI NSViewRepresentable, after scaleEffect transformation
+    /// Its frame in the window coordinate system is inconsistent with the visual position, and forwarding NSEvent directly will cause coordinate errors.
+    /// The local coordinates of the click within the content area are therefore calculated and the operation is performed via the programmatic API.
     private func forwardMouseDownToFileTreeContent(nodeId: UUID, event: NSEvent) {
         guard let canvas = canvas,
               let node = canvas.currentNodes.first(where: { $0.id == nodeId }) else { return }
 
-        // 计算点击在内容区域的本地坐标
+        // Calculate the local coordinates of the click in the content area
         let canvasLoc = canvas.convert(event.locationInWindow, from: nil)
         let nodeScreenFrame = canvas.canvasRectToScreen(node.frame)
         let navBarH = (CanvasNodeConstants.headerHeight + 8) * canvas.zoom
         let contentTop = nodeScreenFrame.minY + navBarH
 
-        // 相对于内容区域左上角的坐标（还原到 zoom=1 空间）
+        // Coordinates relative to the upper left corner of the content area (reverting to zoom=1 space)
         let localX = (canvasLoc.x - nodeScreenFrame.minX) / canvas.zoom
         let localY = (canvasLoc.y - contentTop) / canvas.zoom
         let localPoint = NSPoint(x: localX, y: localY)
 
-        // list 模式：程序化处理点击
+        // list mode: programmatically handle clicks
         if let fileTreeView = FileTreeViewRegistry.shared.view(for: nodeId) {
             fileTreeView.handleClickAtLocalPoint(localPoint, clickCount: event.clickCount)
             return
         }
-        // grid 模式：程序化处理点击
+        // grid mode: handling clicks programmatically
         if let gridView = FileTreeGridViewRegistry.shared.view(for: nodeId) {
             gridView.handleClickAtLocalPoint(localPoint, clickCount: event.clickCount)
             return
         }
     }
 
-    /// fileTree 节点内的命中区域类型
-    /// - navBar:  顶部导航栏（后退/前进/菜单按钮），高度 = headerHeight(32) + 8 = 40
-    /// - content: NSOutlineView / NSCollectionView 区域，需转发给 AppKit 视图
-    /// - swiftUI: 底部搜索栏等由 SwiftUI 渲染的区域，需用 super.mouseDown 正常路由
+    /// Hit region type within fileTree node
+    /// - navBar: Top navigation bar (back/forward/menu buttons), height = headerHeight(32) + 8 = 40
+    /// - content: NSOutlineView / NSCollectionView area, needs to be forwarded to AppKit view
+    /// - swiftUI: Areas rendered by SwiftUI such as the bottom search bar need to use super.mouseDown for normal routing.
     private enum FileTreeContentHitKind { case navBar, content, swiftUI }
 
     private func fileTreeHitKind(
         at loc: CGPoint,
         canvas: CanvasViewportView
     ) -> (UUID, FileTreeContentHitKind)? {
-        // loc 是 canvas 的 flipped 坐标系（isFlipped=true，y 向下，minY=顶边）
+        // loc is the canvas's flipped coordinate system (isFlipped=true, y downward, minY=top edge)
         for node in canvas.currentNodes {
             guard case .fileTree = node.content else { continue }
             let sf = canvas.canvasRectToScreen(node.frame)
             guard sf.contains(loc) else { continue }
             let localFromTop = loc.y - sf.minY
             let navBarH    = (CanvasNodeConstants.headerHeight + 8) * canvas.zoom
-            // 底部 SwiftUI 区域 = 搜索栏(40) + git panel(0 或 120，由 extraBottomSwiftUIHeight 提供)
+            // Bottom SwiftUI area = search bar(40) + git panel(0 or 120, provided by extraBottomSwiftUIHeight)
             let extraH = FileTreeViewRegistry.shared.view(for: node.id)?.extraBottomSwiftUIHeight ?? 0
             let swiftUIBottomH = (40 + extraH) * canvas.zoom
             let localFromBottom = sf.height - (loc.y - sf.minY)
             if localFromTop <= navBarH {
                 return (node.id, .navBar)
             } else if localFromBottom <= swiftUIBottomH {
-                // 底部纯 SwiftUI 区域（搜索栏 + git panel）：走 super.mouseDown 正常路由
+                // Pure SwiftUI area at the bottom (search bar + git panel): use super.mouseDown normal route
                 return (node.id, .swiftUI)
             } else {
                 return (node.id, .content)
@@ -318,9 +318,9 @@ final class CanvasNodesView: NSHostingView<CanvasNodesSwiftUIView> {
         return nil
     }
 
-    /// 递归查找指定坐标下的 NSTextField（SwiftUI TextField 底层使用 NSTextField 渲染）
+    /// Recursively search for NSTextField at specified coordinates (SwiftUI TextField is rendered using NSTextField underneath)
     private func findTextField(at point: CGPoint) -> NSTextField? {
-        // 从 self 出发递归查找包含该点的 NSTextField
+        // Recursively find the NSTextField containing the point starting from self
         return findTextField(in: self, at: point)
     }
 
@@ -364,10 +364,10 @@ final class CanvasNodesView: NSHostingView<CanvasNodesSwiftUIView> {
 }
 
 // MARK: - CanvasNodesSwiftUIView
-/// 所有节点在 ZStack 中以 .frame + .position 布局。
-/// 全部设 allowsHitTesting(false)，交互由 AppKit 层统一负责。
+/// All nodes are laid out with .frame + .position in ZStack.
+/// Set allowsHitTesting(false) for all, and the interaction is handled by the AppKit layer.
 struct CanvasNodesSwiftUIView: View {
-    /// 节点列表（调用方负责按 zIndex 升序排好，避免 body 中反复排序）
+    /// Node list (the caller is responsible for sorting it in ascending order by zIndex to avoid repeated sorting in the body)
     let nodes: [CanvasNode]
     let canvasOrigin: CGPoint
     let zoom: CGFloat
@@ -387,26 +387,26 @@ struct CanvasNodesSwiftUIView: View {
                 let posX = (node.frame.midX - canvasOrigin.x) * zoom
                 let posY = (node.frame.midY - canvasOrigin.y) * zoom
                 nodeView(for: node)
-                    // 以原始画布尺寸渲染，内容不感知 zoom
+                    // Rendering at original canvas size, content not zoom aware
                     .frame(width: node.frame.width, height: node.frame.height)
-                    // scaleEffect 从中心缩放到屏幕尺寸，与 position center 语义匹配
+                    // scaleEffect scales from center to screen size, matching position center semantics
                     .scaleEffect(zoom)
-                    // position 与 hitTestCanvas/canvasRectToScreen 坐标系完全一致
+                    // position is completely consistent with hitTestCanvas/canvasRectToScreen coordinate system
                     .position(x: posX, y: posY)
-                    // 所有几何变换（frame/scaleEffect/position）由 AppKit 层逐帧驱动，
-                    // 必须切断所有动画传播路径（包括 zoom 变化触发的 scaleEffect 动画），
-                    // 否则 SwiftUI 隐式动画会在拖拽/缩放时将节点插值到错误坐标导致消失。
-                    // .animation(.none, value:) 只覆盖特定值的通道，
-                    // .transaction 全量切断，是唯一可靠方案。
+                    // All geometric transformations (frame/scaleEffect/position) are driven by the AppKit layer on a frame-by-frame basis,
+                    // All animation propagation paths must be cut off (including scaleEffect animations triggered by zoom changes),
+                    // Otherwise SwiftUI implicit animation will interpolate nodes to wrong coordinates and disappear when dragging/zooming.
+                    // .animation(.none, value:) only overrides channels with specific values,
+                    // Cutting off all transactions is the only reliable solution.
                     .transaction { $0.animation = nil }
-                    // fileTree 节点的 hitTesting 由 CanvasNodesView.mouseDown 手动转发事件：
-                    // 若设为 true，NSHostingView.hitTest 会穿透到内部 NSOutlineView，
-                    // 导致 CanvasNodesView.mouseDown 不被调用，所有路由逻辑失效。
+                    // fileTree node's hitTesting event is forwarded manually by CanvasNodesView.mouseDown:
+                    // If set to true, NSHostingView.hitTest will penetrate into the inner NSOutlineView.
+                    // As a result, CanvasNodesView.mouseDown is not called and all routing logic becomes invalid.
                     .allowsHitTesting(false)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        // 忽略 safe area，确保 SwiftUI .position() 坐标与 AppKit hitTest 坐标系完全对齐
+        // Ignore safe area and ensure SwiftUI .position() coordinates are fully aligned with AppKit hitTest coordinate system
         .ignoresSafeArea()
         .environment(\.dropTargetNodeId, dropTargetNodeId)
     }

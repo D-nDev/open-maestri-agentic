@@ -1,28 +1,28 @@
 import AppKit
 
-/// Typora 风格实时 Markdown 渲染 NSTextStorage
+/// Typora style real-time Markdown rendering NSTextStorage
 ///
-/// 渲染策略：
-/// - 光标所在行：显示原始 Markdown 符号（可编辑），同时应用样式
-/// - 其他行：隐藏语法符号（字体缩至 0.01pt + 透明），仅呈现渲染效果
+/// Rendering strategy:
+/// - Cursor line: Show original Markdown symbols (editable) with styles applied
+/// - Other lines: Hide syntax symbols (font reduced to 0.01pt + transparent), only render effects
 final class MarkdownTextStorage: NSTextStorage {
 
     private let backing = NSMutableAttributedString()
     var fontSize: CGFloat = NSFont.systemFontSize
 
-    /// 当前光标所在行号（-1 表示无焦点）
-    /// 由 MarkdownLiveEditor Coordinator 在选区变化时调用 updateCursorLine() 更新
+    /// The line number where the current cursor is located (-1 means no focus)
+    /// Updated by MarkdownLiveEditor Coordinator calling updateCursorLine() when the selection changes
     private(set) var cursorLineIndex: Int = -1
 
-    /// 更新光标行并刷新样式，必须在 NSTextStorage 编辑事务之外调用
+    /// Update cursor row and refresh style, must be called outside NSTextStorage edit transaction
     func updateCursorLine(_ lineIndex: Int) {
         guard lineIndex != cursorLineIndex else { return }
         cursorLineIndex = lineIndex
         guard backing.length > 0 else { return }
-        // 直接重新排版，不走 beginEditing/endEditing（避免重入）
+        // Re-layout directly without going through beginEditing/endEditing (to avoid re-entry)
         let fullRange = NSRange(location: 0, length: backing.length)
         applyMarkdownStyles()
-        // 通知所有 layoutManager 重新布局
+        // Notify all layoutManagers to re-layout
         for lm in layoutManagers {
             lm.processEditing(for: self,
                               edited: .editedAttributes,
@@ -32,7 +32,7 @@ final class MarkdownTextStorage: NSTextStorage {
         }
     }
 
-    // MARK: - NSTextStorage 必要重写
+    // MARK: - NSTextStorage needs to be rewritten
 
     override var string: String { backing.string }
 
@@ -57,13 +57,13 @@ final class MarkdownTextStorage: NSTextStorage {
         endEditing()
     }
 
-    // processEditing 在每次 endEditing 后由系统自动调用
+    // processEditing is automatically called by the system after each endEditing
     override func processEditing() {
         applyMarkdownStyles()
         super.processEditing()
     }
 
-    // MARK: - 全文样式应用（直接操作 backing，不走 setAttributes 包裹，避免递归）
+    // MARK: - Full text style application (operate directly on backing, do not use setAttributes package, avoid recursion)
 
     private func applyMarkdownStyles() {
         let fullRange = NSRange(location: 0, length: backing.length)
@@ -113,7 +113,7 @@ final class MarkdownTextStorage: NSTextStorage {
             offset += lineLen + 1
         }
 
-        // 未关闭的代码块
+        // Unclosed code block
         if inCodeBlock {
             let blockStart = offsetForLine(codeBlockStartLine, in: lines)
             let blockRange = NSRange(location: blockStart, length: max(0, backing.length - blockStart))
@@ -124,7 +124,7 @@ final class MarkdownTextStorage: NSTextStorage {
         }
     }
 
-    // MARK: - 行级样式
+    // MARK: - Row-level styles
 
     private func applyLineStyles(_ line: String, lineRange: NSRange, isCursorLine: Bool) {
         if line.hasPrefix("### ") {
@@ -142,7 +142,7 @@ final class MarkdownTextStorage: NSTextStorage {
         }
     }
 
-    // MARK: - 标题
+    // MARK: - Title
 
     private func applyHeading(level: Int, line: String, lineRange: NSRange, isCursorLine: Bool) {
         let (prefixLen, size): (Int, CGFloat) = switch level {
@@ -170,7 +170,7 @@ final class MarkdownTextStorage: NSTextStorage {
         }
     }
 
-    // MARK: - 引用块
+    // MARK: - Quoted block
 
     private func applyBlockquote(line: String, lineRange: NSRange, isCursorLine: Bool) {
         let prefixRange = NSRange(location: lineRange.location, length: min(2, lineRange.length))
@@ -189,7 +189,7 @@ final class MarkdownTextStorage: NSTextStorage {
         }
     }
 
-    // MARK: - 代码块
+    // MARK: - code block
 
     private func applyCodeBlock(
         range: NSRange,
@@ -214,14 +214,14 @@ final class MarkdownTextStorage: NSTextStorage {
         }
     }
 
-    // MARK: - 内联样式
+    // MARK: - Inline style
 
     private func applyInlineStyles(_ line: String, lineRange: NSRange, isCursorLine: Bool) {
         let nsLine = line as NSString
         var pos = 0
 
         while pos < nsLine.length {
-            // 粗体 **text**
+            // Bold **text**
             if pos + 1 < nsLine.length,
                nsLine.character(at: pos) == 42, nsLine.character(at: pos + 1) == 42 {
                 let from = pos + 2
@@ -233,7 +233,7 @@ final class MarkdownTextStorage: NSTextStorage {
                 }
             }
 
-            // 斜체 *text*（排除 **）
+            // Oblique 체 *text* (exclude **)
             if nsLine.character(at: pos) == 42 {
                 let next = pos + 1
                 if next >= nsLine.length || nsLine.character(at: next) != 42 {
@@ -250,7 +250,7 @@ final class MarkdownTextStorage: NSTextStorage {
                 }
             }
 
-            // 删除线 ~~text~~
+            // Strikethrough ~~text~~
             if pos + 1 < nsLine.length,
                nsLine.character(at: pos) == 126, nsLine.character(at: pos + 1) == 126 {
                 let from = pos + 2
@@ -265,7 +265,7 @@ final class MarkdownTextStorage: NSTextStorage {
                 }
             }
 
-            // 行内代码 `code`
+            // Inline code `code`
             if nsLine.character(at: pos) == 96 {
                 if let close = findClosingSingle("`", in: nsLine, from: pos + 1) {
                     let codeFont = NSFont.monospacedSystemFont(ofSize: fontSize - 1, weight: .regular)
@@ -284,7 +284,7 @@ final class MarkdownTextStorage: NSTextStorage {
         }
     }
 
-    /// 统一处理"标记包裹"的样式应用
+    /// Unified processing of "mark package" style applications
     private func applyWrap(
         lineRange: NSRange,
         pos: Int,
@@ -310,7 +310,7 @@ final class MarkdownTextStorage: NSTextStorage {
         }
     }
 
-    // MARK: - 工具方法
+    // MARK: - Tool method
 
     private func hidden(size: CGFloat) -> [NSAttributedString.Key: Any] {
         [

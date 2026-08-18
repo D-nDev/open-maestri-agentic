@@ -19,7 +19,7 @@ struct StrokeNodeSwiftUIView: View {
         .allowsHitTesting(false)
     }
 
-    // MARK: - 渲染主体
+    // MARK: - Rendering body
 
     private var strokeCanvas: some View {
         Canvas { context, size in
@@ -77,7 +77,7 @@ struct StrokeNodeSwiftUIView: View {
         context.fill(head, with: .color(color))
     }
 
-    // MARK: - 选中控制点层
+    // MARK: - Select control point layer
 
     private var controlPointsLayer: some View {
         GeometryReader { geo in
@@ -104,7 +104,7 @@ struct StrokeNodeSwiftUIView: View {
             .position(point)
     }
 
-    // MARK: - 颜色解析
+    // MARK: - Color Analysis
 
     private func resolveColor(_ str: String) -> Color {
         NoteColorPickerPopover.colorFromString(str)

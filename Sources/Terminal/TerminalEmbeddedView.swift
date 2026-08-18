@@ -2,15 +2,15 @@ import SwiftUI
 import AppKit
 import SwiftTerm
 
-/// 终端嵌入视图（NSViewRepresentable 包装 MaestroTerminalView）
-/// makeNSView 返回 MaestroTerminalView（NSView 直接子类），Coordinator 持有 provider
+/// Terminal embedded view (NSViewRepresentable wrapper MaestroTerminalView)
+/// makeNSView returns MaestroTerminalView (direct subclass of NSView), Coordinator holds provider
 struct TerminalEmbeddedView: NSViewRepresentable {
     let terminalId: UUID
     let command: String
     let workingDirectory: String
     var serverPort: UInt16 = 0
     var workspaceId: UUID?
-    /// 节点级主题/字体覆盖（nil 表示跟随全局 Preferences）
+    /// Node-level theme/font overrides (nil means follow global Preferences)
     var nodeThemeId: String?
     var nodeFontFamily: String?
     var nodeFontSize: CGFloat?
@@ -59,8 +59,8 @@ struct TerminalEmbeddedView: NSViewRepresentable {
         @MainActor
         func attachIfNeeded(to maestroView: MaestroTerminalView, terminalId: UUID) {
             guard let provider = TerminalManager.shared.providers[terminalId] else { return }
-            // 如果已 attach 且 provider 未变，跳过（正常情况）
-            // 如果 provider 被替换（终端重启），强制重新 attach
+            // If it has been attached and the provider has not changed, skip (normal situation)
+            // If the provider is replaced (terminal restart), force reattach
             if isAttached && self.provider === provider { return }
             self.provider = provider
             maestroView.attach(provider: provider)
@@ -68,7 +68,7 @@ struct TerminalEmbeddedView: NSViewRepresentable {
         }
 
         deinit {
-            // deinit 是 nonisolated，把 observer 引用拷出来异步清理
+            // deinit is nonisolated, copy the observer reference and clean it asynchronously
             let obs1 = providerReadyObserver
             let obs2 = shellReadyObserver
             if let obs1 { NotificationCenter.default.removeObserver(obs1) }
@@ -84,9 +84,9 @@ struct TerminalEmbeddedView: NSViewRepresentable {
         maestroView.autoresizingMask = [.width, .height]
         context.coordinator.setupObservers(terminalId: terminalId, maestroView: maestroView)
 
-        // 如果 provider 已就绪（工作区切换回来），直接 attach；
-        // 此时跳过占位背景色设置，因为 attach() 内部会立刻清除 layer.backgroundColor，
-        // 避免"背景色 → 终端内容"的一帧闪烁。
+        // If the provider is ready (the workspace is switched back), attach directly;
+        // Skip the placeholder background color setting at this time, because attach() will clear layer.backgroundColor internally immediately.
+        // Avoid one-frame flickering of "Background Color → Terminal Content".
         let providerReady = TerminalManager.shared.providers[terminalId] != nil
         if !providerReady {
             maestroView.updateBackgroundFromTheme()
@@ -97,11 +97,11 @@ struct TerminalEmbeddedView: NSViewRepresentable {
 
     @MainActor
     func updateNSView(_ nsView: MaestroTerminalView, context: Context) {
-        // 只做主题/字体差量更新（resize 由 MaestroTerminalView.layout() 处理）
+        // Only theme/font delta update (resize is handled by MaestroTerminalView.layout())
         guard context.coordinator.isAttached, let tv = nsView.terminalView else { return }
         let prefs = (try? PersistenceManager.shared.loadPreferences()) ?? Preferences()
 
-        // 优先用节点自身设置，回退到全局 Preferences
+        // Prioritize the node's own settings and fall back to global Preferences
         let effectiveThemePref = nodeThemeId ?? prefs.terminalTheme
         let themeId = TerminalThemeRegistry.resolveThemeId(from: effectiveThemePref)
         if context.coordinator.lastTheme != themeId {

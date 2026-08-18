@@ -46,7 +46,7 @@ final class MaestroHandlers {
             return "error: recruit can only be called from a Maestro terminal"
         }
 
-        // 验证 isManager 字段（fail-closed：任何加载失败均拒绝 recruit）
+        // Validate isManager field (fail-closed: any load failure rejects recruit)
         guard let wsId = (try? PersistenceManager.shared.loadAppState())?.activeWorkspaceId,
               let doc = try? PersistenceManager.shared.loadWorkspace(id: wsId),
               let maestroNode = doc.payload.nodes.first(where: { $0.id == maestroId }),
@@ -56,7 +56,7 @@ final class MaestroHandlers {
             return "error: this terminal is not in Maestro mode. Enable Maestro mode when creating the terminal."
         }
 
-        // 查找预设（按 agentType 或 name 匹配）
+        // Find presets (match by agentType or name)
         let preset = prefs.agentPresets.first {
             $0.agentType == presetIdentifier ||
             $0.name.lowercased() == presetIdentifier.lowercased() ||
@@ -68,11 +68,11 @@ final class MaestroHandlers {
             color: "#8E8E93", isActive: true, isBuiltIn: false
         )
 
-        // 如有 customCommand，覆盖 preset command
+        // If there is a customCommand, override the preset command
         var effectivePreset = preset
         if let cmd = customCommand { effectivePreset.command = cmd }
 
-        // 查找角色
+        // Find roles
         let role = roleName.flatMap { rn in
             prefs.rolePresets.first { $0.name.lowercased() == rn.lowercased() }
         }
@@ -88,12 +88,12 @@ final class MaestroHandlers {
             agentType: effectivePreset.agentType
         )
         tm.writeLine(to: recruitId, text: "export OMAESTRI_AGENT_NAME=\"\(recruitName)\"")
-        // 同步到 TerminalSession 供 ListHandler 使用
+        // Synchronize to TerminalSession for use by ListHandler
         tm.terminals[recruitId]?.agentName = recruitName
         let conn = cm.connectTerminals(idA: maestroId, idB: recruitId, serverPort: InterAgentServer.shared.port)
 
-        // 在画布上创建节点并自动布局在 Maestro 下方
-        // 通过 NotificationCenter 通知主线程（AppState）更新工作区节点
+        // Create nodes on canvas and automatically lay out below Maestro
+        // Notify the main thread (AppState) to update the workspace node through NotificationCenter
         let maestroIdCopy = maestroId
         let connCopy = conn
         var tc = TerminalContent(
@@ -121,7 +121,7 @@ final class MaestroHandlers {
         return msg
     }
 
-    // 节点位置计算已移至 ContentView.handleMaestroRecruited（主线程，可访问 workspace）
+    // Node position calculation has been moved to ContentView.handleMaestroRecruited (main thread, accessible to workspace)
 
     // MARK: - dismiss
 
@@ -233,7 +233,7 @@ final class MaestroHandlers {
             }) else { return "error: agent '\(agentName)' not found" }
 
             if roleName == "--none" {
-                // 清除角色：重启到原始目录
+                // Clear role: Reboot to original directory
                 return "Role cleared for '\(agentName)' (takes effect on next restart)"
             }
 
@@ -241,7 +241,7 @@ final class MaestroHandlers {
             guard let role = prefs.rolePresets.first(where: { $0.name.lowercased() == roleName.lowercased() }) else {
                 return "error: role '\(roleName)' not found"
             }
-            // 注入角色文件
+            // Inject character file
             RoleInjector.shared.prepareRoleDirectory(
                 roleId: role.id,
                 rolePrompt: role.prompt,

@@ -1,8 +1,8 @@
 import SwiftUI
 
-// MARK: - 文件树导航状态管理
+// MARK: - File tree navigation status management
 
-/// 管理文件树 Finder 式导航的历史栈
+/// Managing the history stack for Finder-style navigation of the file tree
 @Observable
 final class FileTreeNavigationState {
     var currentPath: String
@@ -45,7 +45,7 @@ final class FileTreeNavigationState {
     }
 }
 
-// MARK: - 排序方式枚举
+// MARK: - Sort by enum
 
 enum FileTreeSortOrder {
     case name, modified, size
@@ -108,7 +108,7 @@ struct FileTreeNodeSwiftUIView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            // 背景：毛玻璃 + 半透明叠加 + 阴影
+            // Background: Frosted Glass + Translucent Overlay + Shadow
             RoundedRectangle(cornerRadius: CanvasNodeConstants.cornerRadius)
                 .fill(Color(nsColor: .windowBackgroundColor).opacity(0.85))
                 .background {
@@ -122,7 +122,7 @@ struct FileTreeNodeSwiftUIView: View {
                 }
 
             VStack(spacing: 0) {
-                // 顶部导航工具栏
+                // Top navigation toolbar
                 FileTreeNavigationBar(
                     navState: navState,
                     viewMode: $viewMode,
@@ -139,7 +139,7 @@ struct FileTreeNodeSwiftUIView: View {
 
                 Divider().opacity(0.3)
 
-                // 文件内容区（根据 viewMode 切换）
+                // File content area (switched according to viewMode)
                 if viewMode == .list {
                     FileTreeRepresentable(
                         nodeId: nodeId,
@@ -162,7 +162,7 @@ struct FileTreeNodeSwiftUIView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
 
-                // Git 操作面板（可折叠）
+                // Git operation panel (foldable)
                 if showGitPanel {
                     Divider().opacity(0.3)
                     FileTreeGitPanelView(rootPath: navState.currentPath)
@@ -172,14 +172,14 @@ struct FileTreeNodeSwiftUIView: View {
 
                 Divider().opacity(0.3)
 
-                // 底部搜索栏
+                // Bottom search bar
                 FileTreeSearchBar(searchText: $searchText)
                     .frame(height: 40)
             }
             .clipShape(RoundedRectangle(cornerRadius: CanvasNodeConstants.cornerRadius))
             .animation(.easeInOut(duration: 0.2), value: showGitPanel)
 
-            // 选中蓝色虚线边框
+            // Select blue dotted border
             if isSelected {
                 RoundedRectangle(cornerRadius: CanvasNodeConstants.cornerRadius + CanvasNodeConstants.selectionOutset)
                     .strokeBorder(
@@ -190,7 +190,7 @@ struct FileTreeNodeSwiftUIView: View {
                     .allowsHitTesting(false)
             }
 
-            // 拖放目标高亮蓝色实线边框
+            // Drag and drop target highlight blue solid border
             if isDropTarget {
                 RoundedRectangle(cornerRadius: CanvasNodeConstants.cornerRadius)
                     .strokeBorder(Color.blue.opacity(0.8), lineWidth: 2)
@@ -219,7 +219,7 @@ struct FileTreeNodeSwiftUIView: View {
     }
 }
 
-// MARK: - 顶部导航工具栏
+// MARK: - Top navigation toolbar
 
 private struct FileTreeNavigationBar: View {
     @Bindable var navState: FileTreeNavigationState
@@ -233,7 +233,7 @@ private struct FileTreeNavigationBar: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            // ─── 左侧：白色胶囊后退/前进按钮 ───
+            // ─── Left: white capsule back/forward button ───
             HStack(spacing: 0) {
                 Button(action: { navState.goBack() }) {
                     Image(systemName: "chevron.left")
@@ -266,7 +266,7 @@ private struct FileTreeNavigationBar: View {
             )
             .padding(.leading, 8)
 
-            // ─── 中间：当前目录名称 ───
+            // ─── Center: current directory name ───
             Text(navState.currentDirectoryName)
                 .font(.system(size: 13, weight: .medium))
                 .lineLimit(1)
@@ -275,14 +275,14 @@ private struct FileTreeNavigationBar: View {
 
             Spacer()
 
-            // ─── 锁定图标 ───
+            // ─── Lock icon ───
             if isLocked {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
             }
 
-            // ─── Git Branch 指示器 ───
+            // ─── Git Branch indicator ───
             if !currentBranch.isEmpty {
                 Button(action: { withAnimation { showGitPanel.toggle() } }) {
                     HStack(spacing: 3) {
@@ -304,13 +304,13 @@ private struct FileTreeNavigationBar: View {
                 .buttonStyle(.plain)
             }
 
-            // TODO: 后续在此处恢复右上角菜单按钮（白色胶囊，点击由 AppKit 层 showNavBarMenu 处理）
+            // TODO: Restore the menu button in the upper right corner here later (white capsule, click is handled by the AppKit layer showNavBarMenu)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
-// MARK: - Git 操作面板（折叠区域）
+// MARK: - Git operation panel (collapse area)
 
 private struct FileTreeGitPanelView: View {
     let rootPath: String
@@ -379,7 +379,7 @@ private struct GitActionButton: View {
     }
 }
 
-// MARK: - 底部搜索栏
+// MARK: - Bottom search bar
 
 private struct FileTreeSearchBar: View {
     @Binding var searchText: String
@@ -416,7 +416,7 @@ private struct FileTreeSearchBar: View {
     }
 }
 
-// MARK: - NSViewRepresentable 桥接（List 模式）
+// MARK: - NSViewRepresentable bridging (List mode)
 
 struct FileTreeRepresentable: NSViewRepresentable {
     let nodeId: UUID
@@ -458,7 +458,7 @@ struct FileTreeRepresentable: NSViewRepresentable {
         ftv.onGoForward = { navState.goForward() }
         ftv.applyFilter(searchText)
         ftv.showHiddenFiles = showHiddenFiles
-        // git panel 展开时额外占据 120pt，需告知 fileTreeHitKind 将其识别为 SwiftUI 区域
+        // git panel occupies an additional 120pt when expanded, and fileTreeHitKind needs to be informed to recognize it as a SwiftUI area
         ftv.extraBottomSwiftUIHeight = showGitPanel ? 120 : 0
 
         if context.coordinator.lastCollapseAllTrigger != collapseAllTrigger {
@@ -474,7 +474,7 @@ struct FileTreeRepresentable: NSViewRepresentable {
     }
 }
 
-// MARK: - NSViewRepresentable 桥接（Grid 模式）
+// MARK: - NSViewRepresentable bridging (Grid mode)
 
 struct FileTreeGridRepresentable: NSViewRepresentable {
     let nodeId: UUID

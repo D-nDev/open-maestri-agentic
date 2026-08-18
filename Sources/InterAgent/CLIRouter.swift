@@ -1,13 +1,13 @@
 import Foundation
 import OSLog
 
-/// CLI 命令路由器：根据 args[0] 分发到对应 Handler
+/// CLI command router: distributed to the corresponding Handler according to args[0]
 final class CLIRouter {
     static let shared = CLIRouter()
     private let logger = Logger.make(category: "CLIRouter")
     private init() {}
 
-    /// 异步路由（InterAgentServer 在 Task 上下文中直接 await 调用）
+    /// Asynchronous routing (InterAgentServer is directly awaited in the Task context)
     func routeAsync(args: [String], terminalId: UUID?) async -> String {
         guard let command = args.first else { return "error: empty command" }
         switch command {

@@ -4,15 +4,15 @@ import XCTest
 final class SkillInjectorTests: XCTestCase {
     let injector = SkillInjector.shared
 
-    // MARK: - SkillInjector 简化版（CLI 二进制已通过 PATH 注入，不再生成 shell 函数）
+    // MARK: - SkillInjector simplified version (CLI binary has been injected via PATH, shell function is no longer generated)
 
     func testInjectorIsSingleton() {
         XCTAssertTrue(SkillInjector.shared === injector, "Should be a singleton")
     }
 
     func testInjectorExists() {
-        // SkillInjector 现在只输出确认信息，不生成 shell 函数
-        // inject(to:host:) 方法签名保持向后兼容
+        // SkillInjector now only outputs a confirmation message and does not generate a shell function
+        // inject(to:host:) method signature remains backwards compatible
         XCTAssertNotNil(injector)
     }
 }

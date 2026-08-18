@@ -20,13 +20,13 @@ final class TerminalSessionTests: XCTestCase {
         let recent = session.recentOutput(lines: 5)
         let lines = recent.components(separatedBy: "\n").filter { !$0.isEmpty }
         XCTAssertLessThanOrEqual(lines.count, 5)
-        // 最后的行应该包含在内
+        // The last line should be included
         XCTAssertTrue(recent.contains("line30"))
     }
 
     func testBufferMaxLinesNotExceeded() {
         let session = TerminalSession(id: UUID(), command: "zsh", workingDirectory: "/tmp", roleName: nil)
-        // 写入超过 500 行
+        // Writing more than 500 lines
         for i in 1...600 {
             session.recordOutput("line\(i)")
         }

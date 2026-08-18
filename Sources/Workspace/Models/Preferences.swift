@@ -1,7 +1,7 @@
 import Foundation
 import CoreGraphics
 
-/// 用户偏好设置，持久化到 ~/.open-maestri/preferences.json（schemaVersion:1）
+/// User preferences, persisted to ~/.open-maestri/preferences.json (schemaVersion:1)
 struct Preferences: Codable, Equatable {
     var schemaVersion: Int
     var agentPresets: [AgentPreset]
@@ -13,7 +13,7 @@ struct Preferences: Codable, Equatable {
     var canvasBackground: String        // "dotGrid" | "solid" | "transparent"
     var defaultNoteColor: String
     var preferredIDE: String            // "cursor" | "vscode" | "xcode"
-    var language: String                // "en" | "zh-Hans" — 应用界面语言
+    var language: String                // "en" | "zh-Hans" — application interface language
     var shortcuts: ShortcutConfig
     var sshEnabled: Bool
     var sshTunnelPort: Int
@@ -23,9 +23,9 @@ struct Preferences: Codable, Equatable {
     var sshScriptPath: String
     var sshAddToPath: Bool
     var metalRendererEnabled: Bool
-    var scrollbackMemoryLimit: Bool     // 是否限制每个终端的 scrollback 内存
-    var optionAsMeta: Bool              // 将 Option 用作 Meta 键
-    var autosaveIntervalSeconds: Int    // 自动保存间隔（秒），与 Maestri preferences 格式对齐
+    var scrollbackMemoryLimit: Bool     // Whether to limit scrollback memory per terminal
+    var optionAsMeta: Bool              // Using Option as Meta key
+    var autosaveIntervalSeconds: Int    // Autosave interval (seconds), aligned with Maestri preferences format
 
     init() {
         self.schemaVersion = 1
@@ -53,7 +53,7 @@ struct Preferences: Codable, Equatable {
         self.autosaveIntervalSeconds = 30
     }
 
-    /// 自定义解码：新增字段使用默认值，兼容旧版 JSON
+    /// Custom decoding: New fields use default values, compatible with old versions of JSON
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         schemaVersion = try container.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
@@ -82,15 +82,15 @@ struct Preferences: Codable, Equatable {
     }
 }
 
-/// Agent 预设配置（与 Maestri agentPresets 格式一致）
+/// Agent preset configuration (consistent with Maestri agentPresets format)
 struct AgentPreset: Codable, Identifiable, Equatable {
     var id: UUID
     var name: String
     var command: String
-    var icon: String            // SF Symbol 名称
+    var icon: String            // SF Symbol name
     var agentType: String       // "claude_code" | "codex" | "gemini_cli" | "open_code" | "generic_shell"
     var color: String           // hex
-    var isActive: Bool          // 是否在 Terminal 创建 sheet 中显示
+    var isActive: Bool          // Whether to display in the sheet created in Terminal
     var isBuiltIn: Bool
 
     static let defaults: [AgentPreset] = [
@@ -102,23 +102,23 @@ struct AgentPreset: Codable, Identifiable, Equatable {
     ]
 }
 
-/// 角色预设
+/// Character preset
 struct RolePreset: Codable, Identifiable, Equatable {
     var id: UUID
     var name: String
     var prompt: String
     var color: String           // hex
-    var icon: String            // SF Symbol 名称
+    var icon: String            // SF Symbol name
 }
 
-/// CLI 技能路径配置
+/// CLI skill path configuration
 struct SkillPath: Codable, Identifiable, Equatable {
     var id: UUID
-    var name: String            // 显示名称，如 "Claude Code"
-    var path: String            // 技能目录路径，如 "~/.claude/skills"
-    var icon: String            // SF Symbol 名称
-    var isActive: Bool          // 是否启用
-    var isBuiltIn: Bool         // 是否为内置项（内置项不可删除）
+    var name: String            // Display name, such as "Claude Code"
+    var path: String            // Skill directory path, such as "~/.claude/skills"
+    var icon: String            // SF Symbol name
+    var isActive: Bool          // Whether to enable
+    var isBuiltIn: Bool         // Whether it is a built-in item (built-in items cannot be deleted)
 
     static let defaults: [SkillPath] = [
         SkillPath(id: UUID(), name: "Claude Code",  path: "~/.claude/skills",                   icon: "gearshape",     isActive: true, isBuiltIn: true),
@@ -128,9 +128,9 @@ struct SkillPath: Codable, Identifiable, Equatable {
     ]
 }
 
-/// 快捷键配置（Maestri preferences.json shortcuts 对象格式）
+/// Shortcut key configuration (Maestri preferences.json shortcuts object format)
 struct ShortcutConfig: Codable, Equatable {
-    /// 用户自定义快捷键（actionId → 快捷键字符串，覆盖默认值）
+    /// User-defined shortcut key (actionId → shortcut key string, override the default value)
     var customKeys: [String: String] = [:]
     var nodeJumpModifier: KeyBinding
     var connectShortcut: KeyBinding

@@ -1,7 +1,7 @@
 import SwiftUI
 import AppKit
 
-// MARK: - Vibrancy 背景（NSVisualEffectView 桥接）
+// MARK: - Vibrancy background (NSVisualEffectView bridge)
 
 struct VibrancyBackground: NSViewRepresentable {
     var material: NSVisualEffectView.Material
@@ -29,8 +29,8 @@ struct VibrancyBackground: NSViewRepresentable {
     }
 }
 
-/// 所有节点的通用外壳，替代 BaseNodeView（NSView 子类）。
-/// 提供：背景/阴影/圆角、Header 栏、可选 Footer 栏、选中蓝色虚线边框、右键菜单。
+/// Common shell for all nodes, replacing BaseNodeView (NSView subclass).
+/// Provides: background/shadow/rounded corners, Header bar, optional Footer bar, selected blue dotted border, right-click menu.
 struct NodeShellView<Content: View, TitleAccessory: View, Accessory: View, Footer: View>: View {
     let nodeId: UUID
     let title: String
@@ -40,7 +40,7 @@ struct NodeShellView<Content: View, TitleAccessory: View, Accessory: View, Foote
     let zoom: CGFloat
     let headerIcon: String?
     let headerColor: Color?
-    /// Note 节点专用：应用到 header 背景和节点整体背景的主题色。其他节点类型保持 nil。
+    /// Note Node-specific: The theme color applied to the header background and the overall background of the node. Other node types remain nil.
     let themeColor: Color?
     let headerTitleAccessory: TitleAccessory
     let headerAccessory: Accessory
@@ -97,7 +97,7 @@ struct NodeShellView<Content: View, TitleAccessory: View, Accessory: View, Foote
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            // 背景：vibrancy 毛玻璃 + 半透明白色叠加 + 阴影
+            // Background: vibrancy frosted glass + translucent white overlay + shadow
             RoundedRectangle(cornerRadius: CanvasNodeConstants.cornerRadius)
                 .fill(Color(nsColor: .windowBackgroundColor).opacity(0.75))
                 .background {
@@ -118,7 +118,7 @@ struct NodeShellView<Content: View, TitleAccessory: View, Accessory: View, Foote
                 }
 
             VStack(spacing: 0) {
-                // Header（固定 32pt 高，与 CanvasNodeConstants.headerHeight 对齐）
+                // Header (fixed 32pt high, aligned with CanvasNodeConstants.headerHeight)
                 NodeHeaderSwiftUIView(
                     title: title,
                     icon: headerIcon,
@@ -132,11 +132,11 @@ struct NodeShellView<Content: View, TitleAccessory: View, Accessory: View, Foote
 
                 Divider().opacity(0.5)
 
-                // 内容区（以节点原始画布尺寸填满，内容不受 zoom 影响）
+                // Content area (filled with the original canvas size of the node, the content is not affected by zoom)
                 content()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                // Footer（可选，仅当提供了非 EmptyView 时显示）
+                // Footer (optional, only shown when a non-EmptyView is provided)
                 if hasFooter {
                     Divider().opacity(0.3)
                     footer
@@ -146,7 +146,7 @@ struct NodeShellView<Content: View, TitleAccessory: View, Accessory: View, Foote
             }
             .clipShape(RoundedRectangle(cornerRadius: CanvasNodeConstants.cornerRadius))
 
-            // 选中蓝色虚线边框
+            // Select blue dotted border
             if isSelected {
                 RoundedRectangle(cornerRadius: CanvasNodeConstants.cornerRadius + CanvasNodeConstants.selectionOutset)
                     .strokeBorder(
@@ -157,7 +157,7 @@ struct NodeShellView<Content: View, TitleAccessory: View, Accessory: View, Foote
                     .allowsHitTesting(false)
             }
 
-            // 拖放目标高亮蓝色实线边框
+            // Drag and drop target highlight blue solid border
             if isDropTarget {
                 RoundedRectangle(cornerRadius: CanvasNodeConstants.cornerRadius)
                     .strokeBorder(Color.blue.opacity(0.8), lineWidth: 2)
@@ -165,19 +165,19 @@ struct NodeShellView<Content: View, TitleAccessory: View, Accessory: View, Foote
             }
 
         }
-        // 右键菜单由 AppKit 层 CanvasViewportView.menu(for:) 统一处理
-        // （SwiftUI .contextMenu 因 allowsHitTesting(false) 永远不会触发）
+        // The right-click menu is handled uniformly by the AppKit layer CanvasViewportView.menu(for:)
+        // (SwiftUI .contextMenu never fires because allowsHitTesting(false))
     }
 }
 
-/// Header 栏（标题 + 图标 + 锁定徽章 + 可选配件）
-/// - `titleAccessory`：紧跟 title 右侧，在 Spacer 之前（如角色徽章）
-/// - `accessory`：最右侧，在 Spacer 之后（如注意力圆点、Maestro 标记）
+/// Header column (title + icon + lock badge + optional accessories)
+/// - `titleAccessory`: immediately to the right of title, before Spacer (like character badge)
+/// - `accessory`: far right, after Spacer (such as attention dot, Maestro mark)
 struct NodeHeaderSwiftUIView<TitleAccessory: View, Accessory: View>: View {
     let title: String
     let icon: String?
     let color: Color?
-    /// Note 节点专用：header 背景叠加颜色（其他节点传 nil 保持原样）
+    /// Note Node-specific: header background overlay color (other nodes pass nil and keep it as is)
     let themeColor: Color?
     let isLocked: Bool
     let titleAccessory: TitleAccessory
@@ -235,7 +235,7 @@ struct NodeHeaderSwiftUIView<TitleAccessory: View, Accessory: View>: View {
     }
 }
 
-/// 终端节点 Footer 栏（显示当前工作目录）
+/// Terminal node Footer column (displays the current working directory)
 struct TerminalFooterView: View {
     let directory: String
 
@@ -258,7 +258,7 @@ struct TerminalFooterView: View {
         }
     }
 
-    /// 将绝对路径缩写为 ~/... 形式
+    /// Abbreviate absolute paths to ~/... form
     private var abbreviatedPath: String {
         let home = NSHomeDirectory()
         if directory.hasPrefix(home) {

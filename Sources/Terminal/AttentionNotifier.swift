@@ -1,30 +1,30 @@
 import Foundation
 import OSLog
 
-/// 终端注意力通知管理器
-/// 当未选中的终端有重要输出（Agent 完成任务等）时，标记红色注意力点
-/// 与 Maestri 的 AttentionNotifier 对齐
+/// Terminal attention notification manager
+/// When the unselected terminal has important output (Agent completes tasks, etc.), mark a red attention point
+/// Alignment with Maestri's AttentionNotifier
 ///
-/// 触发条件（必须全部满足）：
-/// 1. 终端 shell 已就绪（completedProviders 中存在）
-/// 2. 终端从「运行中」变为「空闲」（表示一段输出完成）
-/// 3. 该终端不是当前画布选中节点
+/// Trigger conditions (must all be met):
+/// 1. Terminal shell is ready (exists in completedProviders)
+/// 2. The terminal changes from "Running" to "Idle" (indicating that a section of output is completed)
+/// 3. The terminal is not the selected node of the current canvas
 @MainActor
 final class AttentionNotifier {
     static let shared = AttentionNotifier()
     private let logger = Logger.make(category: "AttentionNotifier")
 
-    /// 需要注意力的终端集合
+    /// Collection of terminals requiring attention
     private(set) var attentionTerminals: Set<UUID> = []
 
-    /// 当前画布选中的节点 ID 集合（CanvasNode.id == TerminalContent.id）
+    /// Collection of node IDs selected in the current canvas (CanvasNode.id == TerminalContent.id)
     private var selectedNodeIds: Set<UUID> = []
 
-    /// 注意力状态变化回调（terminalId, needsAttention）
+    /// Attention state change callback (terminalId, needsAttention)
     var onAttentionChanged: ((UUID, Bool) -> Void)?
 
     private init() {
-        // 监听终端空闲通知（Agent 输出完成，从运行态变为空闲态）
+        // Listen for terminal idle notification (Agent output is completed and changes from running state to idle state)
         NotificationCenter.default.addObserver(
             forName: .terminalBecameIdle,
             object: nil,
@@ -37,7 +37,7 @@ final class AttentionNotifier {
             }
         }
 
-        // 监听画布节点激活通知，追踪当前选中节点
+        // Listen for canvas node activation notification and track the currently selected node
         NotificationCenter.default.addObserver(
             forName: .canvasNodeActivated,
             object: nil,
@@ -47,17 +47,17 @@ final class AttentionNotifier {
                   let nodeId = notification.userInfo?["nodeId"] as? UUID else { return }
             Task { @MainActor in
                 self.selectedNodeIds = [nodeId]
-                // 选中时自动清除该节点的红点
+                // Automatically clear the red dot of this node when selected
                 self.clearAttention(terminalId: nodeId)
             }
         }
     }
 
-    // MARK: - 标记需要注意力
+    // MARK: - Mark requires attention
 
-    /// 标记终端需要注意力（仅由 IPC 任务完成后的 terminalBecameIdle 通知触发）
+    /// Marking terminal requires attention (only triggered by terminalBecameIdle notification after IPC task completion)
     func markNeedsAttention(terminalId: UUID) {
-        // 当前选中的终端不标记
+        // The currently selected terminal is not marked
         if selectedNodeIds.contains(terminalId) { return }
 
         guard !attentionTerminals.contains(terminalId) else { return }
@@ -71,9 +71,9 @@ final class AttentionNotifier {
         logger.debug("Terminal \(terminalId.uuidString.prefix(8)) needs attention")
     }
 
-    // MARK: - 清除注意力
+    // MARK: - Clear attention
 
-    /// 清除终端注意力标记（用户选中/聚焦终端时调用）
+    /// Clear terminal attention mark (called when user selects/focuses on the terminal)
     func clearAttention(terminalId: UUID) {
         guard attentionTerminals.contains(terminalId) else { return }
         attentionTerminals.remove(terminalId)
@@ -86,7 +86,7 @@ final class AttentionNotifier {
         logger.debug("Terminal \(terminalId.uuidString.prefix(8)) attention cleared")
     }
 
-    /// 清除所有注意力标记
+    /// Clear all attention markers
     func clearAll() {
         let ids = attentionTerminals
         attentionTerminals.removeAll()
@@ -100,7 +100,7 @@ final class AttentionNotifier {
         }
     }
 
-    // MARK: - 查询
+    // MARK: - Query
 
     func needsAttention(terminalId: UUID) -> Bool {
         attentionTerminals.contains(terminalId)

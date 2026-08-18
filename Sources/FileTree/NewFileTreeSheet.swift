@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - 新建 FileTree Sheet
+// MARK: - New FileTree Sheet
 
 struct NewFileTreeSheet: View {
     @Environment(\.dismiss) private var dismiss

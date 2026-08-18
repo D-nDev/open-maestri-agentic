@@ -4,12 +4,12 @@ import AppKit
 
 extension CanvasViewportView {
 
-    /// 右键菜单：在 AppKit 层处理，避免 SwiftUI allowsHitTesting(false) 阻断问题
-    /// 根据节点类型动态构建菜单项（对标 Maestri 产品行为）：
+    /// Right-click menu: Processed at AppKit layer to avoid SwiftUI allowsHitTesting(false) blocking problem
+    /// Dynamically build menu items based on node type (matching Maestri product behavior):
     /// - Terminal: Duplicate → Edit Terminal → Assign Role / Enable Maestro → Connect → Delete
     /// - Note: Duplicate → Rename → Connect → Delete
     /// - Portal: Duplicate → Connect → Delete
-    /// - FileTree: Duplicate → Lock → Delete（使用节点内部工具栏，菜单精简）
+    /// - FileTree: Duplicate → Lock → Delete (use node internal toolbar, streamlined menu)
     /// - Text/Drawing: Duplicate → Lock → Delete
     override func menu(for event: NSEvent) -> NSMenu? {
         let loc = convert(event.locationInWindow, from: nil)
@@ -24,7 +24,7 @@ extension CanvasViewportView {
         }
 
         guard let id = nodeId else {
-            // 检查是否右键点击了连接线（连接线层在节点层下方，需在此处手动检测）
+            // Check whether the connection line is right-clicked (the connection line layer is below the node layer and needs to be manually detected here)
             if let overlay = connectionOverlayView {
                 let overlayPoint = overlay.convert(event.locationInWindow, from: nil)
                 if let connId = overlay.connectionId(at: overlayPoint) {
@@ -49,28 +49,28 @@ extension CanvasViewportView {
                 menu.addItem(menuItem(lockTitle, action: #selector(contextMenuLockToggle(_:)), id: id, icon: lockIcon))
                 return menu
             }
-            // 编辑
+            // Edit
             menu.addItem(menuItem("canvas.context.edit_terminal".localized, action: #selector(contextMenuEditTerminal(_:)), id: id, icon: "slider.horizontal.3"))
             menu.addItem(NSMenuItem.separator())
-            // 清除缓冲区
+            // Clear buffer
             menu.addItem(menuItem("canvas.context.clear_buffer".localized, action: #selector(contextMenuClearBuffer(_:)), id: id, icon: "xmark.circle", keyEquivalent: "k"))
-            // 重新加载
+            // Reload
             menu.addItem(menuItem("canvas.context.reload_terminal".localized, action: #selector(contextMenuReloadTerminal(_:)), id: id, icon: "arrow.clockwise"))
             menu.addItem(NSMenuItem.separator())
-            // 拷贝
+            // Copy
             menu.addItem(menuItem("canvas.context.copy_terminal".localized, action: #selector(contextMenuCopyTerminal(_:)), id: id, icon: "doc.on.doc", keyEquivalent: "c"))
-            // 监控活动
+            // Monitoring activities
             let monitorTitle = tc.monitorWithOmbro ? "canvas.context.disable_monitor".localized : "canvas.context.enable_monitor".localized
             menu.addItem(menuItem(monitorTitle, action: #selector(contextMenuToggleMonitor(_:)), id: id, icon: "eye"))
             menu.addItem(NSMenuItem.separator())
-            // 复制（节点复制）
+            // Replication (node replication)
             menu.addItem(menuItem("canvas.context.duplicate".localized, action: #selector(contextMenuDuplicate(_:)), id: id, icon: "plus.square.on.square"))
-            // 锁定
+            // Lock
             let lockTitle = node.isLocked ? "menu.unlock".localized : "menu.lock".localized
             let lockIcon = node.isLocked ? "lock.open" : "lock"
             menu.addItem(menuItem(lockTitle, action: #selector(contextMenuLockToggle(_:)), id: id, icon: lockIcon))
             menu.addItem(NSMenuItem.separator())
-            // 删除
+            // Delete
             menu.addItem(destructiveItem("canvas.context.delete".localized, action: #selector(contextMenuClose(_:)), id: id, icon: "trash"))
 
         case .stickyNote:
@@ -110,7 +110,7 @@ extension CanvasViewportView {
 
     // MARK: - Connection Context Menu
 
-    /// 构建连接线右键菜单（删除连接）
+    /// Build connection line right-click menu (delete connection)
     private func buildConnectionMenu(connectionId: UUID) -> NSMenu {
         let menu = NSMenu()
         let deleteTitle = "connection.delete".localized
@@ -130,17 +130,17 @@ extension CanvasViewportView {
 
     // MARK: - Canvas Blank Area Context Menu
 
-    /// 构建画布空白区域右键菜单（添加 → 终端/便签/附件/文件树/门户/文本 + 粘贴）
+    /// Build the right-click menu of the blank area of the canvas (Add → Terminal/Notes/Attachments/File Tree/Portal/Text + Paste)
     private func buildCanvasBlankMenu(at screenPoint: CGPoint) -> NSMenu {
         let canvasPoint = screenToCanvas(screenPoint)
         let menu = NSMenu()
 
-        // 「添加」子菜单
+        // "Add" submenu
         let addItem = NSMenuItem(title: "canvas.context.add".localized, action: nil, keyEquivalent: "")
         addItem.image = NSImage(systemSymbolName: "plus.square", accessibilityDescription: nil)
         let addSubmenu = NSMenu()
 
-        // 终端子菜单（含 Agent 预设列表）
+        // Terminal submenu (including Agent default list)
         let terminalItem = NSMenuItem(title: "canvas.context.add.terminal".localized, action: nil, keyEquivalent: "")
         terminalItem.image = NSImage(systemSymbolName: "terminal", accessibilityDescription: nil)
         let terminalSubmenu = NSMenu()
@@ -158,35 +158,35 @@ extension CanvasViewportView {
         terminalItem.submenu = terminalSubmenu
         addSubmenu.addItem(terminalItem)
 
-        // 便签
+        // Notes
         let noteItem = NSMenuItem(title: "canvas.context.add.note".localized, action: #selector(contextMenuCreateNote(_:)), keyEquivalent: "")
         noteItem.target = self
         noteItem.image = NSImage(systemSymbolName: "doc.richtext", accessibilityDescription: nil)
         noteItem.representedObject = NSValue(point: NSPoint(x: canvasPoint.x, y: canvasPoint.y))
         addSubmenu.addItem(noteItem)
 
-        // 附件（LinkedFile）
+        // Attachment (LinkedFile)
         let attachmentItem = NSMenuItem(title: "canvas.context.add.attachment".localized, action: #selector(contextMenuCreateAttachment(_:)), keyEquivalent: "")
         attachmentItem.target = self
         attachmentItem.image = NSImage(systemSymbolName: "paperclip", accessibilityDescription: nil)
         attachmentItem.representedObject = NSValue(point: NSPoint(x: canvasPoint.x, y: canvasPoint.y))
         addSubmenu.addItem(attachmentItem)
 
-        // 文件树
+        // File tree
         let fileTreeItem = NSMenuItem(title: "canvas.context.add.filetree".localized, action: #selector(contextMenuCreateFileTree(_:)), keyEquivalent: "")
         fileTreeItem.target = self
         fileTreeItem.image = NSImage(systemSymbolName: "folder", accessibilityDescription: nil)
         fileTreeItem.representedObject = NSValue(point: NSPoint(x: canvasPoint.x, y: canvasPoint.y))
         addSubmenu.addItem(fileTreeItem)
 
-        // 门户
+        // Portal
         let portalItem = NSMenuItem(title: "canvas.context.add.portal".localized, action: #selector(contextMenuCreatePortal(_:)), keyEquivalent: "")
         portalItem.target = self
         portalItem.image = NSImage(systemSymbolName: "globe", accessibilityDescription: nil)
         portalItem.representedObject = NSValue(point: NSPoint(x: canvasPoint.x, y: canvasPoint.y))
         addSubmenu.addItem(portalItem)
 
-        // 文本
+        // Text
         let textItem = NSMenuItem(title: "canvas.context.add.text".localized, action: #selector(contextMenuCreateText(_:)), keyEquivalent: "")
         textItem.target = self
         textItem.image = NSImage(systemSymbolName: "textformat", accessibilityDescription: nil)
@@ -196,19 +196,19 @@ extension CanvasViewportView {
         addItem.submenu = addSubmenu
         menu.addItem(addItem)
 
-        // 粘贴
+        // Paste
         let pasteItem = NSMenuItem(title: "canvas.context.paste".localized, action: #selector(contextMenuPaste(_:)), keyEquivalent: "")
         pasteItem.target = self
         pasteItem.image = NSImage(systemSymbolName: "doc.on.clipboard", accessibilityDescription: nil)
         pasteItem.representedObject = NSValue(point: NSPoint(x: canvasPoint.x, y: canvasPoint.y))
-        // 仅在剪贴板有内容时可用
+        // Only available if the clipboard has content
         pasteItem.isEnabled = NSPasteboard.general.string(forType: .string) != nil
         menu.addItem(pasteItem)
 
         return menu
     }
 
-    /// 根据 AgentPreset 获取 SF Symbol 图标名
+    /// Get the SF Symbol icon name based on AgentPreset
     private func presetIconName(for preset: AgentPreset) -> String? {
         switch preset.agentType {
         case "claude_code": return "seal"

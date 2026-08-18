@@ -1,7 +1,7 @@
 import XCTest
 @testable import open_maestri
 
-/// 测试 AskHandler/CheckHandler 的 Agent 名字匹配逻辑
+/// Test the Agent name matching logic of AskHandler/CheckHandler
 @MainActor
 final class AgentMatchingTests: XCTestCase {
     var tm: TerminalManager!
@@ -10,16 +10,16 @@ final class AgentMatchingTests: XCTestCase {
         tm = TerminalManager.shared
     }
 
-    // MARK: - agentName 匹配
+    // MARK: - agentName matches
 
     func testAskHandlerMatchesByAgentName() async {
-        // 模拟 Maestro recruit 设置的 agentName
+        // Simulate agentName set by Maestro recruit
         let recruitId = UUID()
         let preset = AgentPreset.defaults.first { $0.agentType == "claude_code" } ?? AgentPreset.defaults[0]
         let session = tm.createTerminal(id: recruitId, workingDirectory: "/tmp", preset: preset)
-        session.agentName = "Builder"  // Maestro 设置的实际名称
+        session.agentName = "Builder"  // Actual name of Maestro setting
 
-        // AskHandler 应能通过 "Builder" 找到终端
+        // AskHandler should be able to find the terminal via "Builder"
         let cm = ConnectionManager.shared
         let callerId = UUID()
         let callerPreset = AgentPreset.defaults.last!
@@ -31,17 +31,17 @@ final class AgentMatchingTests: XCTestCase {
             terminalId: callerId
         )
 
-        // 不应返回 "not found"
+        // "not found" should not be returned
         XCTAssertFalse(result.contains("not found"), "agentName='Builder' 应能被找到，实际返回：\(result)")
 
-        // 清理
+        // Cleanup
         cm.disconnectAll(involvedNode: callerId)
         tm.removeTerminal(id: callerId)
         tm.removeTerminal(id: recruitId)
     }
 
     func testAskHandlerMatchesByCommand() async {
-        // 无 agentName 时，通过 command 名称匹配
+        // When there is no agentName, match by command name
         let termId = UUID()
         let preset = AgentPreset(id: UUID(), name: "Shell", command: "zsh", icon: "terminal",
                                  agentType: "generic_shell", color: "#8E8E93", isActive: true, isBuiltIn: true)

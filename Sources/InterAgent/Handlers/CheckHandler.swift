@@ -35,7 +35,7 @@ final class CheckHandler {
     }
 
     private func stripAnsi(_ text: String) -> String {
-        // 过滤 CSI 序列（ESC [ ... 最终字节）、OSC 序列、单字符 ESC 序列
+        // Filter CSI sequence (ESC [...last byte), OSC sequence, single character ESC sequence
         var result = ""
         result.reserveCapacity(text.count)
         var i = text.startIndex
@@ -46,14 +46,14 @@ final class CheckHandler {
                 if next < text.endIndex {
                     let nc = text[next]
                     if nc == "[" {
-                        // CSI 序列：跳到参数结束（最终字节 @-~）
+                        // CSI sequence: jump to end of parameters (last byte @-~)
                         var j = text.index(after: next)
                         while j < text.endIndex && !(text[j] >= "\u{40}" && text[j] <= "\u{7E}") {
                             j = text.index(after: j)
                         }
                         i = j < text.endIndex ? text.index(after: j) : text.endIndex
                     } else if nc == "]" {
-                        // OSC 序列：跳到 BEL 或 ST（ESC \）
+                        // OSC sequence: jump to BEL or ST (ESC \)
                         var j = text.index(after: next)
                         while j < text.endIndex && text[j] != "\u{07}" && text[j] != "\u{1B}" {
                             j = text.index(after: j)
@@ -66,7 +66,7 @@ final class CheckHandler {
                         }
                         i = j
                     } else {
-                        // 其他单字符 ESC 序列
+                        // Other single-character ESC sequences
                         i = text.index(after: next)
                     }
                 } else {

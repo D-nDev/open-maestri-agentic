@@ -4,7 +4,7 @@ import CoreGraphics
 
 final class CanvasViewportTests: XCTestCase {
 
-    // MARK: - 坐标转换（CanvasViewportView 核心逻辑）
+    // MARK: - Coordinate conversion (CanvasViewportView core logic)
 
     func testCanvasToScreenAtZoomOne() {
         let view = CanvasViewportView(frame: NSRect(x: 0, y: 0, width: 800, height: 600))
@@ -46,7 +46,7 @@ final class CanvasViewportTests: XCTestCase {
     }
 
     func testZoomClampedRange() {
-        // CanvasViewportView 的缩放范围 Constants.canvasMinZoom...canvasMaxZoom
+        // CanvasViewportView's zoom range Constants.canvasMinZoom...canvasMaxZoom
         let minZoom = Constants.canvasMinZoom
         let maxZoom = Constants.canvasMaxZoom
         XCTAssertEqual(minZoom, 0.1)
@@ -60,7 +60,7 @@ final class CanvasViewportTests: XCTestCase {
         XCTAssertEqual(expectedOrigin.y, 8500, accuracy: 0.1)
     }
 
-    // MARK: - Comparable.clamped 扩展
+    // MARK: - Comparable.clamped extension
 
     func testClampedWithinRange() {
         let value: CGFloat = 1.0

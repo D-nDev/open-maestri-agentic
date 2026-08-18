@@ -41,7 +41,7 @@ struct NoteNodeSwiftUIView: View {
     }
 }
 
-/// NSViewControllerRepresentable 包裹现有 NoteNodeViewController
+/// NSViewControllerRepresentable wraps an existing NoteNodeViewController
 struct NoteEditorRepresentable: NSViewControllerRepresentable {
     let nodeId: UUID
     let content: StickyNoteContent

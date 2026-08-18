@@ -1,6 +1,6 @@
 import Foundation
 
-/// app-state.json 持久化数据（schemaVersion:1，type:"appState"）
+/// app-state.json persistent data (schemaVersion: 1, type: "appState")
 struct AppStateData: Codable {
     var schemaVersion: Int
     var type: String
@@ -23,7 +23,7 @@ struct AppStateData: Codable {
     }
 }
 
-/// manifest.json 顶层格式（type 值为 "appState"，沿用 Maestri 原始设计）
+/// manifest.json top-level format (type value is "appState", following Maestri's original design)
 struct WorkspaceManifest: Codable {
     var schemaVersion: Int
     var type: String
@@ -31,7 +31,7 @@ struct WorkspaceManifest: Codable {
     var appVersion: String
     var dataFormat: Int
     var workspaces: [WorkspaceEntry]
-    var files: [String: String]     // 保留扩展字段
+    var files: [String: String]     // Reserve extension fields
 
     init() {
         self.schemaVersion = 1
@@ -44,18 +44,18 @@ struct WorkspaceManifest: Codable {
     }
 }
 
-/// 工作区颜色选项
+/// Workspace color options
 enum WorkspaceColor: String, Codable, CaseIterable {
     case blue, red, green, orange, purple, pink, cyan, yellow, rainbow
 }
 
-/// 工作区清单条目
+/// Workspace List Entry
 struct WorkspaceEntry: Codable, Identifiable, Equatable {
     var id: UUID
     var name: String
     var workingDirectory: String
     var icon: String
-    var color: String               // 工作区颜色标识，如 "blue", "red", "green" 等
+    var color: String               // Workspace color identification, such as "blue", "red", "green", etc.
     var isPinned: Bool
     var locationType: String        // "local" | "ssh"
     var createdAt: Date
@@ -73,7 +73,7 @@ struct WorkspaceEntry: Codable, Identifiable, Equatable {
         self.lastOpenedAt = nil
     }
 
-    // 向后兼容：旧 JSON 可能没有 color 字段
+    // Backwards Compatibility: Old JSON may not have a color field
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(UUID.self, forKey: .id)

@@ -1,7 +1,7 @@
 import SwiftUI
 import OSLog
 
-/// Floor 总览视图（⌘⇧\ 打开，右下角按钮打开）
+/// Floor overview view (⌘⇧\ to open, button in the lower right corner to open)
 struct FloorOverviewView: View {
     @Bindable var workspace: WorkspaceManager
     @State private var selectedFloorId: UUID? = nil
@@ -26,7 +26,7 @@ struct FloorOverviewView: View {
 
             ScrollView {
                 VStack(spacing: 6) {
-                    // Ground 层（始终存在）
+                    // Ground layer (always present)
                     FloorRowView(
                         name: "Ground",
                         branchName: currentBranch(),
@@ -81,7 +81,7 @@ struct FloorOverviewView: View {
         .sheet(isPresented: $showLanding) {
             if let floor = landingFloor {
                 LandingView(floor: floor, workingDirectory: workspace.workingDirectory) {
-                    // Landing 成功后删除 floor
+                    // Delete floor after successful Landing
                     removeFloor(floor)
                     showLanding = false
                 } onCancel: {
@@ -107,7 +107,7 @@ struct FloorOverviewView: View {
 
     private var floors: [Floor] {
         workspace.floors.compactMap { entry in
-            // 用 entry.worktreePath 保证路径一致（不重新计算）
+            // Use entry.worktreePath to ensure consistent paths (no recalculation)
             var floor = Floor(id: entry.id, name: entry.name,
                               branchName: entry.branchName,
                               workspaceDir: workspace.workingDirectory)
@@ -155,11 +155,11 @@ struct FloorOverviewView: View {
     }
 
     private func removeFloor(_ floor: Floor) {
-        // 先在主线程更新 UI 状态，再在后台执行文件系统操作
+        // Update the UI status in the main thread first, and then perform file system operations in the background
         let dir = workspace.workingDirectory
         workspace.floors.removeAll { $0.id == floor.id }
         Task { try? await workspace.save() }
-        // 后台执行 hooks + worktree 移除（不需要 @MainActor）
+        // Background execution hooks + worktree removal (no need for @MainActor)
         Task.detached(priority: .utility) {
             try? await HooksManager.shared.runTeardownHooks(floor: floor, workingDirectory: dir)
             try? FloorManager.shared.removeFloor(floor, workingDirectory: dir)
@@ -167,7 +167,7 @@ struct FloorOverviewView: View {
     }
 }
 
-// MARK: - Floor 行
+// MARK: - Floor OK
 
 struct FloorRowView: View {
     let name: String
@@ -209,9 +209,9 @@ struct FloorRowView: View {
     }
 }
 
-// MARK: - Hooks 配置 Sheet
+// MARK: - Hooks Configuration Sheet
 
-/// 编辑 Floor 的 Setup/Run/Teardown Hooks（shell 命令列表）
+/// Edit Floor's Setup/Run/Teardown Hooks (shell command list)
 struct HooksConfigSheet: View {
     @Binding var hooks: FloorHooks
     let floorName: String
@@ -219,7 +219,7 @@ struct HooksConfigSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 标题栏
+            // Title bar
             HStack {
                 Text("Hooks — \(floorName)", comment: "floor.hooks_title")
                     .font(.headline)
@@ -268,7 +268,7 @@ struct HooksConfigSheet: View {
     }
 }
 
-// MARK: - 单个阶段 Hooks 编辑区
+// MARK: - Single stage Hooks editing area
 
 struct HooksPhaseSection: View {
     let title: String
@@ -321,7 +321,7 @@ struct HooksPhaseSection: View {
     }
 }
 
-// MARK: - 创建 Floor Sheet
+// MARK: - Create Floor Sheet
 
 struct CreateFloorSheet: View {
     let workingDirectory: String

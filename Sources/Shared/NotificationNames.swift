@@ -15,78 +15,78 @@ extension Notification.Name {
     static let canvasZoomIn        = Notification.Name("OpenMaestri.canvasZoomIn")
     static let canvasZoomOut       = Notification.Name("OpenMaestri.canvasZoomOut")
     static let canvasZoomReset     = Notification.Name("OpenMaestri.canvasZoomReset")
-    /// Minimap 点击跳转：userInfo 含 "origin" CGPoint（画布坐标）
+    /// Minimap click to jump: userInfo contains "origin" CGPoint (canvas coordinates)
     static let canvasJumpToOrigin  = Notification.Name("OpenMaestri.canvasJumpToOrigin")
-    /// Maestro recruit 完成通知
+    /// Maestro recruit completion notification
     static let maestroRecruited        = Notification.Name("OpenMaestri.maestroRecruited")
-    /// 编辑终端请求：userInfo 含 nodeId/terminalContent
+    /// Edit terminal request: userInfo contains nodeId/terminalContent
     static let editTerminalRequested   = Notification.Name("OpenMaestri.editTerminalRequested")
-    /// 右键菜单：开始连接（userInfo 含 "nodeId" UUID）
+    /// Right-click menu: Start connection (userInfo contains "nodeId" UUID)
     static let contextMenuConnect      = Notification.Name("OpenMaestri.contextMenuConnect")
-    /// 右键菜单：分配角色（userInfo 含 "nodeId" UUID）
+    /// Right-click menu: Assign role (userInfo contains "nodeId" UUID)
     static let contextMenuAssignRole   = Notification.Name("OpenMaestri.contextMenuAssignRole")
-    /// 右键菜单：切换 Maestro 模式（userInfo 含 "nodeId" UUID）
+    /// Right-click menu: switch Maestro mode (userInfo contains "nodeId" UUID)
     static let contextMenuToggleMaestro = Notification.Name("OpenMaestri.contextMenuToggleMaestro")
-    /// Portal WebView 重建通知（shareSession 后更新视图）
+    /// Portal WebView rebuild notification (update view after shareSession)
     static let portalWebViewReplaced   = Notification.Name("OpenMaestri.portalWebViewReplaced")
-    /// FileTree 根目录变更通知：userInfo 含 nodeId/newPath
+    /// FileTree root directory change notification: userInfo contains nodeId/newPath
     static let fileTreeRootChanged     = Notification.Name("OpenMaestri.fileTreeRootChanged")
-    /// 终端从 active→idle（任务完成）：userInfo 含 "terminalId" UUID, "workspaceId" UUID?
+    /// Terminal from active→idle (task completed): userInfo contains "terminalId" UUID, "workspaceId" UUID?
     static let terminalBecameIdle      = Notification.Name("OpenMaestri.terminalBecameIdle")
-    /// 新工作区创建完成：userInfo 含 "workspaceId" UUID
+    /// New workspace creation completed: userInfo contains "workspaceId" UUID
     static let workspaceCreated        = Notification.Name("OpenMaestri.workspaceCreated")
-    /// 画布节点激活（焦点传递给终端）：userInfo 含 "nodeId" UUID
+    /// Canvas node activated (focus passed to terminal): userInfo contains "nodeId" UUID
     static let canvasNodeActivated     = Notification.Name("OpenMaestri.canvasNodeActivated")
-    /// 画布选中节点变化：userInfo 含 "selectedIds" Set<UUID>
+    /// Canvas selected node changes: userInfo contains "selectedIds" Set<UUID>
     static let canvasSelectionChanged  = Notification.Name("OpenMaestri.canvasSelectionChanged")
-    /// ⌘ 按住跳转数字分配：userInfo 含 "mapping" [UUID: Int]（空 mapping = 清除）
+    /// ⌘ Hold to jump to number assignment: userInfo with "mapping" [UUID: Int] (empty mapping = clear)
     static let canvasJumpNumbersAssigned = Notification.Name("OpenMaestri.canvasJumpNumbersAssigned")
-    /// 文件拖放目标节点变化：userInfo 含可选 "dropTargetNodeId" UUID（nil = 清除高亮）
+    /// File drop target node changes: userInfo contains optional "dropTargetNodeId" UUID (nil = clear highlight)
     static let canvasDropTargetChanged   = Notification.Name("OpenMaestri.canvasDropTargetChanged")
-    /// 终端注意力状态变化：userInfo 含 "terminalId" UUID, "needsAttention" Bool
+    /// Terminal attention status change: userInfo contains "terminalId" UUID, "needsAttention" Bool
     static let terminalAttentionChanged  = Notification.Name("OpenMaestri.terminalAttentionChanged")
-    /// 连接状态变化（ask 通信开始/结束）：触发画布重建状态缓存并重渲染
+    /// Connection status change (ask communication starts/ends): Trigger the canvas to rebuild the status cache and re-render
     static let connectionStatusChanged   = Notification.Name("OpenMaestri.connectionStatusChanged")
-    /// 终端主题/字体变更（立即应用到所有已打开终端）
+    /// Terminal theme/font changes (immediately applied to all open terminals)
     static let terminalAppearanceChanged = Notification.Name("OpenMaestri.terminalAppearanceChanged")
-    /// 终端当前工作目录变化：userInfo 含 "terminalId" UUID, "directory" String
+    /// The current working directory of the terminal changes: userInfo contains "terminalId" UUID, "directory" String
     static let terminalDirectoryChanged  = Notification.Name("OpenMaestri.terminalDirectoryChanged")
-    /// 节点 isLocked 状态变更：userInfo 含 "nodeId" UUID, "isLocked" Bool
+    /// Node isLocked status change: userInfo contains "nodeId" UUID, "isLocked" Bool
     static let canvasNodeLockChanged     = Notification.Name("OpenMaestri.canvasNodeLockChanged")
-    /// 节点 content 变更：userInfo 含 "nodeId" UUID, "content" NodeContent
+    /// Node content change: userInfo contains "nodeId" UUID, "content" NodeContent
     static let canvasNodeContentChanged  = Notification.Name("OpenMaestri.canvasNodeContentChanged")
-    /// TerminalManager 已创建 provider，MaestroTerminalView 可 attach
+    /// TerminalManager provider has been created and MaestroTerminalView can be attached
     static let terminalProviderReady     = Notification.Name("OpenMaestri.terminalProviderReady")
-    /// shell 初始化完成，MaestroTerminalView 可加载 scrollback
+    /// Shell initialization is completed, MaestroTerminalView can load scrollback
     static let terminalShellReady        = Notification.Name("OpenMaestri.terminalShellReady")
-    /// Portal 通过 CLI 创建：userInfo 含 "portalNode" CanvasNode, "terminalId" UUID?
+    /// Portal created via CLI: userInfo contains "portalNode" CanvasNode, "terminalId" UUID?
     static let portalCreatedViaCLI       = Notification.Name("OpenMaestri.portalCreatedViaCLI")
-    /// Portal 内 _blank 链接触发新建 Portal：userInfo 含 "url" String, "openerPortalId" UUID
+    /// The _blank link in the Portal triggers a new Portal: userInfo contains "url" String, "openerPortalId" UUID
     static let portalOpenedNewWindow     = Notification.Name("OpenMaestri.portalOpenedNewWindow")
-    /// Portal 导航完成，URL 已变更：userInfo 含 "portalId" UUID, "url" String
+    /// Portal navigation completed, URL changed: userInfo contains "portalId" UUID, "url" String
     static let portalURLDidChange        = Notification.Name("OpenMaestri.portalURLDidChange")
-    /// Note 格式化模式切换：userInfo 含 "nodeId" UUID, "isPreviewing" Bool
+    /// Note Format mode switching: userInfo contains "nodeId" UUID, "isPreviewing" Bool
     static let noteFormattedToggled      = Notification.Name("OpenMaestri.noteFormattedToggled")
-    /// Note 文件内容被外部写入（CLI）：userInfo 含 "filePath" String, "content" String
+    /// Note File content is written externally (CLI): userInfo contains "filePath" String, "content" String
     static let noteFileDidChange         = Notification.Name("OpenMaestri.noteFileDidChange")
-    /// Text 节点内容变更（实时）：userInfo 含 "nodeId" UUID, "text" String, "textField" NSTextField
+    /// Text node content changes (real-time): userInfo contains "nodeId" UUID, "text" String, "textField" NSTextField
     static let textNodeDidChange         = Notification.Name("OpenMaestri.textNodeDidChange")
-    /// Text 节点编辑结束：userInfo 含 "nodeId" UUID, "text" String
+    /// Text node editing ends: userInfo contains "nodeId" UUID, "text" String
     static let textNodeDidEndEditing     = Notification.Name("OpenMaestri.textNodeDidEndEditing")
-    /// 请求 text 节点进入编辑态：userInfo 含 "nodeId" UUID
+    /// Request text node to enter editing state: userInfo contains "nodeId" UUID
     static let textNodeShouldBeginEditing = Notification.Name("OpenMaestri.textNodeShouldBeginEditing")
-    /// 请求 shape 节点进入文字编辑态：userInfo 含 "nodeId" UUID
+    /// Request shape node to enter text editing state: userInfo contains "nodeId" UUID
     static let shapeNodeShouldBeginEditing = Notification.Name("OpenMaestri.shapeNodeShouldBeginEditing")
-    /// shape 节点文字编辑结束：userInfo 含 "nodeId" UUID, "text" String
+    /// End of shape node text editing: userInfo contains "nodeId" UUID, "text" String
     static let shapeNodeTextDidEndEditing = Notification.Name("OpenMaestri.shapeNodeTextDidEndEditing")
-    /// shape 节点旋转角变化（拖动中实时）：userInfo 含 "nodeId" UUID, "rotation" CGFloat
+    /// Shape node rotation angle changes (real-time during dragging): userInfo contains "nodeId" UUID, "rotation" CGFloat
     static let shapeNodeRotationChanged = Notification.Name("OpenMaestri.shapeNodeRotationChanged")
-    /// shape 节点旋转结束（mouseUp）：userInfo 含 "nodeId" UUID
+    /// shape node rotation ends (mouseUp): userInfo contains "nodeId" UUID
     static let shapeNodeRotationDidEnd = Notification.Name("OpenMaestri.shapeNodeRotationDidEnd")
-    /// stroke 节点绘制完成：userInfo 含 "nodeType" String, "startPoint" CGPoint, "endPoint" CGPoint, "frame" CGRect
+    /// Stroke node drawing is completed: userInfo contains "nodeType" String, "startPoint" CGPoint, "endPoint" CGPoint, "frame" CGRect
     static let strokeNodeDrawn = Notification.Name("OpenMaestri.strokeNodeDrawn")
-    /// stroke 控制点拖拽结束（mouseUp）：userInfo 含 "nodeId" UUID
+    /// End of stroke control point dragging (mouseUp): userInfo contains "nodeId" UUID
     static let strokePointDragDidEnd = Notification.Name("OpenMaestri.strokePointDragDidEnd")
-    /// 打开设置 → Agents 面板
+    /// Open Settings → Agents panel
     static let openSettingsAgents    = Notification.Name("OpenMaestri.openSettingsAgents")
 }

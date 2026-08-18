@@ -2,9 +2,9 @@ import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
-// MARK: - Note ScrollView 注册表
+// MARK: - Note ScrollView Registry
 
-/// 全局注册表：nodeId → NSScrollView（供画布路由滚动事件使用）
+/// Global registry: nodeId → NSScrollView (for canvas routing scroll events)
 final class NoteScrollViewRegistry {
     static let shared = NoteScrollViewRegistry()
     private var scrollViews: [UUID: NSScrollView] = [:]
@@ -29,9 +29,9 @@ final class NoteScrollViewRegistry {
     }
 }
 
-// MARK: - Note NSTextView 注册表（供工具栏格式化操作使用）
+// MARK: - Note NSTextView registry (used for toolbar formatting operations)
 
-/// 全局注册表：nodeId → NSTextView，工具栏按钮通过此注册表获取 NSTextView 并执行格式化插入
+/// Global registry: nodeId → NSTextView, the toolbar button obtains NSTextView through this registry and performs formatted insertion
 final class NoteTextViewRegistry {
     static let shared = NoteTextViewRegistry()
     private var textViews: [UUID: NSTextView] = [:]
@@ -43,7 +43,7 @@ final class NoteTextViewRegistry {
         textViews[nodeId] = textView
     }
 
-    /// 只有当注册表中存储的正是 `textView` 本身时才注销，防止新视图注册后被旧视图的 dismantleNSView 误删
+    /// Only log out when the `textView` itself is stored in the registry to prevent the new view from being accidentally deleted by the dismantleNSView of the old view after registration.
     func unregister(nodeId: UUID, ifMatching textView: NSTextView) {
         lock.lock(); defer { lock.unlock() }
         if textViews[nodeId] === textView {
@@ -56,7 +56,7 @@ final class NoteTextViewRegistry {
         return textViews[nodeId]
     }
 
-    /// 在选中范围插入 markdown 包裹语法（如 **text**）；无选中则插入后将光标置于中间
+    /// Insert markdown wrapping syntax (such as **text**) in the selected range; if it is not selected, place the cursor in the middle after inserting
     @MainActor func insertWrapping(nodeId: UUID, prefix: String, suffix: String) {
         guard let tv = textView(for: nodeId) else { return }
         let range = tv.selectedRange()
@@ -74,7 +74,7 @@ final class NoteTextViewRegistry {
         }
     }
 
-    /// 在选中行首插入前缀（标题 # / 列表 - / 待办 - [ ]  等）
+    /// Insert a prefix at the beginning of the selected line (title # / list - / to-do - [ ], etc.)
     @MainActor func insertLinePrefix(nodeId: UUID, prefix: String) {
         guard let tv = textView(for: nodeId) else { return }
         let str = tv.string as NSString
@@ -87,13 +87,13 @@ final class NoteTextViewRegistry {
         }
     }
 
-    /// 更新 NSTextView 的字体大小（等宽字体）
+    /// Update font size of NSTextView (monospaced font)
     @MainActor func setFontSize(nodeId: UUID, size: Int) {
         guard let tv = textView(for: nodeId) else { return }
         tv.font = .monospacedSystemFont(ofSize: CGFloat(size), weight: .regular)
     }
 
-    /// 在光标处插入原始文本，并将光标移至末尾
+    /// Insert original text at cursor and move cursor to end
     @MainActor func insertText(nodeId: UUID, text: String, cursorOffset: Int? = nil) {
         guard let tv = textView(for: nodeId) else { return }
         let range = tv.selectedRange()
@@ -106,9 +106,9 @@ final class NoteTextViewRegistry {
     }
 }
 
-// MARK: - 上树感知 ScrollView（viewDidMoveToWindow 回调）
+// MARK: - Tree-aware ScrollView (viewDidMoveToWindow callback)
 
-/// 在 viewDidMoveToWindow（首次 window 非 nil）时调用 onWindowAttached
+/// onWindowAttached called on viewDidMoveToWindow (first time window is non-nil)
 final class NoteAwareScrollView: NSScrollView {
     var onWindowAttached: (() -> Void)?
     private var hasAttached = false
@@ -121,23 +121,23 @@ final class NoteAwareScrollView: NSScrollView {
     }
 }
 
-// MARK: - 支持粘贴图片的 Note 文本编辑器
+// MARK: - Note text editor that supports pasting images
 
-/// AppKit 包装的文本编辑器，支持从剪贴板粘贴图片
-/// 图片以 PNG 格式保存至 `imagesDir`，并以 `![filename](relative_path)` 语法插入
+/// Text editor wrapped in AppKit, supports pasting images from the clipboard
+/// Image saved to `imagesDir` in PNG format and inserted with `![filename](relative_path)` syntax
 struct NoteImagePasteTextEditor: NSViewRepresentable {
     @Binding var text: String
-    /// Note 所在目录（图片存储子目录 `images/` 位于此目录下）
+    /// The directory where Note is located (the image storage subdirectory `images/` is located in this directory)
     let noteFilePath: String
-    /// 节点 ID（用于注册 ScrollView 到全局注册表）
+    /// Node ID (used to register the ScrollView to the global registry)
     var nodeId: UUID? = nil
-    /// 内容变化回调
+    /// Content change callback
     var onChange: ((String) -> Void)? = nil
-    /// 首行变化回调
+    /// First line change callback
     var onFirstLineChanged: ((String) -> Void)? = nil
-    /// 焦点变化回调
+    /// Focus change callback
     var onFocusChanged: ((Bool) -> Void)? = nil
-    /// view 加入 window hierarchy（viewDidMoveToWindow）时调用，textView 已可接受焦点
+    /// Called when view joins window hierarchy (viewDidMoveToWindow), textView can accept focus
     var onWindowAttached: (() -> Void)? = nil
 
     func makeCoordinator() -> Coordinator {
@@ -184,7 +184,7 @@ struct NoteImagePasteTextEditor: NSViewRepresentable {
             NoteTextViewRegistry.shared.register(nodeId: nodeId, textView: textView)
         }
 
-        // view 加入 window hierarchy 后再抢焦点（此时 makeFirstResponder 才会成功）
+        // Add the view to the window hierarchy before grabbing the focus (only then will makeFirstResponder succeed)
         scrollView.onWindowAttached = onWindowAttached
         return scrollView
     }
@@ -198,7 +198,7 @@ struct NoteImagePasteTextEditor: NSViewRepresentable {
 
     func updateNSView(_ scrollView: NoteAwareScrollView, context: Context) {
         guard let textView = scrollView.documentView as? NSTextView else { return }
-        // 只在外部变化时更新，防止光标跳动
+        // Only update when external changes occur to prevent the cursor from jumping.
         if textView.string != text {
             let selected = textView.selectedRange()
             textView.string = text
@@ -224,7 +224,7 @@ struct NoteImagePasteTextEditor: NSViewRepresentable {
             let newText = textView.string
             parent.text = newText
             parent.onChange?(newText)
-            // 首行标题
+            // First line title
             emitFirstLine(newText)
         }
 
@@ -236,7 +236,7 @@ struct NoteImagePasteTextEditor: NSViewRepresentable {
             parent.onFocusChanged?(false)
         }
 
-        // MARK: - 粘贴拦截
+        // MARK: - Paste interception
 
         func textView(_ textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
             if commandSelector == #selector(NSText.paste(_:)) {
@@ -245,23 +245,23 @@ struct NoteImagePasteTextEditor: NSViewRepresentable {
             return false
         }
 
-        // MARK: - 图片粘贴处理
+        // MARK: - Image pasting processing
 
         private func handlePaste(in textView: NSTextView) -> Bool {
             let pasteboard = NSPasteboard.general
-            // 优先检查图片
+            // Check pictures first
             if pasteboard.canReadItem(withDataConformingToTypes: [UTType.image.identifier, UTType.png.identifier, UTType.jpeg.identifier, UTType.tiff.identifier]) {
                 if let image = NSImage(pasteboard: pasteboard) {
                     insertImage(image, into: textView)
                     return true
                 }
             }
-            // 其他类型走默认粘贴
+            // Other types are pasted by default.
             return false
         }
 
         private func insertImage(_ image: NSImage, into textView: NSTextView) {
-            // 生成唯一文件名
+            // Generate unique file name
             let filename = "image-\(UUID().uuidString.prefix(8)).png"
             let noteDir = URL(fileURLWithPath: parent.noteFilePath).deletingLastPathComponent()
             let imagesDir = noteDir.appendingPathComponent("images")
@@ -270,7 +270,7 @@ struct NoteImagePasteTextEditor: NSViewRepresentable {
                 try FileManager.default.createDirectory(at: imagesDir, withIntermediateDirectories: true)
                 let imageURL = imagesDir.appendingPathComponent(filename)
 
-                // 导出为 PNG
+                // Export to PNG
                 guard let tiff = image.tiffRepresentation,
                       let bitmap = NSBitmapImageRep(data: tiff),
                       let pngData = bitmap.representation(using: .png, properties: [:]) else {
@@ -278,7 +278,7 @@ struct NoteImagePasteTextEditor: NSViewRepresentable {
                 }
                 try pngData.write(to: imageURL)
 
-                // 插入 Markdown 语法（相对路径）
+                // Insert Markdown syntax (relative path)
                 let relPath = "images/\(filename)"
                 let markdownSnippet = "![\(filename)](\(relPath))"
 
@@ -288,12 +288,12 @@ struct NoteImagePasteTextEditor: NSViewRepresentable {
                     textView.didChangeText()
                 }
             } catch {
-                // 插入失败时降级为默认粘贴
+                // Downgrade to default paste when insert fails
                 textView.paste(nil)
             }
         }
 
-        // MARK: - 首行标题提取
+        // MARK: - First line title extraction
 
         private func emitFirstLine(_ text: String) {
             let firstLine = text

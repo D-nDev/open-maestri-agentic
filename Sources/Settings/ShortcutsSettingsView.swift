@@ -292,7 +292,7 @@ struct ShortcutsSettingsView: View {
     }
 }
 
-// MARK: - Key Capture View（透明 NSView 捕获键盘事件）
+// MARK: - Key Capture View (transparent NSView captures keyboard events)
 
 struct KeyCaptureView: NSViewRepresentable {
     let isCapturing: Bool

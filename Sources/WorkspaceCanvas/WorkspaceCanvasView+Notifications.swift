@@ -97,7 +97,7 @@ extension WorkspaceCanvasView {
         guard let info = notif.userInfo,
               let portalId = info["portalId"] as? UUID,
               let url = info["url"] as? String else { return }
-        // 静默更新：不修改 workspace.nodes（避免触发 @Observable → 画布重渲染 → makeNSView → 重复加载 URL）
+        // Silent update: do not modify workspace.nodes (avoid triggering @Observable → canvas re-rendering → makeNSView → repeatedly loading URL)
         workspace.updatePortalURLSilently(portalId: portalId, url: url)
         Task { try? await workspace.save() }
     }

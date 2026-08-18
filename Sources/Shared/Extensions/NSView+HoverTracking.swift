@@ -1,9 +1,9 @@
 import AppKit
 import SwiftUI
 
-// MARK: - AppKit 级别 Hover 追踪（解决 NSViewRepresentable 上方 SwiftUI hover 失效问题）
+// MARK: - AppKit level Hover tracking (solve the problem of SwiftUI hover failure above NSViewRepresentable)
 
-/// 使用 NSTrackingArea 在 AppKit 层面检测 hover，绕过 SwiftUI .onHover 在 NSView 上方失效的问题
+/// Use NSTrackingArea to detect hover at the AppKit level, bypassing the problem of SwiftUI .onHover failing above NSView
 struct HoverTrackingView: NSViewRepresentable {
     let onHover: (Bool) -> Void
 

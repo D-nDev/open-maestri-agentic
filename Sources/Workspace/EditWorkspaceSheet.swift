@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 编辑工作区 Sheet（名称 / 图标 / 颜色 / 工作目录）
+/// Edit Workspace Sheet (Name/Icon/Color/Working Directory)
 struct EditWorkspaceSheet: View {
     @Environment(\.dismiss) private var dismiss
     let entry: WorkspaceEntry
@@ -11,7 +11,7 @@ struct EditWorkspaceSheet: View {
     @State private var selectedIcon: String
     @State private var selectedColor: String
 
-    // 扩展图标列表（对应截图中 9×3 的网格）
+    // Expanded icon list (corresponds to the 9×3 grid in the screenshot)
     private let iconOptions: [String] = [
         // Row 1
         "photo.on.rectangle.angled", "face.smiling", "terminal.fill", "star.fill",
@@ -24,7 +24,7 @@ struct EditWorkspaceSheet: View {
         "doc.text", "shippingbox", "cube", "eye"
     ]
 
-    // 颜色选项（对应截图中的 9 个色圆）
+    // Color options (corresponding to the 9 color circles in the screenshot)
     private let colorOptions: [(id: String, color: Color)] = [
         ("blue", .blue),
         ("red", .red),
@@ -34,7 +34,7 @@ struct EditWorkspaceSheet: View {
         ("pink", .pink),
         ("cyan", .cyan),
         ("yellow", .yellow),
-        ("rainbow", .clear) // rainbow 用特殊渲染
+        ("rainbow", .clear) // rainbow with special rendering
     ]
 
     init(entry: WorkspaceEntry, onSave: @escaping (WorkspaceEntry) -> Void) {
@@ -48,22 +48,22 @@ struct EditWorkspaceSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 标题
+            // Title
             Text("workspace.edit.title")
                 .font(.title2.weight(.semibold))
                 .padding(.top, 24)
                 .padding(.bottom, 16)
 
-            // 内容区域
+            // Content area
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    // 名称输入框
+                    // Name input box
                     TextField("workspace.name", text: $name)
                         .textFieldStyle(.roundedBorder)
                         .font(.title3)
                         .padding(.horizontal)
 
-                    // 图标选择
+                    // Icon selection
                     VStack(alignment: .leading, spacing: 10) {
                         Text("workspace.section.icon")
                             .font(.subheadline)
@@ -93,7 +93,7 @@ struct EditWorkspaceSheet: View {
                         .padding(.horizontal)
                     }
 
-                    // 颜色选择
+                    // Color selection
                     VStack(alignment: .leading, spacing: 10) {
                         Text("workspace.section.color")
                             .font(.subheadline)
@@ -107,7 +107,7 @@ struct EditWorkspaceSheet: View {
                                 } label: {
                                     ZStack {
                                         if option.id == "rainbow" {
-                                            // 彩虹色用渐变圆
+                                            // Gradient circles for rainbow colors
                                             Circle()
                                                 .fill(
                                                     AngularGradient(
@@ -121,7 +121,7 @@ struct EditWorkspaceSheet: View {
                                                 .fill(option.color)
                                                 .frame(width: 28, height: 28)
                                         }
-                                        // 选中指示器
+                                        // Check indicator
                                         if selectedColor == option.id {
                                             Circle()
                                                 .stroke(Color.primary, lineWidth: 2.5)
@@ -136,7 +136,7 @@ struct EditWorkspaceSheet: View {
                         .padding(.horizontal)
                     }
 
-                    // 工作目录
+                    // Working directory
                     VStack(alignment: .leading, spacing: 10) {
                         Text("workspace.section.working_dir")
                             .font(.subheadline)
@@ -170,7 +170,7 @@ struct EditWorkspaceSheet: View {
             Divider()
                 .padding(.top, 8)
 
-            // 底部按钮
+            // Bottom button
             HStack(spacing: 12) {
                 Button("button.cancel") { dismiss() }
                     .keyboardShortcut(.escape)

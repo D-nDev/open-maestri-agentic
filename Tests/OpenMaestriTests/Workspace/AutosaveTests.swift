@@ -1,10 +1,10 @@
 import XCTest
 @testable import open_maestri
 
-// Story 1.5 AC 验收测试：自动保存与备份
+// Story 1.5 AC acceptance testing: automatic saving and backup
 final class AutosaveTests: XCTestCase {
 
-    // MARK: - Story 1.5 AC: 30 秒自动保存
+    // MARK: - Story 1.5 AC: 30 seconds auto-save
 
     func testAutosaveIntervalIs30Seconds() {
         XCTAssertEqual(Constants.autosaveInterval, 30.0,
@@ -15,19 +15,19 @@ final class AutosaveTests: XCTestCase {
     func testStartAutosaveCreatesTimer() {
         let appState = AppState()
         appState.startAutosave()
-        // Timer 存在（通过 forceSave 验证 appState 已启动自动保存逻辑）
+        // Timer exists (verify via forceSave that appState has started auto-save logic)
         appState.stopAutosave()
-        // 不崩溃即通过
+        // Pass without crashing
         XCTAssertTrue(true)
     }
 
     @MainActor
     func testForceSaveWritesCleanShutdown() throws {
         let appState = AppState()
-        // 确保目录存在
+        // Make sure the directory exists
         try PersistenceManager.shared.ensureDirectoriesExist()
         appState.forceSave(cleanShutdown: true)
-        // 验证 app-state.json 被写入
+        // Verify app-state.json is written
         let state = try PersistenceManager.shared.loadAppState()
         XCTAssertTrue(state.cleanShutdown, "forceSave(cleanShutdown: true) must persist cleanShutdown=true")
     }
@@ -41,7 +41,7 @@ final class AutosaveTests: XCTestCase {
         XCTAssertFalse(state.cleanShutdown, "forceSave(cleanShutdown: false) must persist cleanShutdown=false")
     }
 
-    // MARK: - Story 1.5 AC: 每小时 .omaestribak 备份（NFR12）
+    // MARK: - Story 1.5 AC: Hourly .omaestribak backups (NFR12)
 
     func testBackupIntervalIs3600Seconds() {
         XCTAssertEqual(Constants.backupInterval, 3600.0,
@@ -62,10 +62,10 @@ final class AutosaveTests: XCTestCase {
                        "NFR12: createBackup() must create a .omaestribak file")
     }
 
-    // MARK: - Story 1.5 AC: 重启后恢复时间 < 0.5s（NFR2）
+    // MARK: - Story 1.5 AC: Recovery time after reboot < 0.5s (NFR2)
 
     func testWorkspacePayloadCodingIsfast() throws {
-        // 创建一个有 10 个节点的工作区，测试序列化速度
+        // Create a workspace with 10 nodes to test serialization speed
         var payload = WorkspacePayload(name: "PerfTest", workingDirectory: "/tmp")
         for i in 0..<10 {
             let node = CanvasNode(
@@ -85,7 +85,7 @@ final class AutosaveTests: XCTestCase {
                           "NFR2: Workspace restore must complete quickly, took \(elapsed)s")
     }
 
-    // MARK: - PersistenceManager 原子写入（NFR11）
+    // MARK: - PersistenceManager atomic writes (NFR11)
 
     func testAtomicWriteNoTempFileLeftBehind() async throws {
         let pm = PersistenceManager.shared
@@ -95,10 +95,10 @@ final class AutosaveTests: XCTestCase {
 
         try await pm.save(["test": "value"], to: tmpUrl)
 
-        // 临时文件不应残留
+        // Temporary files should not remain
         XCTAssertFalse(FileManager.default.fileExists(atPath: tmpUrl.appendingPathExtension("tmp").path),
                        "NFR11: Atomic write must clean up .tmp file")
-        // 正式文件应存在
+        // Formal documentation should exist
         XCTAssertTrue(FileManager.default.fileExists(atPath: tmpUrl.path))
     }
 }

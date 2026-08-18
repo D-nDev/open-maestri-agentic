@@ -2,10 +2,10 @@
 import Foundation
 
 enum Transport {
-    /// 向主 app 发送 CLI 请求，返回响应 body（纯文本）
-    /// 对标逆向：socketTransport @ 0x10000c34c + buildHTTPRequest @ 0x10000b9c0 + sendAndReceive @ 0x10000c0c8
+    /// Send a CLI request to the main app and return the response body (plain text)
+    /// Benchmark reverse engineering: socketTransport @ 0x10000c34c + buildHTTPRequest @ 0x10000b9c0 + sendAndReceive @ 0x10000c0c8
     static func send(args: [String], socketPath: String, terminalId: String) -> String {
-        // 1. 创建 Unix socket（对标逆向：socket(AF_UNIX=1, SOCK_STREAM=1, 0)）
+        // 1. Create Unix socket (reverse reverse: socket(AF_UNIX=1, SOCK_STREAM=1, 0))
         let fd = socket(AF_UNIX, SOCK_STREAM, 0)
         guard fd >= 0 else {
             fputs("error: socket creation failed\n", stderr)
@@ -13,21 +13,21 @@ enum Transport {
         }
         defer { close(fd) }
 
-        // 2. 设置超时（对标逆向：SO_SNDTIMEO=0x1006, SO_RCVTIMEO=0x1005, SOL_SOCKET=0xffff）
-        // Maestri 原版设置 {0, 0} = 无超时（无限阻塞），适用于长时间 ask 等命令
+        // 2. Set timeout (benchmark reverse: SO_SNDTIMEO=0x1006, SO_RCVTIMEO=0x1005, SOL_SOCKET=0xffff)
+        // Maestri original setting {0, 0} = no timeout (infinite blocking), suitable for long-term ask and other commands
         var tv = timeval(tv_sec: 0, tv_usec: 0)
         setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &tv, socklen_t(MemoryLayout<timeval>.size))
         setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, socklen_t(MemoryLayout<timeval>.size))
 
-        // 3. 构建 sockaddr_un（对标逆向：sizeof = 106 = sun_len(1) + sun_family(1) + sun_path(104)）
+        // 3. Construct sockaddr_un (reverse reverse: sizeof = 106 = sun_len(1) + sun_family(1) + sun_path(104))
         var addr = sockaddr_un()
         addr.sun_family = sa_family_t(AF_UNIX)
-        let pathBytes = socketPath.utf8.prefix(103)  // 最大 103 字节（+1 null terminator）
+        let pathBytes = socketPath.utf8.prefix(103)  // Maximum 103 bytes (+1 null terminator)
         withUnsafeMutableBytes(of: &addr.sun_path) { ptr in
             pathBytes.enumerated().forEach { ptr[$0.offset] = $0.element }
         }
 
-        // 4. 连接
+        // 4. Connect
         let connectResult = withUnsafePointer(to: &addr) {
             $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
                 connect(fd, $0, socklen_t(MemoryLayout<sockaddr_un>.size))
@@ -40,13 +40,13 @@ enum Transport {
             exit(1)
         }
 
-        // 5. 构建 JSON body（对标逆向：{"args":["command","arg1","arg2",...]}）
+        // 5. Construct JSON body (reverse reverse: {"args":["command","arg1","arg2",...]})
         guard let bodyData = try? JSONSerialization.data(withJSONObject: ["args": args]) else {
             fputs("error: JSON serialization failed\n", stderr)
             exit(1)
         }
 
-        // 6. 构建 HTTP/1.0 请求头（对标逆向：buildHTTPRequest @ 0x10000b9c0）
+        // 6. Build HTTP/1.0 request header (benchmark reverse engineering: buildHTTPRequest @ 0x10000b9c0)
         var request = "POST /cli HTTP/1.0\r\n"
         request += "Host: maestri\r\n"
         request += "X-Terminal-ID: \(terminalId)\r\n"
@@ -54,7 +54,7 @@ enum Transport {
         request += "Content-Length: \(bodyData.count)\r\n"
         request += "\r\n"
 
-        // 7. 发送请求头 + body（两次 send，对标逆向两次 _send 调用）
+        // 7. Send request header + body (twice send, two reverse _send calls)
         guard let headerData = request.data(using: .utf8) else {
             fputs("error: header encoding failed\n", stderr)
             exit(1)
@@ -70,7 +70,7 @@ enum Transport {
             exit(1)
         }
 
-        // 8. 接收响应（循环 recv，8KB buffer，对标逆向 0x2000 缓冲区）
+        // 8. Receive response (cyclic recv, 8KB buffer, benchmark reverse 0x2000 buffer)
         var accumulated = Data()
         var buffer = [UInt8](repeating: 0, count: 0x2000)
         while true {
@@ -79,7 +79,7 @@ enum Transport {
             accumulated.append(contentsOf: buffer[..<n])
         }
 
-        // 9. 解析 HTTP 响应，提取 body（对标逆向：查找 \r\n\r\n 后取 body）
+        // 9. Parse the HTTP response and extract the body (reverse reverse: search for \r\n\r\n and then get the body)
         return parseHTTPResponse(accumulated)
     }
 
@@ -88,7 +88,7 @@ enum Transport {
             fputs("error: invalid response encoding\n", stderr)
             exit(1)
         }
-        // 检查状态码
+        // Check status code
         guard responseStr.hasPrefix("HTTP/") else {
             fputs("error: invalid HTTP response\n", stderr)
             exit(1)
@@ -100,7 +100,7 @@ enum Transport {
             fputs("Request failed (status \(statusCode))\n", stderr)
             exit(1)
         }
-        // 提取 body（\r\n\r\n 之后）
+        // Extract body (after\r\n\r\n)
         guard let range = responseStr.range(of: "\r\n\r\n") else {
             return responseStr
         }

@@ -5,7 +5,7 @@ final class CLIRouterTests: XCTestCase {
     let router = CLIRouter.shared
     let testTerminalId = UUID()
 
-    // MARK: - 路由基础（使用 async 接口，避免 @MainActor 死锁）
+    // MARK: - Routing basics (use async interface to avoid @MainActor deadlock)
 
     func testUnknownCommandReturnsError() async {
         let result = await router.routeAsync(args: ["foobar"], terminalId: testTerminalId)
@@ -65,7 +65,7 @@ final class CLIRouterTests: XCTestCase {
     }
 
     func testNoteWriteReturnsError_NoteNotFound() async {
-        // 不存在的 Note 应返回 error（路径不存在）
+        // Note that does not exist should return error (path does not exist)
         let result = await router.routeAsync(args: ["note", "write", "NonExistentNote", "content"], terminalId: testTerminalId)
         XCTAssertTrue(result.hasPrefix("error:"), "Write to non-existent note should error: \(result)")
     }
@@ -80,7 +80,7 @@ final class CLIRouterTests: XCTestCase {
         XCTAssertTrue(result.hasPrefix("error:"))
     }
 
-    // MARK: - List / Check（async，需要 @MainActor 但无 terminal 连接）
+    // MARK: - List/Check (async, requires @MainActor but no terminal connection)
 
     func testListWithMissingTerminalIdReturnsError() async {
         let result = await router.routeAsync(args: ["list"], terminalId: nil)
@@ -95,7 +95,7 @@ final class CLIRouterTests: XCTestCase {
     func testListWithUnconnectedTerminalReturnsEmpty() async {
         let unconnectedId = UUID()
         let result = await router.routeAsync(args: ["list"], terminalId: unconnectedId)
-        // 有 terminal ID 但无连接，应返回 "No connections"
+        // There is a terminal ID but no connection, "No connections" should be returned
         XCTAssertFalse(result.hasPrefix("error: missing terminal ID"))
     }
 }
