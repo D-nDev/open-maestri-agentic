@@ -72,6 +72,47 @@ final class LocalizationCatalogTests: XCTestCase {
         XCTAssertTrue(failures.isEmpty, failures.joined(separator: "\n"))
     }
 
+    func testBrazilianPortugueseUsesProductTerminology() throws {
+        let strings = try loadCatalogStrings()
+        let expected: [String: String] = [
+            "agents.skills.title": "Locais das Skills",
+            "button.commit": "Commit",
+            "canvas.toolbar.draw": "Desenhar",
+            "canvas.toolbar.filetree": "Arquivos",
+            "canvas.toolbar.terminal": "Terminal",
+            "floor.new": "Novo Floor",
+            "git.action.push": "Push",
+            "settings.tab.terminal": "Terminal",
+            "shortcut.group.canvas": "Canvas",
+            "terminal.command_placeholder": "ex.: claude, codex, gemini",
+            "workspace.new": "Novo Workspace",
+        ]
+        let forbiddenFragments = [
+            "espaço de trabalho",
+            "árvore de arquivos",
+            "habilidade",
+            "filial",
+            "Cláudio",
+            "Códice",
+            "Gêmeos",
+            "AGENTES.md",
+        ]
+
+        for (key, expectedValue) in expected {
+            XCTAssertEqual(portugueseValue(for: key, in: strings), expectedValue, key)
+        }
+
+        for (key, _) in strings {
+            guard let value = portugueseValue(for: key, in: strings) else { continue }
+            for fragment in forbiddenFragments {
+                XCTAssertFalse(
+                    value.localizedCaseInsensitiveContains(fragment),
+                    "\(key) contains forbidden literal translation: \(fragment)"
+                )
+            }
+        }
+    }
+
     private func loadCatalogStrings() throws -> [String: Any] {
         let data = try Data(contentsOf: repositoryRoot
             .appendingPathComponent("Sources/Resources/Localizable.xcstrings"))
@@ -95,6 +136,16 @@ final class LocalizationCatalogTests: XCTestCase {
             guard let url = item as? URL, url.pathExtension == "swift" else { return nil }
             return url
         }
+    }
+
+    private func portugueseValue(for key: String, in strings: [String: Any]) -> String? {
+        guard let entry = strings[key] as? [String: Any],
+              let localizations = entry["localizations"] as? [String: Any],
+              let portuguese = localizations["pt-BR"] as? [String: Any],
+              let stringUnit = portuguese["stringUnit"] as? [String: Any] else {
+            return nil
+        }
+        return stringUnit["value"] as? String
     }
 
     private var repositoryRoot: URL {
