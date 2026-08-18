@@ -575,11 +575,14 @@ final class OrcaTerminalRegistry {
     private func applyOutput(_ result: OrcaOutputResult) {
         guard var state = states[result.request.nodeId] else { return }
         if let snapshot = result.snapshot {
-            let cleanLines = snapshot.tail.map(Self.stripTerminalControlSequences)
+            let cleanLines = snapshot.tail.map(OrcaTerminalTranscript.normalize)
             if result.request.cursor == nil {
                 state.output = Array(cleanLines.suffix(500))
             } else if !cleanLines.isEmpty {
-                state.output = Array((state.output + cleanLines).suffix(500))
+                state.output = OrcaTerminalTranscript.merge(
+                    existing: state.output,
+                    incoming: cleanLines
+                )
             }
             state.status = snapshot.status
             state.connected = true
@@ -780,11 +783,4 @@ final class OrcaTerminalRegistry {
         }
     }
 
-    private nonisolated static func stripTerminalControlSequences(_ line: String) -> String {
-        line.replacingOccurrences(
-            of: "\u{001B}\\[[0-?]*[ -/]*[@-~]",
-            with: "",
-            options: .regularExpression
-        )
-    }
 }

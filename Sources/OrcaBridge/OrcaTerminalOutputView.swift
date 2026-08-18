@@ -33,6 +33,7 @@ final class OrcaTerminalScrollViewRegistry {
 struct OrcaTerminalOutputView: NSViewRepresentable {
     let nodeId: UUID
     let text: String
+    let isActive: Bool
 
     @MainActor
     final class Coordinator {
@@ -55,7 +56,7 @@ struct OrcaTerminalOutputView: NSViewRepresentable {
         scrollView.hasHorizontalScroller = false
         scrollView.autohidesScrollers = true
         scrollView.drawsBackground = true
-        scrollView.backgroundColor = NSColor.textBackgroundColor.withAlphaComponent(0.92)
+        updateBackground(of: scrollView)
 
         let textView = NSTextView(frame: .zero)
         textView.isEditable = false
@@ -81,6 +82,7 @@ struct OrcaTerminalOutputView: NSViewRepresentable {
 
     @MainActor
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
+        updateBackground(of: scrollView)
         guard let textView = scrollView.documentView as? NSTextView,
               context.coordinator.lastText != text else { return }
 
@@ -103,7 +105,9 @@ struct OrcaTerminalOutputView: NSViewRepresentable {
         context: Context,
         followOutput: Bool
     ) {
-        textView.string = text
+        textView.textStorage?.setAttributedString(
+            OrcaTerminalTextStyler.attributedString(for: text)
+        )
         context.coordinator.lastText = text
 
         guard followOutput else { return }
@@ -116,5 +120,66 @@ struct OrcaTerminalOutputView: NSViewRepresentable {
         guard let documentView = scrollView.documentView else { return true }
         let visibleBottom = scrollView.contentView.bounds.maxY
         return visibleBottom >= documentView.bounds.maxY - 8
+    }
+
+    private func updateBackground(of scrollView: NSScrollView) {
+        let base = NSColor.textBackgroundColor.withAlphaComponent(0.92)
+        scrollView.backgroundColor = isActive
+            ? NSColor.systemGreen.withAlphaComponent(0.045).blended(withFraction: 0.92, of: base) ?? base
+            : base
+    }
+}
+
+enum OrcaTerminalTextStyler {
+    @MainActor
+    static func attributedString(for text: String) -> NSAttributedString {
+        let font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
+        let attributed = NSMutableAttributedString(string: text, attributes: [
+            .font: font,
+            .foregroundColor: NSColor.textColor,
+        ])
+
+        colorMatches(#"(?m)^\s*\$.*$"#, in: attributed, color: .systemGreen)
+        colorMatches(#"\"[^\"\n]+\"(?=\s*:)"#, in: attributed, color: .systemCyan)
+        colorMatches(#"(?<=:)\s*\"[^\"\n]*\""#, in: attributed, color: .systemGreen)
+        colorMatches(#"\b(true|false|null)\b"#, in: attributed, color: .systemPurple)
+        colorMatches(#"(?<![A-Za-z_])-?\d+(?:\.\d+)?"#, in: attributed, color: .systemOrange)
+        colorMatches(
+            #"(?i)\b(error|failed|failure|block|timeout)\b"#,
+            in: attributed,
+            color: .systemRed
+        )
+        colorMatches(
+            #"(?i)\b(warning|aviso|waiting|queued|idle)\b"#,
+            in: attributed,
+            color: .systemOrange
+        )
+        colorMatches(
+            #"(?i)\b(pass|passed|success|succeeded|ok|done|completed|running|working)\b"#,
+            in: attributed,
+            color: .systemGreen
+        )
+        colorMatches(
+            #"(?m)^\s*(Todos|Tasks?|Output|Results?)\b.*$"#,
+            in: attributed,
+            color: .systemCyan,
+            font: .monospacedSystemFont(ofSize: 11, weight: .semibold)
+        )
+        return attributed
+    }
+
+    @MainActor
+    private static func colorMatches(
+        _ pattern: String,
+        in text: NSMutableAttributedString,
+        color: NSColor,
+        font: NSFont? = nil
+    ) {
+        guard let expression = try? NSRegularExpression(pattern: pattern) else { return }
+        let range = NSRange(location: 0, length: text.length)
+        for match in expression.matches(in: text.string, range: range) {
+            text.addAttribute(.foregroundColor, value: color, range: match.range)
+            if let font { text.addAttribute(.font, value: font, range: match.range) }
+        }
     }
 }

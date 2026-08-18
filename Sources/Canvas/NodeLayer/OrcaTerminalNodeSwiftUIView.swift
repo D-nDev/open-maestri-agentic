@@ -18,7 +18,7 @@ struct OrcaTerminalNodeSwiftUIView: View {
             title: localizedTitle,
             isSelected: isSelected,
             isLocked: isLocked,
-            isCommunicating: false,
+            isCommunicating: isActive,
             zoom: zoom,
             headerIcon: state?.environment == nil ? "network" : "cloud",
             headerColor: state?.environment == nil ? .blue : .purple,
@@ -34,9 +34,7 @@ struct OrcaTerminalNodeSwiftUIView: View {
     @ViewBuilder
     private var statusBadge: some View {
         HStack(spacing: 4) {
-            Circle()
-                .fill(statusColor)
-                .frame(width: 6, height: 6)
+            OrcaActivityIndicator(color: statusColor, isActive: isActive)
             Text(state?.status ?? "offline")
                 .font(.system(size: 9, weight: .semibold))
                 .lineLimit(1)
@@ -58,7 +56,7 @@ struct OrcaTerminalNodeSwiftUIView: View {
     }
 
     private var outputView: some View {
-        OrcaTerminalOutputView(nodeId: nodeId, text: outputText)
+        OrcaTerminalOutputView(nodeId: nodeId, text: outputText, isActive: isActive)
         .overlay(alignment: .topTrailing) {
             if let role = state?.role, !role.isEmpty {
                 Text(localizedRole(role))
@@ -114,6 +112,13 @@ struct OrcaTerminalNodeSwiftUIView: View {
         }
     }
 
+    private var isActive: Bool {
+        switch state?.status.lowercased() {
+        case "running", "active", "working", "reconnecting", "waiting": return true
+        default: return false
+        }
+    }
+
     private var localizedTitle: String {
         let title = state?.title ?? fallbackContent.name
         return title.lowercased() == "coordinator" ? "orca.role.coordinator".localized : title
@@ -128,5 +133,27 @@ struct OrcaTerminalNodeSwiftUIView: View {
 
     private func localizedRole(_ role: String) -> String {
         role.lowercased() == "coordinator" ? "orca.role.coordinator".localized : role
+    }
+}
+
+private struct OrcaActivityIndicator: View {
+    let color: Color
+    let isActive: Bool
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 1 / 30, paused: !isActive)) { context in
+            let elapsed = context.date.timeIntervalSinceReferenceDate
+            let wave = isActive ? (sin(elapsed * .pi * 2 / 1.25) + 1) / 2 : 0
+            ZStack {
+                Circle()
+                    .stroke(color.opacity(0.45 * wave), lineWidth: 1.5)
+                    .frame(width: 6, height: 6)
+                    .scaleEffect(1 + wave * 1.15)
+                Circle()
+                    .fill(color)
+                    .frame(width: 6, height: 6)
+            }
+        }
+        .frame(width: 10, height: 10)
     }
 }
