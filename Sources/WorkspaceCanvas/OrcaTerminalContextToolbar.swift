@@ -12,15 +12,15 @@ struct OrcaTerminalContextToolbar: View {
         HStack(spacing: 2) {
             ContextToolbarButton(
                 icon: "arrow.trianglehead.branch",
-                tooltip: "Connect",
+                tooltip: "button.connect".localized,
                 action: onConnect
             )
             if !connections.isEmpty {
                 ConnectionBadgeButton(connections: connections, onDelete: onDeleteConnection)
             }
-            ContextToolbarButton(icon: "arrow.clockwise", tooltip: "Refresh from Orca", action: onRefresh)
-            ContextToolbarButton(icon: "paperplane", tooltip: "Queue message", action: onSendQueued)
-            ContextToolbarButton(icon: "exclamationmark.octagon", tooltip: "Interrupt and send", action: onInterrupt)
+            ContextToolbarButton(icon: "arrow.clockwise", tooltip: "orca.toolbar.refresh".localized, action: onRefresh)
+            ContextToolbarButton(icon: "paperplane", tooltip: "orca.toolbar.queue_message".localized, action: onSendQueued)
+            ContextToolbarButton(icon: "exclamationmark.octagon", tooltip: "orca.toolbar.interrupt_send".localized, action: onInterrupt)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 5)
@@ -49,17 +49,17 @@ struct OrcaSendSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(target.mode == .queue ? "Queue message to Orca" : "Interrupt Orca terminal")
+            Text(target.mode == .queue ? "orca.send.queue_title".localized : "orca.send.interrupt_title".localized)
                 .font(.headline)
             if target.mode == .interrupt {
                 Label(
-                    "This explicitly interrupts the current model turn.",
+                    "orca.send.interrupt_warning".localized,
                     systemImage: "exclamationmark.triangle.fill"
                 )
                 .font(.callout)
                 .foregroundStyle(.orange)
             } else {
-                Text("The message will be delivered after Orca reports tui-idle.")
+                Text("orca.send.queue_hint".localized)
                     .font(.callout)
                     .foregroundStyle(.secondary)
             }
@@ -72,9 +72,9 @@ struct OrcaSendSheet: View {
             }
             HStack {
                 Spacer()
-                Button("Cancel") { dismiss() }
+                Button("button.cancel".localized) { dismiss() }
                     .keyboardShortcut(.cancelAction)
-                Button(target.mode == .queue ? "Queue" : "Interrupt and send") {
+                Button(target.mode == .queue ? "orca.send.queue_button".localized : "orca.toolbar.interrupt_send".localized) {
                     send()
                 }
                 .buttonStyle(.borderedProminent)

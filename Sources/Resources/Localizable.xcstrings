@@ -14,6 +14,12 @@
             "state": "translated",
             "value": "颜色"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cor"
+          }
         }
       }
     },
@@ -29,6 +35,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Agent 启动命令（如 claude、codex、gemini）"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comando de inicialização do agente (por exemplo, Claude, Codex, Gemini)"
           }
         }
       }
@@ -46,6 +58,12 @@
             "state": "translated",
             "value": "图标"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ícone"
+          }
         }
       }
     },
@@ -61,6 +79,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "名称"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome"
           }
         }
       }
@@ -78,6 +102,12 @@
             "state": "translated",
             "value": "新建 Agent 预设"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova predefinição de agente"
+          }
         }
       }
     },
@@ -93,6 +123,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "从顶部工具栏拖入终端节点，选择 Claude Code / Codex / Shell 等预设"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arraste um nó terminal da barra de ferramentas superior, escolha Claude Code/Codex/Shell e muito mais"
           }
         }
       }
@@ -110,6 +146,12 @@
             "state": "translated",
             "value": "角色为终端提供初始指令。Maestro 招募子 Agent 时可指定角色。"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As funções fornecem instruções iniciais para terminais. O Maestro pode atribuir funções ao recrutar subagentes."
+          }
         }
       }
     },
@@ -125,6 +167,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "分配角色后，以下内容将写入 CLAUDE.md / AGENTS.md 文件"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Após atribuir uma função, o seguinte conteúdo será gravado em CLAUDE.md / AGENTS.md"
           }
         }
       }
@@ -142,6 +190,12 @@
             "state": "translated",
             "value": "（请输入角色指令）"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(Insira as instruções da função)"
+          }
         }
       }
     },
@@ -157,6 +211,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Agent 预设"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Predefinições de agente"
           }
         }
       }
@@ -174,6 +234,12 @@
             "state": "translated",
             "value": "角色指令"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instruções de função"
+          }
         }
       }
     },
@@ -189,6 +255,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "基本信息"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informações básicas"
           }
         }
       }
@@ -206,6 +278,12 @@
             "state": "translated",
             "value": "指令预览"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visualização de instruções"
+          }
         }
       }
     },
@@ -221,6 +299,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "类型"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tipo"
           }
         }
       }
@@ -238,6 +322,12 @@
             "state": "translated",
             "value": "添加角色"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar função"
+          }
         }
       }
     },
@@ -253,6 +343,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "为你的代理创建包含具体指令的角色。分配到终端后，代理会自动遵循这些指令。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crie funções com instruções específicas para seus agentes. Uma vez atribuídos a um terminal, os agentes seguirão automaticamente estas instruções."
           }
         }
       }
@@ -270,6 +366,12 @@
             "state": "translated",
             "value": "搜索角色..."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pesquisar funções..."
+          }
         }
       }
     },
@@ -285,6 +387,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "代理角色"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funções do Agente"
           }
         }
       }
@@ -302,6 +410,12 @@
             "state": "translated",
             "value": "添加自定义路径"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar caminho personalizado"
+          }
         }
       }
     },
@@ -317,6 +431,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "这些是 Maestri 技能的安装位置 — 它们是智能体理解并使用 Maestri 各项功能的关键。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esses são os locais de instalação das habilidades do Maestri — eles são essenciais para que os agentes entendam e usem os recursos do Maestri."
           }
         }
       }
@@ -334,6 +454,12 @@
             "state": "translated",
             "value": "编辑技能路径"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar caminho de habilidade"
+          }
         }
       }
     },
@@ -349,6 +475,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "暂无技能路径，点击下方按钮添加"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum caminho de habilidade configurado. Clique no botão abaixo para adicionar um."
           }
         }
       }
@@ -366,6 +498,12 @@
             "state": "translated",
             "value": "更改会立即在本机生效。远程 SSH 主机会在下次打开终端时采用新列表。"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As alterações entram em vigor imediatamente nesta máquina. Os hosts SSH remotos adotarão a nova lista na próxima vez que um terminal for aberto."
+          }
         }
       }
     },
@@ -381,6 +519,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "新建技能路径"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novo caminho de habilidade"
           }
         }
       }
@@ -398,6 +542,12 @@
             "state": "translated",
             "value": "路径"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caminho"
+          }
         }
       }
     },
@@ -413,6 +563,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "名称"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome"
           }
         }
       }
@@ -430,6 +586,12 @@
             "state": "translated",
             "value": "恢复默认设置"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redefinir para os padrões"
+          }
         }
       }
     },
@@ -445,6 +607,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "技能位置"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locais de habilidades"
           }
         }
       }
@@ -462,6 +630,12 @@
             "state": "translated",
             "value": "角色"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funções"
+          }
         }
       }
     },
@@ -477,6 +651,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "技能"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Habilidades"
           }
         }
       }
@@ -494,6 +674,12 @@
             "state": "translated",
             "value": "部分工作区加载失败"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alguns espaços de trabalho não foram carregados"
+          }
         }
       }
     },
@@ -509,6 +695,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "添加自定义预设…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar predefinição personalizada…"
           }
         }
       }
@@ -526,6 +718,12 @@
             "state": "translated",
             "value": "新建角色…"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova função…"
+          }
         }
       }
     },
@@ -541,6 +739,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "浏览…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navegar…"
           }
         }
       }
@@ -558,6 +762,12 @@
             "state": "translated",
             "value": "取消"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
         }
       }
     },
@@ -573,6 +783,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "检查更新…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verifique se há atualizações…"
           }
         }
       }
@@ -590,6 +806,12 @@
             "state": "translated",
             "value": "选择…"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolher…"
+          }
         }
       }
     },
@@ -605,6 +827,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "关闭"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechar"
           }
         }
       }
@@ -622,6 +850,12 @@
             "state": "translated",
             "value": "提交"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprometer-se"
+          }
         }
       }
     },
@@ -637,6 +871,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "确定"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmar"
           }
         }
       }
@@ -654,6 +894,12 @@
             "state": "translated",
             "value": "连接"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectar"
+          }
         }
       }
     },
@@ -669,6 +915,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "继续"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar"
           }
         }
       }
@@ -686,6 +938,12 @@
             "state": "translated",
             "value": "创建"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Criar"
+          }
         }
       }
     },
@@ -701,6 +959,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "删除"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir"
           }
         }
       }
@@ -718,6 +982,12 @@
             "state": "translated",
             "value": "删除分组"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir grupo"
+          }
         }
       }
     },
@@ -733,6 +1003,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "完成"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feito"
           }
         }
       }
@@ -750,6 +1026,12 @@
             "state": "translated",
             "value": "复制"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicado"
+          }
         }
       }
     },
@@ -765,6 +1047,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "编辑"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar"
           }
         }
       }
@@ -782,6 +1070,12 @@
             "state": "translated",
             "value": "开始使用"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comece"
+          }
         }
       }
     },
@@ -797,6 +1091,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "合并"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mesclar"
           }
         }
       }
@@ -814,6 +1114,12 @@
             "state": "translated",
             "value": "修改"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modificar"
+          }
         }
       }
     },
@@ -829,6 +1135,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "好"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
           }
         }
       }
@@ -846,6 +1158,12 @@
             "state": "translated",
             "value": "从分组移除"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover do grupo"
+          }
         }
       }
     },
@@ -861,6 +1179,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "重命名"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renomear"
           }
         }
       }
@@ -878,6 +1202,12 @@
             "state": "translated",
             "value": "重命名分组"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renomear grupo"
+          }
         }
       }
     },
@@ -893,6 +1223,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "恢复"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar"
           }
         }
       }
@@ -910,6 +1246,12 @@
             "state": "translated",
             "value": "恢复默认"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar padrões"
+          }
         }
       }
     },
@@ -925,6 +1267,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "保存"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvar"
           }
         }
       }
@@ -942,6 +1290,12 @@
             "state": "translated",
             "value": "保存文件"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvar arquivos"
+          }
         }
       }
     },
@@ -957,6 +1311,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecione…"
           }
         }
       }
@@ -974,6 +1334,12 @@
             "state": "translated",
             "value": "开始"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Começar"
+          }
         }
       }
     },
@@ -989,6 +1355,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "查看备份…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver backups…"
           }
         }
       }
@@ -1006,6 +1378,12 @@
             "state": "translated",
             "value": "居中选中节点"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centralizar o nó selecionado"
+          }
         }
       }
     },
@@ -1021,6 +1399,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "隐藏控制栏"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ocultar o Chrome"
           }
         }
       }
@@ -1038,6 +1422,12 @@
             "state": "translated",
             "value": "显示控制栏"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar Chrome"
+          }
         }
       }
     },
@@ -1053,6 +1443,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "隐藏/显示控制栏"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ocultar/Mostrar Chrome"
           }
         }
       }
@@ -1070,6 +1466,12 @@
             "state": "translated",
             "value": "添加"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar"
+          }
         }
       }
     },
@@ -1085,6 +1487,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "附件"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anexo"
           }
         }
       }
@@ -1102,6 +1510,12 @@
             "state": "translated",
             "value": "文件树"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Árvore de arquivos"
+          }
         }
       }
     },
@@ -1117,6 +1531,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "便签"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Observação"
           }
         }
       }
@@ -1134,6 +1554,12 @@
             "state": "translated",
             "value": "门户"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Portal"
+          }
         }
       }
     },
@@ -1149,6 +1575,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "终端"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "terminal"
           }
         }
       }
@@ -1166,6 +1598,12 @@
             "state": "translated",
             "value": "文本"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Texto"
+          }
         }
       }
     },
@@ -1181,6 +1619,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "分配角色"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atribuir função"
           }
         }
       }
@@ -1198,6 +1642,12 @@
             "state": "translated",
             "value": "清除缓冲区"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpar buffer"
+          }
         }
       }
     },
@@ -1213,6 +1663,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "连接"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectar"
           }
         }
       }
@@ -1230,6 +1686,12 @@
             "state": "translated",
             "value": "拷贝"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cópia"
+          }
         }
       }
     },
@@ -1245,6 +1707,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "删除"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir"
           }
         }
       }
@@ -1262,6 +1730,12 @@
             "state": "translated",
             "value": "关闭监控活动"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desativar monitor"
+          }
         }
       }
     },
@@ -1277,6 +1751,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "复制"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicado"
           }
         }
       }
@@ -1294,6 +1774,12 @@
             "state": "translated",
             "value": "编辑终端"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar terminal"
+          }
         }
       }
     },
@@ -1309,6 +1795,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "监控活动"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monitorar atividade"
           }
         }
       }
@@ -1326,6 +1818,12 @@
             "state": "translated",
             "value": "粘贴"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Colar"
+          }
         }
       }
     },
@@ -1341,6 +1839,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "重新加载"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recarregar"
           }
         }
       }
@@ -1358,6 +1862,12 @@
             "state": "translated",
             "value": "重命名"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renomear"
+          }
         }
       }
     },
@@ -1373,6 +1883,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "删除选中节点"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir nó selecionado"
           }
         }
       }
@@ -1390,6 +1906,12 @@
             "state": "translated",
             "value": "画布为空"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A tela está vazia"
+          }
         }
       }
     },
@@ -1405,6 +1927,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "画布缩略图"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minimapa de tela"
           }
         }
       }
@@ -1422,6 +1950,12 @@
             "state": "translated",
             "value": "手绘"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empate"
+          }
         }
       }
     },
@@ -1437,6 +1971,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "文件树"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Árvore de arquivos"
           }
         }
       }
@@ -1454,6 +1994,12 @@
             "state": "translated",
             "value": "过滤/搜索"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtrar/Pesquisar"
+          }
         }
       }
     },
@@ -1469,6 +2015,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "格式"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formatar"
           }
         }
       }
@@ -1486,6 +2038,12 @@
             "state": "translated",
             "value": "笔记"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Observação"
+          }
         }
       }
     },
@@ -1501,6 +2059,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "浏览器"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navegador"
           }
         }
       }
@@ -1518,6 +2082,12 @@
             "state": "translated",
             "value": "选择工具"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecione"
+          }
         }
       }
     },
@@ -1533,6 +2103,34 @@
           "stringUnit": {
             "state": "translated",
             "value": "打开设置"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abra Configurações"
+          }
+        }
+      }
+    },
+    "canvas.toolbar.shape": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shape"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "形状"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forma"
           }
         }
       }
@@ -1550,6 +2148,12 @@
             "state": "translated",
             "value": "终端"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "terminal"
+          }
         }
       }
     },
@@ -1565,6 +2169,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "文本标签"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etiqueta de texto"
           }
         }
       }
@@ -1582,6 +2192,12 @@
             "state": "translated",
             "value": "删除连接"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir conexão"
+          }
         }
       }
     },
@@ -1597,6 +2213,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "开始连线"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar conexão"
           }
         }
       }
@@ -1614,6 +2236,12 @@
             "state": "translated",
             "value": "这将清除全局范围传送门的所有 Cookie、缓存和本地数据。您可能需要重新登录网站。"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isso removerá todos os cookies, cache e dados locais dos portais de escopo global. Pode ser necessário fazer login novamente em sites."
+          }
         }
       }
     },
@@ -1629,6 +2257,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "清除全局存储？"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpar armazenamento global?"
           }
         }
       }
@@ -1646,6 +2280,12 @@
             "state": "translated",
             "value": "这将永久删除所有工作区、笔记、终端和设置数据。输入 DELETE 确认。"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isso excluirá permanentemente todos os espaços de trabalho, notas, terminais e configurações. Digite DELETE para confirmar."
+          }
         }
       }
     },
@@ -1661,6 +2301,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "输入 DELETE 确认"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Digite DELETE para confirmar"
           }
         }
       }
@@ -1678,6 +2324,12 @@
             "state": "translated",
             "value": "删除所有数据？"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir todos os dados?"
+          }
         }
       }
     },
@@ -1693,6 +2345,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "间隔"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intervalo"
           }
         }
       }
@@ -1710,6 +2368,12 @@
             "state": "translated",
             "value": "上次保存"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Último salvamento"
+          }
         }
       }
     },
@@ -1725,6 +2389,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "尚未保存"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ainda não"
           }
         }
       }
@@ -1742,6 +2412,12 @@
             "state": "translated",
             "value": "上次自动备份"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Último backup automático"
+          }
         }
       }
     },
@@ -1757,6 +2433,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "无"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum"
           }
         }
       }
@@ -1774,6 +2456,12 @@
             "state": "translated",
             "value": "清除全局存储…"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpar armazenamento global…"
+          }
         }
       }
     },
@@ -1789,6 +2477,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "删除所有数据…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir todos os dados…"
           }
         }
       }
@@ -1806,6 +2500,12 @@
             "state": "translated",
             "value": "导出完整备份…"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exportar backup…"
+          }
         }
       }
     },
@@ -1821,6 +2521,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "导入备份…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importar cópia de segurança…"
           }
         }
       }
@@ -1838,6 +2544,12 @@
             "state": "translated",
             "value": "在访达中显示"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revelar no Finder"
+          }
         }
       }
     },
@@ -1853,6 +2565,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "导出"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exportar"
           }
         }
       }
@@ -1870,6 +2588,12 @@
             "state": "translated",
             "value": "导出备份"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exportar backup"
+          }
         }
       }
     },
@@ -1885,6 +2609,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "备份导出成功"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backup exportado com sucesso"
           }
         }
       }
@@ -1902,6 +2632,12 @@
             "state": "translated",
             "value": "使用全局范围的传送门共享的 Cookie、缓存和本地数据"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cookies, cache e dados locais compartilhados por portais de escopo global"
+          }
         }
       }
     },
@@ -1917,6 +2653,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "共享数据"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dados compartilhados"
           }
         }
       }
@@ -1934,6 +2676,12 @@
             "state": "translated",
             "value": "导入"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importar"
+          }
         }
       }
     },
@@ -1949,6 +2697,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "导入备份"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importar backup"
           }
         }
       }
@@ -1966,6 +2720,12 @@
             "state": "translated",
             "value": "已从备份恢复 %d 个文件"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arquivos %d restaurados do backup"
+          }
         }
       }
     },
@@ -1981,6 +2741,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "位置"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Localização"
           }
         }
       }
@@ -1998,6 +2764,12 @@
             "state": "translated",
             "value": "自动保存"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvamento automático"
+          }
         }
       }
     },
@@ -2013,6 +2785,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "备份与恢复"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backup e restauração"
           }
         }
       }
@@ -2030,6 +2808,12 @@
             "state": "translated",
             "value": "全局存储"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Armazenamento Global"
+          }
         }
       }
     },
@@ -2045,6 +2829,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "重置"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reiniciar"
           }
         }
       }
@@ -2062,6 +2852,12 @@
             "state": "translated",
             "value": "存储位置"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local de armazenamento"
+          }
         }
       }
     },
@@ -2077,6 +2873,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "存储用量"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uso de armazenamento"
           }
         }
       }
@@ -2094,6 +2896,12 @@
             "state": "translated",
             "value": "其他（配置、备份等）"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Outros (configurações, backups)"
+          }
         }
       }
     },
@@ -2109,6 +2917,232 @@
           "stringUnit": {
             "state": "translated",
             "value": "总计"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total"
+          }
+        }
+      }
+    },
+    "draw.help.fill_style": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fill Style"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "填充风格"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estilo de preenchimento"
+          }
+        }
+      }
+    },
+    "draw.help.stroke_style": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stroke Style"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "线条风格"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estilo de traço"
+          }
+        }
+      }
+    },
+    "draw.help.theme_color": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theme Color"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主题颜色"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cor do tema"
+          }
+        }
+      }
+    },
+    "draw.tool.arrow": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrow"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "箭头"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seta"
+          }
+        }
+      }
+    },
+    "draw.tool.diamond": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diamond"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "菱形"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diamante"
+          }
+        }
+      }
+    },
+    "draw.tool.ellipse": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ellipse"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圆形"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elipse"
+          }
+        }
+      }
+    },
+    "draw.tool.highlighter": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Highlighter"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "荧光笔"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marcador"
+          }
+        }
+      }
+    },
+    "draw.tool.line": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Line"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "线条"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linha"
+          }
+        }
+      }
+    },
+    "draw.tool.pen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pen"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "钢笔"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caneta"
+          }
+        }
+      }
+    },
+    "draw.tool.rect": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rectangle"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "矩形"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retângulo"
           }
         }
       }
@@ -2126,6 +3160,12 @@
             "state": "translated",
             "value": "CLAUDE.md / AGENTS.md（同步）"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CLAUDE.md / AGENTS.md (Sincronizar)"
+          }
         }
       }
     },
@@ -2141,6 +3181,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "名称"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome"
           }
         }
       }
@@ -2158,6 +3204,12 @@
             "state": "translated",
             "value": "此操作无法撤销。"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta ação não pode ser desfeita."
+          }
         }
       }
     },
@@ -2174,6 +3226,12 @@
             "state": "translated",
             "value": "删除\"%@\"？"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir \"%@\"?"
+          }
         }
       }
     },
@@ -2189,6 +3247,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "目录路径"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caminho do diretório"
           }
         }
       }
@@ -2207,6 +3271,12 @@
             "state": "translated",
             "value": "目录不存在：%@"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diretório não encontrado: %@"
+          }
         }
       }
     },
@@ -2222,6 +3292,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "全部折叠"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recolher tudo"
           }
         }
       }
@@ -2239,6 +3315,12 @@
             "state": "translated",
             "value": "删除"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir"
+          }
         }
       }
     },
@@ -2254,6 +3336,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "隐藏隐藏文件"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ocultar arquivos ocultos"
           }
         }
       }
@@ -2271,6 +3359,12 @@
             "state": "translated",
             "value": "图标视图"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visualização de ícones"
+          }
         }
       }
     },
@@ -2286,6 +3380,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "列表视图"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visualização de lista"
           }
         }
       }
@@ -2303,6 +3403,12 @@
             "state": "translated",
             "value": "新建文件"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novo arquivo"
+          }
         }
       }
     },
@@ -2318,6 +3424,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "新建文件夹"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova pasta"
           }
         }
       }
@@ -2335,6 +3447,12 @@
             "state": "translated",
             "value": "打开"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir"
+          }
         }
       }
     },
@@ -2350,6 +3468,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "在访达中打开"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir no Finder"
           }
         }
       }
@@ -2367,6 +3491,12 @@
             "state": "translated",
             "value": "重命名"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renomear"
+          }
         }
       }
     },
@@ -2382,6 +3512,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "在访达中显示"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revelar no Finder"
           }
         }
       }
@@ -2399,6 +3535,12 @@
             "state": "translated",
             "value": "显示隐藏文件"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar arquivos ocultos"
+          }
         }
       }
     },
@@ -2414,6 +3556,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "新建文件树"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova árvore de arquivos"
           }
         }
       }
@@ -2431,6 +3579,12 @@
             "state": "translated",
             "value": "文件名"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome do arquivo"
+          }
         }
       }
     },
@@ -2446,6 +3600,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "新建文件"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novo arquivo"
           }
         }
       }
@@ -2463,6 +3623,12 @@
             "state": "translated",
             "value": "文件夹名"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome da pasta"
+          }
         }
       }
     },
@@ -2478,6 +3644,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "新建文件夹"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova pasta"
           }
         }
       }
@@ -2495,6 +3667,12 @@
             "state": "translated",
             "value": "重命名"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renomear"
+          }
         }
       }
     },
@@ -2510,6 +3688,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "同步 CLAUDE.md ↔ AGENTS.md"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sincronizar CLAUDE.md ↔ AGENTES.md"
           }
         }
       }
@@ -2527,6 +3711,12 @@
             "state": "translated",
             "value": "修改任意一个文件时，自动同步到另一个文件"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quando um dos arquivos é modificado, sincroniza automaticamente com o outro"
+          }
         }
       }
     },
@@ -2542,6 +3732,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "分支名"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome da filial"
           }
         }
       }
@@ -2559,6 +3755,12 @@
             "state": "translated",
             "value": "取消"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
         }
       }
     },
@@ -2574,6 +3776,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "未知分支"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filial desconhecida"
           }
         }
       }
@@ -2592,6 +3800,12 @@
             "state": "translated",
             "value": "工作目录 '%@' 不是 git repository，无法创建 Floor。请先运行 git init。"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O diretório de trabalho '%@' não é um repositório git. Por favor, execute git init primeiro."
+          }
         }
       }
     },
@@ -2607,6 +3821,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "手动触发时执行"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Executado no gatilho manual"
           }
         }
       }
@@ -2624,6 +3844,12 @@
             "state": "translated",
             "value": "创建 Floor 后自动执行"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Executado após a criação do piso"
+          }
         }
       }
     },
@@ -2639,6 +3865,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Landing/删除 Floor 前执行"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Executado antes de pousar/excluir andar"
           }
         }
       }
@@ -2656,6 +3888,12 @@
             "state": "translated",
             "value": "Hooks — %@"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ganchos — %@"
+          }
         }
       }
     },
@@ -2671,6 +3909,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Land"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terra"
           }
         }
       }
@@ -2688,6 +3932,12 @@
             "state": "translated",
             "value": "合并成功！Floor 已完成。"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mesclagem bem sucedida! Piso completo."
+          }
         }
       }
     },
@@ -2703,6 +3953,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Floor 名称"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome do Andar"
           }
         }
       }
@@ -2720,6 +3976,12 @@
             "state": "translated",
             "value": "新建 Floor"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novo andar"
+          }
         }
       }
     },
@@ -2735,6 +3997,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "+ 新建 Floor"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+ Novo Andar"
           }
         }
       }
@@ -2752,6 +4020,12 @@
             "state": "translated",
             "value": "Floor 总览"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visão geral do andar"
+          }
         }
       }
     },
@@ -2767,6 +4041,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "目标分支"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filial alvo"
           }
         }
       }
@@ -2784,6 +4064,12 @@
             "state": "translated",
             "value": "目标分支："
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filial alvo:"
+          }
         }
       }
     },
@@ -2799,6 +4085,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "使用已有分支"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar filial existente"
           }
         }
       }
@@ -2816,6 +4108,12 @@
             "state": "translated",
             "value": "工作分支（Floors）"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ramos de Trabalho (Andares)"
+          }
         }
       }
     },
@@ -2831,6 +4129,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "外观自定义功能即将推出"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personalização de aparência em breve"
           }
         }
       }
@@ -2848,6 +4152,12 @@
             "state": "translated",
             "value": "自动备份"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backup automático"
+          }
         }
       }
     },
@@ -2863,6 +4173,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "每小时"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De hora em hora"
           }
         }
       }
@@ -2880,6 +4196,12 @@
             "state": "translated",
             "value": "点阵网格"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grade de pontos"
+          }
         }
       }
     },
@@ -2895,6 +4217,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "纯色"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sólido"
           }
         }
       }
@@ -2912,6 +4240,12 @@
             "state": "translated",
             "value": "透明"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transparente"
+          }
         }
       }
     },
@@ -2927,6 +4261,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "暂无备份"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem backups"
           }
         }
       }
@@ -2944,6 +4284,12 @@
             "state": "translated",
             "value": "已确认文件数："
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arquivos confirmados:"
+          }
         }
       }
     },
@@ -2959,6 +4305,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "备份列表"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lista de backups"
           }
         }
       }
@@ -2976,6 +4328,12 @@
             "state": "translated",
             "value": "画布背景"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fundo de tela"
+          }
         }
       }
     },
@@ -2991,6 +4349,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "语言"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idioma"
           }
         }
       }
@@ -3008,6 +4372,12 @@
             "state": "translated",
             "value": "Metal 渲染器（终端高性能模式）"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renderizador de Metal (Terminal de Alto Desempenho)"
+          }
         }
       }
     },
@@ -3023,6 +4393,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "使用 Metal GPU 加速终端渲染，可降低大量输出时的 CPU 占用"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use a aceleração Metal GPU para renderização de terminal para reduzir o uso da CPU durante saída pesada"
           }
         }
       }
@@ -3040,6 +4416,12 @@
             "state": "translated",
             "value": "首选 IDE"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IDE preferido"
+          }
         }
       }
     },
@@ -3055,6 +4437,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "在「View → Open in Editor」时使用的编辑器"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editor usado ao escolher Exibir → Abrir no Editor"
           }
         }
       }
@@ -3072,6 +4460,12 @@
             "state": "translated",
             "value": "外观"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aparência"
+          }
         }
       }
     },
@@ -3087,6 +4481,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "备份"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backup"
           }
         }
       }
@@ -3104,6 +4504,12 @@
             "state": "translated",
             "value": "集成"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Integração"
+          }
         }
       }
     },
@@ -3119,6 +4525,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "语言偏好"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linguagem"
           }
         }
       }
@@ -3136,6 +4548,12 @@
             "state": "translated",
             "value": "更新"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualizar"
+          }
         }
       }
     },
@@ -3151,6 +4569,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "添加到 PATH"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar ao PATH"
           }
         }
       }
@@ -3168,6 +4592,12 @@
             "state": "translated",
             "value": "启用 Remote SSH"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Habilitar SSH remoto"
+          }
         }
       }
     },
@@ -3183,6 +4613,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Host"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hospedar"
           }
         }
       }
@@ -3200,6 +4636,12 @@
             "state": "translated",
             "value": "脚本路径"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caminho do script"
+          }
         }
       }
     },
@@ -3215,6 +4657,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "omaestri 脚本安装路径（默认 ~/.local/bin/omaestri）"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "caminho de instalação do script omaestri (padrão ~/.local/bin/omaestri)"
           }
         }
       }
@@ -3232,6 +4680,12 @@
             "state": "translated",
             "value": "SSH 反向隧道端口（默认 7433），远端 omaestri CLI 通过此端口回连"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Porta de túnel reverso SSH (padrão 7433), usada pela CLI omaestri remota para conectar-se novamente"
+          }
         }
       }
     },
@@ -3247,6 +4701,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "用户名"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome de usuário"
           }
         }
       }
@@ -3264,6 +4724,12 @@
             "state": "translated",
             "value": "Fetch"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar"
+          }
         }
       }
     },
@@ -3279,6 +4745,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pull"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puxar"
           }
         }
       }
@@ -3296,6 +4768,12 @@
             "state": "translated",
             "value": "Push"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empurrar"
+          }
         }
       }
     },
@@ -3311,6 +4789,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "未知分支"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filial desconhecida"
           }
         }
       }
@@ -3328,6 +4812,12 @@
             "state": "translated",
             "value": "提交信息…"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmar mensagem…"
+          }
         }
       }
     },
@@ -3343,6 +4833,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "差异图"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visualização de diferenças"
           }
         }
       }
@@ -3360,6 +4856,12 @@
             "state": "translated",
             "value": "(无差异)"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(Sem diferenças)"
+          }
         }
       }
     },
@@ -3375,6 +4877,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "目标分支"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filial alvo"
           }
         }
       }
@@ -3392,6 +4900,12 @@
             "state": "translated",
             "value": "外观"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aparência"
+          }
         }
       }
     },
@@ -3407,6 +4921,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "基本信息"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informações básicas"
           }
         }
       }
@@ -3424,6 +4944,12 @@
             "state": "translated",
             "value": "详细信息"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalhes"
+          }
         }
       }
     },
@@ -3439,6 +4965,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "搜索"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Procurar"
           }
         }
       }
@@ -3456,6 +4988,12 @@
             "state": "translated",
             "value": "新建工作区"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novo espaço de trabalho"
+          }
         }
       }
     },
@@ -3471,6 +5009,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Routines…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rotinas…"
           }
         }
       }
@@ -3488,6 +5032,12 @@
             "state": "translated",
             "value": "分配角色"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atribuir função"
+          }
         }
       }
     },
@@ -3503,6 +5053,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "更改根目录"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alterar diretório raiz"
           }
         }
       }
@@ -3520,6 +5076,12 @@
             "state": "translated",
             "value": "清除全部"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpar tudo"
+          }
         }
       }
     },
@@ -3535,6 +5097,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "关闭"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechar"
           }
         }
       }
@@ -3552,6 +5120,12 @@
             "state": "translated",
             "value": "全部折叠"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recolher tudo"
+          }
         }
       }
     },
@@ -3567,6 +5141,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "创建连接"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Criar conexão"
           }
         }
       }
@@ -3584,6 +5164,12 @@
             "state": "translated",
             "value": "删除"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir"
+          }
         }
       }
     },
@@ -3599,6 +5185,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "删除连接"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir conexão"
           }
         }
       }
@@ -3616,6 +5208,12 @@
             "state": "translated",
             "value": "差异图"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visualização de diferenças"
+          }
         }
       }
     },
@@ -3631,6 +5229,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "停用 Maestro 模式"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desativar Maestro"
           }
         }
       }
@@ -3648,6 +5252,12 @@
             "state": "translated",
             "value": "复制节点"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nó duplicado"
+          }
         }
       }
     },
@@ -3663,6 +5273,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "编辑"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar"
           }
         }
       }
@@ -3680,6 +5296,12 @@
             "state": "translated",
             "value": "启用 Maestro 模式"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Habilitar Maestro"
+          }
         }
       }
     },
@@ -3695,6 +5317,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "图标视图"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visualização de ícones"
           }
         }
       }
@@ -3712,6 +5340,12 @@
             "state": "translated",
             "value": "列表视图"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visualização de lista"
+          }
         }
       }
     },
@@ -3727,6 +5361,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "锁定"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trancar"
           }
         }
       }
@@ -3744,6 +5384,12 @@
             "state": "translated",
             "value": "移动到…"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mude para…"
+          }
         }
       }
     },
@@ -3759,6 +5405,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "导航进入"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navegue até"
           }
         }
       }
@@ -3776,6 +5428,12 @@
             "state": "translated",
             "value": "无角色（清除）"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem Função (Limpar)"
+          }
         }
       }
     },
@@ -3791,6 +5449,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "重命名"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renomear"
           }
         }
       }
@@ -3808,6 +5472,12 @@
             "state": "translated",
             "value": "在访达中显示"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revelar no Finder"
+          }
         }
       }
     },
@@ -3823,6 +5493,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "显示隐藏文件"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar arquivos ocultos"
           }
         }
       }
@@ -3840,6 +5516,12 @@
             "state": "translated",
             "value": "开始连线"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar conexão"
+          }
         }
       }
     },
@@ -3855,6 +5537,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "撤销笔画"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desfazer traço"
           }
         }
       }
@@ -3872,6 +5560,12 @@
             "state": "translated",
             "value": "解锁"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desbloquear"
+          }
         }
       }
     },
@@ -3887,6 +5581,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "视图"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visualizar"
           }
         }
       }
@@ -3904,6 +5604,12 @@
             "state": "translated",
             "value": "过滤/搜索"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtrar/Pesquisar"
+          }
         }
       }
     },
@@ -3919,6 +5625,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Floor 总览"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visão geral do andar"
           }
         }
       }
@@ -3936,6 +5648,12 @@
             "state": "translated",
             "value": "下一个终端"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Próximo terminal"
+          }
         }
       }
     },
@@ -3951,6 +5669,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "下一个工作区"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Próximo espaço de trabalho"
           }
         }
       }
@@ -3968,6 +5692,12 @@
             "state": "translated",
             "value": "在编辑器中打开"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir no Editor"
+          }
         }
       }
     },
@@ -3983,6 +5713,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "上一个终端"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminal Anterior"
           }
         }
       }
@@ -4000,6 +5736,12 @@
             "state": "translated",
             "value": "上一个工作区"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espaço de trabalho anterior"
+          }
         }
       }
     },
@@ -4015,6 +5757,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "重置缩放"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redefinir zoom"
           }
         }
       }
@@ -4032,6 +5780,12 @@
             "state": "translated",
             "value": "切换缩放"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alternar zoom"
+          }
         }
       }
     },
@@ -4047,6 +5801,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "放大"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ampliar"
           }
         }
       }
@@ -4064,6 +5824,34 @@
             "state": "translated",
             "value": "缩小"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diminuir zoom"
+          }
+        }
+      }
+    },
+    "node.default_name.note": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "便签"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Observação"
+          }
         }
       }
     },
@@ -4079,6 +5867,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "编辑"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar"
           }
         }
       }
@@ -4096,6 +5890,12 @@
             "state": "translated",
             "value": "在此输入笔记内容…"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comece a digitar sua nota…"
+          }
         }
       }
     },
@@ -4111,6 +5911,210 @@
           "stringUnit": {
             "state": "translated",
             "value": "预览"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visualização"
+          }
+        }
+      }
+    },
+    "note.toolbar.background_color": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Background Color"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "背景颜色"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cor de fundo"
+          }
+        }
+      }
+    },
+    "note.toolbar.bold": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bold"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "粗体"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Negrito"
+          }
+        }
+      }
+    },
+    "note.toolbar.code_block": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code Block"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "代码块"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloco de código"
+          }
+        }
+      }
+    },
+    "note.toolbar.copy_all": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy All"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部复制"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar tudo"
+          }
+        }
+      }
+    },
+    "note.toolbar.heading": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heading"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "标题"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Título"
+          }
+        }
+      }
+    },
+    "note.toolbar.inline_code": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inline Code"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行内代码"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Código em linha"
+          }
+        }
+      }
+    },
+    "note.toolbar.insert_image": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insert Image"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "插入图片"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inserir imagem"
+          }
+        }
+      }
+    },
+    "note.toolbar.italic": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Italic"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "斜体"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Itálico"
+          }
+        }
+      }
+    },
+    "note.toolbar.list_item": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "List Item"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "列表项"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Item de lista"
           }
         }
       }
@@ -4128,6 +6132,122 @@
             "state": "translated",
             "value": "更多颜色"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mais cores"
+          }
+        }
+      }
+    },
+    "note.toolbar.save_as": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save As"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "另存为"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvar como"
+          }
+        }
+      }
+    },
+    "note.toolbar.strikethrough": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strikethrough"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除线"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tachado"
+          }
+        }
+      }
+    },
+    "note.toolbar.task_item": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Task Item"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "任务项"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Item de tarefa"
+          }
+        }
+      }
+    },
+    "note.toolbar.toggle_format.formatted": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formatted"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "格式化"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formatado"
+          }
+        }
+      }
+    },
+    "note.toolbar.toggle_format.plain": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plain Text"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "纯文本"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Texto Simples"
+          }
         }
       }
     },
@@ -4143,6 +6263,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "从这里开始"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comece aqui"
           }
         }
       }
@@ -4160,6 +6286,12 @@
             "state": "translated",
             "value": "开始使用"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comece"
+          }
         }
       }
     },
@@ -4175,6 +6307,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "快速开始"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Início rápido"
           }
         }
       }
@@ -4192,6 +6330,12 @@
             "state": "translated",
             "value": "在画布上可视化管理你的 AI Agent 团队"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerencie visualmente sua equipe de agentes de IA na tela"
+          }
         }
       }
     },
@@ -4207,6 +6351,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "欢迎使用 open-maestri"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bem-vindo ao open-maestri"
           }
         }
       }
@@ -4224,6 +6374,12 @@
             "state": "translated",
             "value": "从顶部工具栏拖入终端节点，选择 Claude Code / Codex / Shell 等预设"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arraste um nó terminal da barra de ferramentas superior, escolha Claude Code/Codex/Shell e muito mais"
+          }
         }
       }
     },
@@ -4239,6 +6395,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "创建 Agent 终端"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Criar terminais de agente"
           }
         }
       }
@@ -4256,6 +6418,12 @@
             "state": "translated",
             "value": "连线两个终端，omaestri skill 会自动注入，Agent 可以互相通信"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conecte dois terminais – a habilidade omaestri é injetada automaticamente para que os agentes possam se comunicar"
+          }
         }
       }
     },
@@ -4271,6 +6439,188 @@
           "stringUnit": {
             "state": "translated",
             "value": "连接 Agent"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectar agentes"
+          }
+        }
+      }
+    },
+    "orca.send.interrupt_title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interrupt Orca Terminal"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "中断 Orca 终端"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interromper terminal do Orca"
+          }
+        }
+      }
+    },
+    "orca.send.interrupt_warning": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This explicitly interrupts the current model turn."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这会明确中断当前模型回合。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isso interrompe explicitamente o turno atual do modelo."
+          }
+        }
+      }
+    },
+    "orca.send.queue_button": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Queue"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加入队列"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enfileirar"
+          }
+        }
+      }
+    },
+    "orca.send.queue_hint": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The message will be delivered after Orca reports tui-idle."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "消息将在 Orca 报告 tui-idle 后送达。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A mensagem será entregue depois que o Orca informar tui-idle."
+          }
+        }
+      }
+    },
+    "orca.send.queue_title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Queue Message to Orca"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "向 Orca 排队发送消息"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enfileirar mensagem para o Orca"
+          }
+        }
+      }
+    },
+    "orca.toolbar.interrupt_send": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interrupt and Send"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "中断并发送"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interromper e enviar"
+          }
+        }
+      }
+    },
+    "orca.toolbar.queue_message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Queue Message"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "排队消息"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enfileirar mensagem"
+          }
+        }
+      }
+    },
+    "orca.toolbar.refresh": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh from Orca"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从 Orca 刷新"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualizar pelo Orca"
           }
         }
       }
@@ -4288,6 +6638,12 @@
             "state": "translated",
             "value": "移动到这里"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mova-se aqui"
+          }
         }
       }
     },
@@ -4303,6 +6659,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择目录"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecione o diretório"
           }
         }
       }
@@ -4320,6 +6682,12 @@
             "state": "translated",
             "value": "选择目标目录"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecione o diretório de destino"
+          }
         }
       }
     },
@@ -4335,6 +6703,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择工作区目录"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecione o diretório do espaço de trabalho"
           }
         }
       }
@@ -4352,6 +6726,12 @@
             "state": "translated",
             "value": "未配置来源"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma fonte configurada"
+          }
         }
       }
     },
@@ -4367,6 +6747,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "名称"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome"
           }
         }
       }
@@ -4384,6 +6770,12 @@
             "state": "translated",
             "value": "可选"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcional"
+          }
         }
       }
     },
@@ -4400,6 +6792,12 @@
             "state": "translated",
             "value": "新建 Portal"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novo Portal"
+          }
         }
       }
     },
@@ -4412,6 +6810,12 @@
           }
         },
         "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL"
+          }
+        },
+        "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "URL"
@@ -4432,6 +6836,12 @@
             "state": "translated",
             "value": "输入网址…"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insira o URL…"
+          }
         }
       }
     },
@@ -4447,6 +6857,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "请在设置中添加角色预设"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicione funções nas configurações para começar"
           }
         }
       }
@@ -4464,6 +6880,12 @@
             "state": "translated",
             "value": "编辑角色"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar função"
+          }
         }
       }
     },
@@ -4479,6 +6901,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "角色名称"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome da função"
           }
         }
       }
@@ -4496,6 +6924,12 @@
             "state": "translated",
             "value": "例如：Leader、Coder、Reviewer、Tester"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "por exemplo Líder, codificador, revisor, testador"
+          }
         }
       }
     },
@@ -4511,6 +6945,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "新建角色"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova função"
           }
         }
       }
@@ -4528,6 +6968,12 @@
             "state": "translated",
             "value": "暂无自定义角色，可在设置中添加"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem funções personalizadas. Adicione um em Configurações"
+          }
         }
       }
     },
@@ -4543,6 +6989,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "暂无角色，点击下方按钮创建"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ainda não há papéis. Clique no botão abaixo para criar um"
           }
         }
       }
@@ -4560,6 +7012,12 @@
             "state": "translated",
             "value": "无角色"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem função"
+          }
         }
       }
     },
@@ -4575,6 +7033,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "（无）"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(Nenhum)"
           }
         }
       }
@@ -4592,6 +7056,12 @@
             "state": "translated",
             "value": "分配一个角色来定义此代理的工作重点。"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atribua uma função para definir o foco deste agente."
+          }
         }
       }
     },
@@ -4607,6 +7077,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "发现角色"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descubra funções"
           }
         }
       }
@@ -4624,6 +7100,12 @@
             "state": "translated",
             "value": "角色设置由 open-maestri 管理。指令副本将放置在项目的 .open-maestri 文件夹中，以便代理启动时读取。建议将 .open-maestri 添加到 .gitignore。"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As configurações de função são gerenciadas pelo open-maestri. Uma cópia das instruções será colocada na pasta .open-maestri do seu projeto para que os agentes leiam na inicialização. Considere adicionar .open-maestri ao seu .gitignore."
+          }
         }
       }
     },
@@ -4639,6 +7121,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "新建"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novo"
           }
         }
       }
@@ -4656,6 +7144,12 @@
             "state": "translated",
             "value": "选择一个角色以查看其指令"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecione uma função para ver suas instruções"
+          }
         }
       }
     },
@@ -4671,6 +7165,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "搜索..."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Procurar..."
           }
         }
       }
@@ -4688,6 +7188,12 @@
             "state": "translated",
             "value": "取消分配角色"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar atribuição de função"
+          }
         }
       }
     },
@@ -4703,6 +7209,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "角色 (Roles)"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funções"
           }
         }
       }
@@ -4720,6 +7232,12 @@
             "state": "translated",
             "value": "角色"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funções"
+          }
         }
       }
     },
@@ -4735,6 +7253,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "自动执行 Setup Hooks"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ganchos de configuração de execução automática"
           }
         }
       }
@@ -4752,6 +7276,12 @@
             "state": "translated",
             "value": "提交信息..."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmar mensagem..."
+          }
         }
       }
     },
@@ -4768,6 +7298,12 @@
             "state": "translated",
             "value": "暂无 Routine"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem rotinas"
+          }
         }
       }
     },
@@ -4783,6 +7319,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "创建定时任务，自动向 Agent 发送提示"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crie tarefas agendadas para enviar avisos automaticamente aos agentes"
           }
         }
       }
@@ -4801,6 +7343,12 @@
             "state": "translated",
             "value": "每 %1$d 小时 · %2$d 条提示"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A cada %1$d horas · %2$d solicita"
+          }
         }
       }
     },
@@ -4817,6 +7365,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "每 %1$d 分钟 · %2$d 条提示"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A cada %1$d min · %2$d solicita"
           }
         }
       }
@@ -4835,6 +7389,12 @@
             "state": "translated",
             "value": "%1$ds 间隔 · %2$d 条提示"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intervalo %1$d · Solicitações %2$d"
+          }
         }
       }
     },
@@ -4850,6 +7410,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "间隔（分钟）"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intervalo (minutos)"
           }
         }
       }
@@ -4867,6 +7433,12 @@
             "state": "translated",
             "value": "名称"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome"
+          }
         }
       }
     },
@@ -4882,6 +7454,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "新建 Routine"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova rotina"
           }
         }
       }
@@ -4899,6 +7477,12 @@
             "state": "translated",
             "value": "提示（用 && 分隔多条）"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prompt (use && para separar vários)"
+          }
         }
       }
     },
@@ -4914,6 +7498,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "shell 命令…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "comando shell…"
           }
         }
       }
@@ -4931,6 +7521,12 @@
             "state": "translated",
             "value": "代理"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agentes"
+          }
         }
       }
     },
@@ -4946,6 +7542,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "数据"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dados"
           }
         }
       }
@@ -4963,6 +7565,12 @@
             "state": "translated",
             "value": "通用"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Em geral"
+          }
         }
       }
     },
@@ -4978,6 +7586,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "角色"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funções"
           }
         }
       }
@@ -4995,6 +7609,12 @@
             "state": "translated",
             "value": "快捷键"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atalhos"
+          }
         }
       }
     },
@@ -5010,6 +7630,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "终端"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "terminal"
           }
         }
       }
@@ -5027,6 +7653,12 @@
             "state": "translated",
             "value": "字体"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fonte"
+          }
         }
       }
     },
@@ -5042,6 +7674,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "字体变更立即应用到所有已打开的终端。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As alterações de fonte aplicam-se imediatamente a todos os terminais abertos."
           }
         }
       }
@@ -5059,6 +7697,12 @@
             "state": "translated",
             "value": "字号"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamanho da fonte"
+          }
         }
       }
     },
@@ -5074,6 +7718,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "键盘"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teclado"
           }
         }
       }
@@ -5091,6 +7741,12 @@
             "state": "translated",
             "value": "每个终端的内存限制"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limite de memória por terminal"
+          }
         }
       }
     },
@@ -5106,6 +7762,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "限制每个终端的 scrollback 内存使用。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limite o uso da memória de rolagem para cada terminal."
           }
         }
       }
@@ -5123,6 +7785,12 @@
             "state": "translated",
             "value": "Metal 渲染器"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renderizador de metal"
+          }
         }
       }
     },
@@ -5138,6 +7806,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "使用 GPU 加速终端渲染。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use aceleração de GPU para renderização de terminal."
           }
         }
       }
@@ -5155,6 +7829,12 @@
             "state": "translated",
             "value": "将 Option 用作 Meta 键"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use a opção como meta-chave"
+          }
         }
       }
     },
@@ -5170,6 +7850,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "性能"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desempenho"
           }
         }
       }
@@ -5187,6 +7873,12 @@
             "state": "translated",
             "value": "快速启动预设"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Predefinições de início rápido"
+          }
         }
       }
     },
@@ -5202,6 +7894,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "+ 添加预设"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+ Adicionar predefinição"
           }
         }
       }
@@ -5219,6 +7917,12 @@
             "state": "translated",
             "value": "编辑预设"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar predefinição"
+          }
         }
       }
     },
@@ -5234,6 +7938,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "创建终端时最多显示 5 个活动预设。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Até 5 predefinições ativas são mostradas ao criar um terminal."
           }
         }
       }
@@ -5251,6 +7961,12 @@
             "state": "translated",
             "value": "恢复默认设置"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redefinir para os padrões"
+          }
         }
       }
     },
@@ -5266,6 +7982,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "主题"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tema"
           }
         }
       }
@@ -5283,6 +8005,12 @@
             "state": "translated",
             "value": "深色"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escuro"
+          }
         }
       }
     },
@@ -5298,6 +8026,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "主题变更立即应用到所有已打开的终端。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As alterações de tema aplicam-se imediatamente a todos os terminais abertos."
           }
         }
       }
@@ -5315,6 +8049,12 @@
             "state": "translated",
             "value": "浅色"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luz"
+          }
         }
       }
     },
@@ -5330,6 +8070,34 @@
           "stringUnit": {
             "state": "translated",
             "value": "跟随系统"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seguir sistema"
+          }
+        }
+      }
+    },
+    "shape.toolbar.font_size": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Size"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大小"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamanho"
           }
         }
       }
@@ -5347,149 +8115,11 @@
             "state": "translated",
             "value": "操作"
           }
-        }
-      }
-    },
-    "shortcut.connect_nodes.desc": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start a connection from the selected node to another."
-          }
         },
-        "zh-Hans": {
+        "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "从选中节点开始连线到另一个节点。"
-          }
-        }
-      }
-    },
-    "shortcut.filter_placeholder": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Filter"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "筛选"
-          }
-        }
-      }
-    },
-    "shortcut.focus_terminal.desc": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jump to a terminal by its index number."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "按序号跳转到指定终端。"
-          }
-        }
-      }
-    },
-    "shortcut.group.canvas": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Canvas"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "画布"
-          }
-        }
-      }
-    },
-    "shortcut.group.element_nav": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Element Navigation"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "元素导航"
-          }
-        }
-      }
-    },
-    "shortcut.group.workspace_nav": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Workspace Navigation"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "工作区导航"
-          }
-        }
-      }
-    },
-    "shortcut.restore_defaults": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restore Defaults"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "恢复默认设置"
-          }
-        }
-      }
-    },
-    "shortcut.zoom_scroll_modifier": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zoom Scroll Modifier"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "缩放滚动修饰键"
-          }
-        }
-      }
-    },
-    "shortcut.zoom_scroll_modifier.desc": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hold this modifier key while scrolling to zoom the canvas."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "按住此修饰键并滚动以缩放画布。"
+            "value": "Ação"
           }
         }
       }
@@ -5507,6 +8137,12 @@
             "state": "translated",
             "value": "居中选中节点"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centralizar o nó selecionado"
+          }
         }
       }
     },
@@ -5522,6 +8158,34 @@
           "stringUnit": {
             "state": "translated",
             "value": "开始连线"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar conexão"
+          }
+        }
+      }
+    },
+    "shortcut.connect_nodes.desc": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start a connection from the selected node to another."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从选中节点开始连线到另一个节点。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inicie uma conexão do nó selecionado para outro."
           }
         }
       }
@@ -5539,6 +8203,12 @@
             "state": "translated",
             "value": "下一个终端"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Próximo terminal"
+          }
         }
       }
     },
@@ -5554,6 +8224,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "上一个终端"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminal Anterior"
           }
         }
       }
@@ -5571,6 +8247,34 @@
             "state": "translated",
             "value": "删除选中节点"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir nó selecionado"
+          }
+        }
+      }
+    },
+    "shortcut.filter_placeholder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "筛选"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtro"
+          }
         }
       }
     },
@@ -5586,6 +8290,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "过滤/搜索"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtrar/Pesquisar"
           }
         }
       }
@@ -5603,6 +8313,12 @@
             "state": "translated",
             "value": "Floor 总览"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visão geral do andar"
+          }
         }
       }
     },
@@ -5618,6 +8334,100 @@
           "stringUnit": {
             "state": "translated",
             "value": "跳转终端（⌘+数字）"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ir para o Terminal (⌘+número)"
+          }
+        }
+      }
+    },
+    "shortcut.focus_terminal.desc": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jump to a terminal by its index number."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按序号跳转到指定终端。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vá para um terminal pelo seu número de índice."
+          }
+        }
+      }
+    },
+    "shortcut.group.canvas": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Canvas"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "画布"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tela"
+          }
+        }
+      }
+    },
+    "shortcut.group.element_nav": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Element Navigation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "元素导航"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navegação de Elementos"
+          }
+        }
+      }
+    },
+    "shortcut.group.workspace_nav": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workspace Navigation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "工作区导航"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navegação no espaço de trabalho"
           }
         }
       }
@@ -5635,6 +8445,12 @@
             "state": "translated",
             "value": "快捷键"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atalho"
+          }
         }
       }
     },
@@ -5650,6 +8466,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "打开设置"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abra Configurações"
           }
         }
       }
@@ -5667,6 +8489,34 @@
             "state": "translated",
             "value": "按下新快捷键…"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pressione novo atalho…"
+          }
+        }
+      }
+    },
+    "shortcut.restore_defaults": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore Defaults"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复默认设置"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar padrões"
+          }
         }
       }
     },
@@ -5682,6 +8532,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "切换下一个工作区"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Próximo espaço de trabalho"
           }
         }
       }
@@ -5699,6 +8555,12 @@
             "state": "translated",
             "value": "切换上一个工作区"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espaço de trabalho anterior"
+          }
         }
       }
     },
@@ -5714,6 +8576,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "锁定/解锁自动滚动"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloquear/desbloquear rolagem automática"
           }
         }
       }
@@ -5731,6 +8599,56 @@
             "state": "translated",
             "value": "无限"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ilimitado"
+          }
+        }
+      }
+    },
+    "shortcut.zoom_scroll_modifier": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoom Scroll Modifier"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "缩放滚动修饰键"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modificador de rolagem de zoom"
+          }
+        }
+      }
+    },
+    "shortcut.zoom_scroll_modifier.desc": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold this modifier key while scrolling to zoom the canvas."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按住此修饰键并滚动以缩放画布。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Segure esta tecla modificadora enquanto rola para ampliar a tela."
+          }
         }
       }
     },
@@ -5746,6 +8664,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "锁定/解锁自动滚动"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloquear/desbloquear rolagem automática"
           }
         }
       }
@@ -5763,6 +8687,12 @@
             "state": "translated",
             "value": "浏览..."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navegar..."
+          }
         }
       }
     },
@@ -5778,6 +8708,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "命令"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comando"
           }
         }
       }
@@ -5795,6 +8731,12 @@
             "state": "translated",
             "value": "例如：claude、codex、gemini"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "por exemplo Cláudio, Códice, Gêmeos"
+          }
         }
       }
     },
@@ -5810,6 +8752,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "颜色"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cor"
           }
         }
       }
@@ -5827,6 +8775,12 @@
             "state": "translated",
             "value": "例如：claude、codex、gemini、zsh"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "por exemplo claude, códice, gêmeos, zsh"
+          }
         }
       }
     },
@@ -5842,6 +8796,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "字体"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fonte"
           }
         }
       }
@@ -5859,6 +8819,12 @@
             "state": "translated",
             "value": "选择..."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolher..."
+          }
         }
       }
     },
@@ -5874,6 +8840,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "图标"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ícone"
           }
         }
       }
@@ -5891,6 +8863,12 @@
             "state": "translated",
             "value": "Maestro 可以通过 omaestri recruit 招募子 Agent"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maestro pode recrutar subagentes com omaestri recruta"
+          }
         }
       }
     },
@@ -5906,6 +8884,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "编辑终端"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar terminal"
           }
         }
       }
@@ -5923,6 +8907,12 @@
             "state": "translated",
             "value": "当终端有活动时发送通知"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notificar quando a atividade do terminal for detectada"
+          }
         }
       }
     },
@@ -5938,6 +8928,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "角色配置即将推出"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configuração de função em breve"
           }
         }
       }
@@ -5955,6 +8951,12 @@
             "state": "translated",
             "value": "外观"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aparência"
+          }
         }
       }
     },
@@ -5970,6 +8972,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "详细信息"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalhes"
           }
         }
       }
@@ -5987,6 +8995,12 @@
             "state": "translated",
             "value": "角色"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Papel"
+          }
         }
       }
     },
@@ -6002,6 +9016,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "主题"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tema"
           }
         }
       }
@@ -6019,6 +9039,12 @@
             "state": "translated",
             "value": "编辑终端"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar terminal"
+          }
         }
       }
     },
@@ -6034,6 +9060,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "跳转终端（⌘+数字）"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ir para o Terminal (⌘+número)"
           }
         }
       }
@@ -6051,6 +9083,12 @@
             "state": "translated",
             "value": "启动命令"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comando de lançamento"
+          }
         }
       }
     },
@@ -6066,6 +9104,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Maestro 模式"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modo Maestro"
           }
         }
       }
@@ -6083,6 +9127,12 @@
             "state": "translated",
             "value": "Maestro 终端可通过 omaestri recruit 命令招募子 Agent"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminais Maestro podem recrutar subagentes com recrutamento omaestri"
+          }
         }
       }
     },
@@ -6098,6 +9148,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "监控活动"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monitorar atividade"
           }
         }
       }
@@ -6115,6 +9171,12 @@
             "state": "translated",
             "value": "终端名称"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome do Terminal"
+          }
         }
       }
     },
@@ -6130,6 +9192,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "终端名称"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome do terminal"
           }
         }
       }
@@ -6147,6 +9215,12 @@
             "state": "translated",
             "value": "新建终端"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novo terminal"
+          }
         }
       }
     },
@@ -6162,6 +9236,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "下一个终端"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Próximo terminal"
           }
         }
       }
@@ -6179,6 +9259,12 @@
             "state": "translated",
             "value": "暂无活跃终端"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum terminal ativo"
+          }
         }
       }
     },
@@ -6194,6 +9280,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "无命令"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem comando"
           }
         }
       }
@@ -6211,6 +9303,12 @@
             "state": "translated",
             "value": "上一个终端"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminal Anterior"
+          }
         }
       }
     },
@@ -6226,6 +9324,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "锁定滚动（⌘⇧B）"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloquear rolagem (⌘⇧B)"
           }
         }
       }
@@ -6243,6 +9347,12 @@
             "state": "translated",
             "value": "解除滚动锁定"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desbloquear rolagem"
+          }
         }
       }
     },
@@ -6258,6 +9368,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "快捷键"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atalho"
           }
         }
       }
@@ -6275,6 +9391,12 @@
             "state": "translated",
             "value": "自动"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automático"
+          }
         }
       }
     },
@@ -6290,6 +9412,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "无"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum"
           }
         }
       }
@@ -6307,6 +9435,12 @@
             "state": "translated",
             "value": "目标终端"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminal de destino"
+          }
         }
       }
     },
@@ -6322,6 +9456,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "自定义"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personalizado"
           }
         }
       }
@@ -6339,21 +9479,11 @@
             "state": "translated",
             "value": "自定义主题"
           }
-        }
-      }
-    },
-    "terminal.theme.preview_placeholder": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Select a theme to preview"
-          }
         },
-        "zh-Hans": {
+        "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "选择一个主题以预览"
+            "value": "Tema personalizado"
           }
         }
       }
@@ -6371,6 +9501,12 @@
             "state": "translated",
             "value": "深色"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escuro"
+          }
         }
       }
     },
@@ -6386,6 +9522,34 @@
           "stringUnit": {
             "state": "translated",
             "value": "浅色"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luz"
+          }
+        }
+      }
+    },
+    "terminal.theme.preview_placeholder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select a theme to preview"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择一个主题以预览"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecione um tema para visualizar"
           }
         }
       }
@@ -6403,6 +9567,12 @@
             "state": "translated",
             "value": "系统"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistema"
+          }
         }
       }
     },
@@ -6418,6 +9588,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "取消分配"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar atribuição de função"
           }
         }
       }
@@ -6435,6 +9611,56 @@
             "state": "translated",
             "value": "工作目录"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diretório de trabalho"
+          }
+        }
+      }
+    },
+    "text.toolbar.custom_font_preview": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom Font (preview only)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自定义字体（仅预览）"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fonte personalizada (somente visualização)"
+          }
+        }
+      }
+    },
+    "text.toolbar.text_color": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text Color"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文本颜色"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cor do texto"
+          }
         }
       }
     },
@@ -6450,6 +9676,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "连接"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conexões"
           }
         }
       }
@@ -6467,6 +9699,12 @@
             "state": "translated",
             "value": "后退"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voltar"
+          }
         }
       }
     },
@@ -6482,6 +9720,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "配置 Hooks"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurar ganchos"
           }
         }
       }
@@ -6499,6 +9743,12 @@
             "state": "translated",
             "value": "隐藏/显示控制栏"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ocultar/Mostrar Chrome"
+          }
         }
       }
     },
@@ -6514,6 +9764,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "画布缩略图"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minimapa de tela"
           }
         }
       }
@@ -6531,6 +9787,12 @@
             "state": "translated",
             "value": "更改根目录"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alterar diretório raiz"
+          }
         }
       }
     },
@@ -6546,6 +9808,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "连接到终端"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conecte-se ao terminal"
           }
         }
       }
@@ -6563,6 +9831,12 @@
             "state": "translated",
             "value": "查看连接"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver conexões"
+          }
         }
       }
     },
@@ -6578,6 +9852,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "删除"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir"
           }
         }
       }
@@ -6595,6 +9875,12 @@
             "state": "translated",
             "value": "编辑"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar"
+          }
         }
       }
     },
@@ -6610,6 +9896,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "在访达中显示"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revelar no Finder"
           }
         }
       }
@@ -6627,6 +9919,12 @@
             "state": "translated",
             "value": "刷新"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualizar"
+          }
         }
       }
     },
@@ -6643,6 +9941,12 @@
             "state": "translated",
             "value": "创建连接（L）"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar conexão (L)"
+          }
         }
       }
     },
@@ -6658,6 +9962,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "停止"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parar"
           }
         }
       }
@@ -6676,6 +9986,12 @@
             "state": "translated",
             "value": "确认删除工作区 \"%@\"？"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir espaço de trabalho \"%@\"?"
+          }
         }
       }
     },
@@ -6691,6 +10007,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "复制"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicado"
           }
         }
       }
@@ -6708,6 +10030,12 @@
             "state": "translated",
             "value": "副本"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cópia"
+          }
         }
       }
     },
@@ -6724,6 +10052,12 @@
             "state": "translated",
             "value": "编辑工作区"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar espaço de trabalho"
+          }
         }
       }
     },
@@ -6739,6 +10073,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "分组名称"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome do grupo"
           }
         }
       }
@@ -6757,6 +10097,12 @@
             "state": "translated",
             "value": "工作区 \"%1$@\" 加载失败: %2$@"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Falha ao carregar espaço de trabalho \"%1$@\": %2$@"
+          }
         }
       }
     },
@@ -6772,6 +10118,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "移入分组"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mover para grupo"
           }
         }
       }
@@ -6789,6 +10141,12 @@
             "state": "translated",
             "value": "工作区名称"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome do espaço de trabalho"
+          }
         }
       }
     },
@@ -6804,6 +10162,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "新建工作区"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novo espaço de trabalho"
           }
         }
       }
@@ -6821,6 +10185,12 @@
             "state": "translated",
             "value": "新建分组"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novo grupo"
+          }
         }
       }
     },
@@ -6836,6 +10206,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "新建工作区或分组"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novo espaço de trabalho ou grupo"
           }
         }
       }
@@ -6853,229 +10229,11 @@
             "state": "translated",
             "value": "切换下一个工作区"
           }
-        }
-      }
-    },
-    "workspace.pin": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pin"
-          }
         },
-        "zh-Hans": {
+        "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "置顶"
-          }
-        }
-      }
-    },
-    "workspace.prev": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Previous Workspace"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "切换上一个工作区"
-          }
-        }
-      }
-    },
-    "workspace.rename_group.alert": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rename Group"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "重命名分组"
-          }
-        }
-      }
-    },
-    "workspace.search": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Search Workspaces"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "搜索工作区"
-          }
-        }
-      }
-    },
-    "workspace.section.basic_info": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Basic Info"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "基本信息"
-          }
-        }
-      }
-    },
-    "workspace.section.icon": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Icon"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "图标"
-          }
-        }
-      }
-    },
-    "workspace.section.color": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Color"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "颜色"
-          }
-        }
-      }
-    },
-    "workspace.section.working_dir": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Working Directory"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "工作目录"
-          }
-        }
-      }
-    },
-    "workspace.sidebar.create_hint": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Create a workspace in the sidebar"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在侧边栏创建一个工作区"
-          }
-        }
-      }
-    },
-    "workspace.tab.agent_instructions": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Agent Instructions"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Agent 指令"
-          }
-        }
-      }
-    },
-    "workspace.tab.general": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "General"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "常规"
-          }
-        }
-      }
-    },
-    "workspace.unpin": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unpin"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "取消置顶"
-          }
-        }
-      }
-    },
-    "workspace.working_dir": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Working Directory"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "工作目录"
-          }
-        }
-      }
-    },
-    "workspace.working_dir.none": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not selected"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "未选择"
+            "value": "Próximo espaço de trabalho"
           }
         }
       }
@@ -7093,229 +10251,319 @@
             "state": "translated",
             "value": "在访达中打开"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir no Finder"
+          }
         }
       }
     },
-    "draw.tool.pen": {
+    "workspace.pin": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pen"
+            "value": "Pin"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "钢笔"
+            "value": "置顶"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alfinete"
           }
         }
       }
     },
-    "draw.tool.arrow": {
+    "workspace.prev": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Arrow"
+            "value": "Previous Workspace"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "箭头"
+            "value": "切换上一个工作区"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espaço de trabalho anterior"
           }
         }
       }
     },
-    "draw.tool.highlighter": {
+    "workspace.rename_group.alert": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Highlighter"
+            "value": "Rename Group"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "荧光笔"
+            "value": "重命名分组"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renomear grupo"
           }
         }
       }
     },
-    "draw.tool.line": {
+    "workspace.search": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Line"
+            "value": "Search Workspaces"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "线条"
+            "value": "搜索工作区"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pesquisar espaços de trabalho"
           }
         }
       }
     },
-    "draw.tool.rect": {
+    "workspace.section.basic_info": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rectangle"
+            "value": "Basic Info"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "矩形"
+            "value": "基本信息"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informações básicas"
           }
         }
       }
     },
-    "draw.tool.ellipse": {
+    "workspace.section.color": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ellipse"
+            "value": "Color"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "圆形"
+            "value": "颜色"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cor"
           }
         }
       }
     },
-    "draw.tool.diamond": {
+    "workspace.section.icon": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Diamond"
+            "value": "Icon"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "菱形"
+            "value": "图标"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ícone"
           }
         }
       }
     },
-    "draw.help.theme_color": {
+    "workspace.section.working_dir": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Theme Color"
+            "value": "Working Directory"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "主题颜色"
+            "value": "工作目录"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diretório de trabalho"
           }
         }
       }
     },
-    "draw.help.stroke_style": {
+    "workspace.sidebar.create_hint": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stroke Style"
+            "value": "Create a workspace in the sidebar"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "线条风格"
+            "value": "在侧边栏创建一个工作区"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crie um espaço de trabalho na barra lateral"
           }
         }
       }
     },
-    "draw.help.fill_style": {
+    "workspace.tab.agent_instructions": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fill Style"
+            "value": "Agent Instructions"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "填充风格"
+            "value": "Agent 指令"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instruções do Agente"
           }
         }
       }
     },
-    "note.toolbar.toggle_format.plain": {
+    "workspace.tab.general": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Plain Text"
+            "value": "General"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "纯文本"
+            "value": "常规"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Em geral"
           }
         }
       }
     },
-    "note.toolbar.toggle_format.formatted": {
+    "workspace.unpin": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Formatted"
+            "value": "Unpin"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "格式化"
+            "value": "取消置顶"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liberar"
           }
         }
       }
     },
-    "shape.toolbar.font_size": {
+    "workspace.working_dir": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Size"
+            "value": "Working Directory"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "大小"
+            "value": "工作目录"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diretório de trabalho"
           }
         }
       }
     },
-    "node.default_name.note": {
+    "workspace.working_dir.none": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Note"
+            "value": "Not selected"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "便签"
+            "value": "未选择"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não selecionado"
           }
         }
       }

@@ -43,7 +43,7 @@ struct FreehandContextToolbar: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("Theme Color")
+        .help("draw.help.theme_color".localized)
         .popover(isPresented: $showThemeColorPicker, arrowEdge: .bottom) {
             NoteColorPickerPopover(selectedColor: content.strokeColor) { color in
                 var updated = content
@@ -99,7 +99,7 @@ struct FreehandContextToolbar: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("Delete")
+        .help("button.delete".localized)
         .background(HoverTrackingView { hovering in isDeleteHovered = hovering })
     }
 

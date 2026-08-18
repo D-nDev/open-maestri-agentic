@@ -144,7 +144,7 @@ struct TextContextToolbar: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("Custom Font (preview only)")
+        .help("text.toolbar.custom_font_preview".localized)
         .opacity(0.6)
     }
 
@@ -160,7 +160,7 @@ struct TextContextToolbar: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("Text Color")
+        .help("text.toolbar.text_color".localized)
         .popover(isPresented: $showColorPicker, arrowEdge: .bottom) {
             NoteColorPickerPopover(selectedColor: currentColor) { color in
                 onColor(color)
@@ -172,7 +172,7 @@ struct TextContextToolbar: View {
     // MARK: - Delete button
 
     private var deleteButton: some View {
-        NoteToolbarButton(icon: "trash", tooltip: "Delete", isDestructive: true, action: onDelete)
+        NoteToolbarButton(icon: "trash", tooltip: "button.delete".localized, isDestructive: true, action: onDelete)
     }
 
     // MARK: - divider

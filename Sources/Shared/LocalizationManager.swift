@@ -33,6 +33,7 @@ final class LocalizationManager {
     static let supportedLanguages: [(id: String, name: String, localName: String)] = [
         ("en", "English", "English"),
         ("zh-Hans", "Chinese (Simplified)", "简体中文"),
+        ("pt-BR", "Portuguese (Brazil)", "Português (Brasil)"),
     ]
 
     private init() {

@@ -32,38 +32,38 @@ struct NoteContextToolbar: View {
             toolbarSeparator
 
             // Group 2: Inline format
-            noteButton("bold",        tooltip: "Bold")         { insertWrapping("**", "**") }
-            noteButton("italic",      tooltip: "Italic")       { insertWrapping("*",  "*") }
-            noteButton("strikethrough", tooltip: "Strikethrough") { insertWrapping("~~", "~~") }
+            noteButton("bold",        tooltip: "note.toolbar.bold".localized)         { insertWrapping("**", "**") }
+            noteButton("italic",      tooltip: "note.toolbar.italic".localized)       { insertWrapping("*",  "*") }
+            noteButton("strikethrough", tooltip: "note.toolbar.strikethrough".localized) { insertWrapping("~~", "~~") }
             noteButton("chevron.left.forwardslash.chevron.right",
-                       tooltip: "Inline Code")                 { insertWrapping("`", "`") }
+                       tooltip: "note.toolbar.inline_code".localized)                 { insertWrapping("`", "`") }
 
             toolbarSeparator
 
             // Group 3: Block Level Format
             headingButton
-            noteButton("checklist",   tooltip: "Task Item")    { insertLinePrefix("- [ ] ") }
-            noteButton("list.bullet", tooltip: "List Item")    { insertLinePrefix("- ") }
-            noteButton("curlybraces", tooltip: "Code Block")   { insertCodeBlock() }
+            noteButton("checklist",   tooltip: "note.toolbar.task_item".localized)    { insertLinePrefix("- [ ] ") }
+            noteButton("list.bullet", tooltip: "note.toolbar.list_item".localized)    { insertLinePrefix("- ") }
+            noteButton("curlybraces", tooltip: "note.toolbar.code_block".localized)   { insertCodeBlock() }
 
             toolbarSeparator
 
             // Group 4: Media & Operations
-            noteButton("photo",              tooltip: "Insert Image") { insertImage() }
-            noteButton("doc.on.doc",         tooltip: "Copy All")    { copyAll() }
-            noteButton("square.and.arrow.down", tooltip: "Save As")  { onSaveAs() }
+            noteButton("photo",              tooltip: "note.toolbar.insert_image".localized) { insertImage() }
+            noteButton("doc.on.doc",         tooltip: "note.toolbar.copy_all".localized)    { copyAll() }
+            noteButton("square.and.arrow.down", tooltip: "note.toolbar.save_as".localized)  { onSaveAs() }
 
             toolbarSeparator
 
             // Group 5: Node Operations
-            noteButton("arrow.trianglehead.branch", tooltip: "Connect") { onConnect() }
+            noteButton("arrow.trianglehead.branch", tooltip: "button.connect".localized) { onConnect() }
             if !connections.isEmpty {
                 ConnectionBadgeButton(connections: connections, onDelete: onDeleteConnection)
             }
             noteButton("m.square",
                        tooltip: isFormatted ? "note.toolbar.toggle_format.plain".localized : "note.toolbar.toggle_format.formatted".localized,
                        isActive: isFormatted)                           { onToggleFormatted() }
-            noteButton("trash", tooltip: "Delete", isDestructive: true) { onDelete() }
+            noteButton("trash", tooltip: "button.delete".localized, isDestructive: true) { onDelete() }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 5)
@@ -99,7 +99,7 @@ struct NoteContextToolbar: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("Background Color")
+        .help("note.toolbar.background_color".localized)
         .popover(isPresented: $showColorPicker, arrowEdge: .bottom) {
             NoteColorPickerPopover(selectedColor: currentColor) { color in
                 onBgColor(color)
@@ -109,7 +109,7 @@ struct NoteContextToolbar: View {
     }
 
     private var fontSizeButton: some View {
-        ContextToolbarButton(icon: "textformat.size", tooltip: "Font Size") {
+        ContextToolbarButton(icon: "textformat.size", tooltip: "settings.terminal.font_size".localized) {
             currentFontSize = fontSize
             showFontSizeMenu = true
         }
@@ -121,7 +121,7 @@ struct NoteContextToolbar: View {
     }
 
     private var headingButton: some View {
-        ContextToolbarButton(icon: "textformat", tooltip: "Heading") {
+        ContextToolbarButton(icon: "textformat", tooltip: "note.toolbar.heading".localized) {
             showHeadingPicker = true
         }
         .popover(isPresented: $showHeadingPicker, arrowEdge: .bottom) {
@@ -419,6 +419,7 @@ struct NoteToolbarButton: View {
             if showTooltip {
                 Text(tooltip)
                     .font(.system(size: 11))
+                    .foregroundStyle(Color(white: 0.15))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     .background(

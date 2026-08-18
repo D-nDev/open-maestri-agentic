@@ -66,7 +66,7 @@ struct ShapeContextToolbar: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("Theme Color")
+        .help("draw.help.theme_color".localized)
         .popover(isPresented: $showThemeColorPicker, arrowEdge: .bottom) {
             NoteColorPickerPopover(selectedColor: content.strokeColor) { color in
                 var updated = content
@@ -125,7 +125,7 @@ struct ShapeContextToolbar: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("Stroke Style")
+        .help("draw.help.stroke_style".localized)
         .popover(isPresented: $showStrokeStylePicker, arrowEdge: .bottom) {
             ShapeStrokeStylePopover(selected: content.strokeStyle) { style in
                 var updated = content
@@ -149,7 +149,7 @@ struct ShapeContextToolbar: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("Fill Style")
+        .help("draw.help.fill_style".localized)
         .popover(isPresented: $showFillStylePicker, arrowEdge: .bottom) {
             ShapeFillStylePopover(selected: content.fillStyle) { style in
                 var updated = content
@@ -213,7 +213,7 @@ struct ShapeContextToolbar: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("Delete")
+        .help("button.delete".localized)
         .background(
             HoverTrackingView { hovering in isDeleteHovered = hovering }
         )
