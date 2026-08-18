@@ -47,7 +47,7 @@ struct ContextToolbarButton: View {
             if showTooltip && !tooltip.isEmpty {
                 Text(tooltip)
                     .font(.system(size: 11))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(Color(white: 0.15))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     .background(
